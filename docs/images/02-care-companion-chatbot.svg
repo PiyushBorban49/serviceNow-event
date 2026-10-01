@@ -1,157 +1,153 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 680" width="1200" height="680" style="background:#FFFDF7; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 680" width="1200" height="680" style="background:#FAF8F5; font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
   <defs>
-    <filter id="shadow4" x="0" y="0" width="200%" height="200%">
-      <feOffset dx="4" dy="4" result="offset"/>
-      <feFlood flood-color="#000000" flood-opacity="1"/>
-      <feComposite in2="offset" in="SourceGraphic" operator="over"/>
+    <filter id="softShadow" x="-5%" y="-5%" width="115%" height="115%">
+      <feDropShadow dx="0" dy="4" stdDeviation="12" flood-color="#1B4332" flood-opacity="0.06"/>
     </filter>
-    <filter id="shadow6" x="0" y="0" width="200%" height="200%">
-      <feOffset dx="6" dy="6" result="offset"/>
-      <feFlood flood-color="#000000" flood-opacity="1"/>
-      <feComposite in2="offset" in="SourceGraphic" operator="over"/>
-    </filter>
+    <linearGradient id="primaryGreen" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#2D6A4F"/>
+      <stop offset="100%" stop-color="#1B4332"/>
+    </linearGradient>
+    <linearGradient id="warmSms" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#FDF7E7"/>
+      <stop offset="100%" stop-color="#FCF4DF"/>
+    </linearGradient>
+    <linearGradient id="breathCircle" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#E8F3EE"/>
+      <stop offset="100%" stop-color="#D4E8DC"/>
+    </linearGradient>
   </defs>
 
   <!-- Top Navigation Header -->
-  <rect x="0" y="0" width="1200" height="75" fill="#FFFFFF" stroke="#000000" stroke-width="3"/>
-  <rect x="25" y="14" width="46" height="46" fill="#FFE55C" stroke="#000000" stroke-width="3" filter="url(#shadow4)"/>
-  <path d="M 40 37 L 48 45 L 60 30" stroke="#000" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+  <rect x="0" y="0" width="1200" height="75" fill="#FAF8F5" stroke="#E3E8E3" stroke-width="1"/>
+  <rect x="25" y="15" width="44" height="44" rx="14" fill="url(#primaryGreen)"/>
+  <path d="M 40 37 L 46 43 L 56 31" stroke="#FFFFFF" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
 
-  <text x="85" y="38" font-size="20" font-weight="900" fill="#000000">DHRONA</text>
-  <rect x="180" y="20" width="105" height="24" fill="#BAE6FD" stroke="#000000" stroke-width="2"/>
-  <text x="188" y="36" font-size="10" font-weight="900" fill="#000000">STUDENT SUPPORT</text>
-  <rect x="295" y="20" width="95" height="24" fill="#A7F3D0" stroke="#000000" stroke-width="2"/>
-  <text x="303" y="36" font-size="10" font-weight="900" fill="#000000">CLINICAL TRIAGE</text>
-  <text x="85" y="56" font-size="11" font-weight="700" fill="#4B5563">Multi-Need Navigator, Clinical Acuity Scoring &amp; Care Companion</text>
+  <text x="82" y="38" font-size="20" font-weight="800" fill="#143224">DHRONA</text>
+  <rect x="175" y="22" width="105" height="22" rx="11" fill="#E8F3EE" stroke="#C5DEC8" stroke-width="1"/>
+  <text x="187" y="37" font-size="10" font-weight="700" fill="#2D6A4F">Care Navigator</text>
+  <rect x="290" y="22" width="130" height="22" rx="11" fill="#EBF2F7" stroke="#CADCE9" stroke-width="1"/>
+  <text x="300" y="37" font-size="10" font-weight="700" fill="#507693">Clinical Acuity Triage</text>
+  <text x="82" y="56" font-size="11" font-weight="500" fill="#52685E">Empathetic student triage, multi-need navigation &amp; gentle companion care</text>
 
-  <!-- Nav Tabs -->
-  <rect x="440" y="20" width="115" height="34" fill="#F3F4F6" stroke="#000000" stroke-width="2"/>
-  <rect x="475" y="24" width="75" height="26" fill="#FFE55C" stroke="#000000" stroke-width="1.5"/>
-  <text x="446" y="41" font-size="9" font-weight="900">MODE:</text>
-  <text x="482" y="41" font-size="9" font-weight="900">🕵️ ANONYMOUS</text>
+  <!-- Controls on right -->
+  <rect x="660" y="20" width="115" height="34" rx="17" fill="#FFFFFF" stroke="#E3E8E3" stroke-width="1"/>
+  <circle cx="678" cy="37" r="4" fill="#2D6A4F"/>
+  <text x="690" y="42" font-size="11" font-weight="600" fill="#2D6A4F">Calm Audio: On</text>
 
-  <rect x="565" y="20" width="105" height="34" fill="#FFFFFF" stroke="#000000" stroke-width="2" filter="url(#shadow4)"/>
-  <text x="578" y="42" font-size="11" font-weight="900">⚡ NAVIGATOR</text>
+  <rect x="785" y="20" width="120" height="34" rx="17" fill="#FFFFFF" stroke="#E3E8E3" stroke-width="1"/>
+  <text x="800" y="42" font-size="11" font-weight="600" fill="#40564C">🛡️ Anonymous</text>
 
-  <!-- Care Companion Active -->
-  <rect x="680" y="20" width="130" height="34" fill="#DDD6FE" stroke="#000000" stroke-width="2" filter="url(#shadow4)"/>
-  <text x="692" y="42" font-size="11" font-weight="900">🤖 CARE COMPANION</text>
-  <circle cx="800" cy="37" r="3.5" fill="#10B981" stroke="#000" stroke-width="1"/>
-
-  <rect x="820" y="20" width="95" height="34" fill="#FFFFFF" stroke="#000000" stroke-width="2" filter="url(#shadow4)"/>
-  <text x="835" y="42" font-size="11" font-weight="900">🏛️ 12 DEPTS</text>
-
-  <rect x="925" y="20" width="100" height="34" fill="#FFFFFF" stroke="#000000" stroke-width="2" filter="url(#shadow4)"/>
-  <text x="938" y="42" font-size="11" font-weight="900">📊 ADMIN VIEW</text>
-
-  <rect x="1035" y="20" width="85" height="34" fill="#FFFFFF" stroke="#000000" stroke-width="2" filter="url(#shadow4)"/>
-  <text x="1050" y="42" font-size="11" font-weight="900">🗂️ PITCH</text>
+  <!-- Nav Segmented Tabs -->
+  <rect x="915" y="20" width="260" height="34" rx="14" fill="#EDEBE6" stroke="#DFDDD8" stroke-width="1"/>
+  <text x="930" y="41" font-size="11" font-weight="600" fill="#5A6D63">Navigator</text>
+  <rect x="990" y="23" width="95" height="28" rx="11" fill="#FFFFFF" filter="url(#softShadow)"/>
+  <text x="1004" y="41" font-size="11" font-weight="700" fill="#1B4332">Companion</text>
+  <circle cx="1075" cy="37" r="3" fill="#2D6A4F"/>
+  <text x="1095" y="41" font-size="11" font-weight="600" fill="#5A6D63">12 Silos</text>
+  <text x="1145" y="41" font-size="11" font-weight="600" fill="#5A6D63">Admin</text>
 
   <!-- Banner Ticker -->
-  <rect x="0" y="75" width="1200" height="42" fill="#FEF08A" stroke="#000000" stroke-width="3"/>
-  <rect x="25" y="83" width="170" height="26" fill="#000000"/>
-  <text x="35" y="100" font-size="10" font-weight="900" fill="#FFE55C">CLINICAL TRIAGE SCORING</text>
-  <text x="210" y="101" font-size="12" font-weight="800" fill="#000000">Natural Language Intake + 5 Objective Clinical Acuity Questions calibrate queue priority (P1 to P4).</text>
+  <rect x="0" y="75" width="1200" height="38" fill="#EBF4EF" stroke="#DFE7E1" stroke-width="1"/>
+  <circle cx="35" cy="94" r="3.5" fill="#2D6A4F"/>
+  <text x="48" y="98" font-size="11" font-weight="600" fill="#2A4D3B">You are not alone in this waiting period • Grounding tools and companion support are active 24/7.</text>
 
   <!-- Main Card -->
-  <rect x="40" y="140" width="1120" height="515" fill="#FFFFFF" stroke="#000000" stroke-width="4" filter="url(#shadow6)"/>
+  <rect x="40" y="130" width="1120" height="525" rx="24" fill="#FFFFFF" stroke="#E3E8E3" stroke-width="1" filter="url(#softShadow)"/>
 
-  <!-- Ticket & Escalation Header -->
-  <rect x="65" y="160" width="160" height="22" fill="#DDD6FE" stroke="#000" stroke-width="1.5"/>
-  <text x="73" y="175" font-size="9" font-weight="900">COMPANION MODE ACTIVE</text>
-  <text x="235" y="175" font-size="10" font-weight="700" fill="#4B5563">• Ticket #DH-8291</text>
+  <!-- Card Header -->
+  <rect x="65" y="150" width="150" height="22" rx="11" fill="#EBF2F7" stroke="#CADCE9" stroke-width="1"/>
+  <text x="75" y="165" font-size="9" font-weight="700" fill="#345C78">Companion Mode Active</text>
+  <text x="225" y="165" font-size="10" font-weight="500" fill="#7C9286">• Ticket #DH-8291</text>
 
-  <text x="65" y="212" font-size="24" font-weight="900">THE TEMPORARY REASSURANCE CHATBOT</text>
-  <text x="65" y="234" font-size="12" font-weight="700" fill="#4B5563">For students placed in P2, P3, or P4 queues, waiting for an appointment can cause secondary anxiety.</text>
-  <text x="65" y="250" font-size="12" font-weight="700" fill="#4B5563">Your Care Companion Virtual Agent is active with validation, grounding tools, and dynamic re-triage.</text>
+  <text x="65" y="200" font-size="22" font-weight="800" fill="#143224">The Temporary Reassurance Chatbot</text>
+  <text x="65" y="220" font-size="12" font-weight="500" fill="#52685E">For students placed in waiting queues, waiting for an appointment can cause secondary anxiety.</text>
+  <text x="65" y="235" font-size="12" font-weight="500" fill="#52685E">Your Care Companion Virtual Agent is active with validation, grounding tools, and dynamic re-triage.</text>
 
   <!-- Queue Status Box on Top Right -->
-  <rect x="880" y="160" width="255" height="55" fill="#F3F4F6" stroke="#000" stroke-width="2"/>
-  <text x="960" y="177" font-size="9" font-weight="900" fill="#4B5563">ACTIVE QUEUE STATUS</text>
-  <text x="915" y="196" font-size="13" font-weight="900">P3 Queue (In 2 Days)</text>
-  <text x="910" y="209" font-size="9" font-weight="600" fill="#6B7280">Counselling &amp; Psychological Services</text>
+  <rect x="880" y="150" width="255" height="58" rx="16" fill="#FAF8F5" stroke="#E3E8E3" stroke-width="1"/>
+  <text x="960" y="168" font-size="9" font-weight="700" fill="#7C9286">ACTIVE QUEUE STATUS</text>
+  <text x="925" y="187" font-size="13" font-weight="800" fill="#143224">P3 Queue (In 2 Days)</text>
+  <text x="915" y="200" font-size="9" font-weight="500" fill="#658273">Counselling &amp; Psychological Services</text>
 
-  <!-- Red Escalation Button -->
-  <rect x="750" y="225" width="385" height="38" fill="#FF4949" stroke="#000" stroke-width="2.5" filter="url(#shadow4)"/>
-  <text x="790" y="249" font-size="12" font-weight="900" fill="#FFF">🚨 "MY SITUATION HAS WORSENED" (ESCALATE)</text>
+  <!-- Escalation Button -->
+  <rect x="750" y="220" width="385" height="38" rx="12" fill="#FDF0ED" stroke="#F5C7C3" stroke-width="1"/>
+  <text x="790" y="244" font-size="11" font-weight="700" fill="#9E2A2B">⚠️ "My Situation Has Worsened" (Escalate)</text>
 
-  <!-- Daily Warm Check-In Banner -->
-  <rect x="65" y="275" width="1070" height="75" fill="#FEF08A" stroke="#000" stroke-width="2.5" filter="url(#shadow4)"/>
-  <text x="80" y="295" font-size="11" font-weight="900">✉️ DAILY WARM CHECK-IN • AUTOMATED SMS &amp; APP PUSH</text>
-  <rect x="990" y="282" width="135" height="18" fill="#FFF" stroke="#000"/>
-  <text x="998" y="295" font-size="8" font-weight="900">SCHEDULED DAILY CHECK-IN</text>
+  <!-- Daily Warm Check-In -->
+  <rect x="65" y="270" width="1070" height="75" rx="16" fill="url(#warmSms)" stroke="#F2DEB0" stroke-width="1"/>
+  <text x="80" y="290" font-size="11" font-weight="700" fill="#7C5315">✉️ Daily Warm Check-in • Automated SMS &amp; App Push</text>
+  <rect x="990" y="278" width="135" height="20" rx="10" fill="#FFFFFF" stroke="#F2DEB0"/>
+  <text x="1005" y="292" font-size="8" font-weight="700" fill="#7C5315">SCHEDULED DAILY</text>
 
-  <rect x="80" y="306" width="1040" height="36" fill="#FFF" stroke="#000" stroke-width="1.5"/>
-  <text x="90" y="322" font-size="8" font-weight="600" fill="#6B7280">Incoming SMS from DHRONA Care:</text>
-  <text x="90" y="335" font-size="10" font-weight="800">"Hi Student, your intake session is in 2 days. How are you feeling today? Tap here if you need a quick grounding exercise."</text>
+  <rect x="80" y="302" width="1040" height="34" rx="10" fill="#FFFFFF" stroke="#F2DEB0" stroke-width="1"/>
+  <text x="90" y="316" font-size="8" font-weight="500" fill="#8D7646">Incoming SMS from DHRONA Care:</text>
+  <text x="90" y="328" font-size="10" font-weight="600" fill="#143224">"Hi Student, your intake session is in 2 days. How are you feeling today? Tap here if you need a quick grounding exercise."</text>
 
-  <rect x="680" y="312" width="115" height="24" fill="#A7F3D0" stroke="#000"/>
-  <text x="690" y="328" font-size="9" font-weight="900">👍 HANGING IN THERE</text>
-  <rect x="805" y="312" width="115" height="24" fill="#FFE55C" stroke="#000"/>
-  <text x="815" y="328" font-size="9" font-weight="900">😟 A BIT OVERWHELMED</text>
-  <rect x="930" y="312" width="125" height="24" fill="#DDD6FE" stroke="#000"/>
-  <text x="940" y="328" font-size="9" font-weight="900">🌬️ NEED 60S GROUNDING</text>
+  <rect x="680" y="307" width="115" height="24" rx="6" fill="#E8F3EE" stroke="#C5DEC8"/>
+  <text x="690" y="323" font-size="9" font-weight="700" fill="#1B4332">👍 Hanging in there</text>
+  <rect x="805" y="307" width="115" height="24" rx="6" fill="#FDF7E7" stroke="#F2DEB0"/>
+  <text x="815" y="323" font-size="9" font-weight="700" fill="#7C5315">😟 A bit overwhelmed</text>
+  <rect x="930" y="307" width="125" height="24" rx="6" fill="#EBF2F7" stroke="#CADCE9"/>
+  <text x="940" y="323" font-size="9" font-weight="700" fill="#2C4A63">🌬️ Need 60s Grounding</text>
 
-  <!-- Left: Chat Window -->
-  <rect x="65" y="365" width="600" height="270" fill="#FFFDF9" stroke="#000" stroke-width="2.5" filter="url(#shadow4)"/>
-  <rect x="65" y="365" width="600" height="38" fill="#FFF" stroke="#000" stroke-width="2"/>
-  <text x="80" y="388" font-size="11" font-weight="900">🤖 CARE COMPANION AGENT</text>
-  <text x="250" y="388" font-size="9" font-weight="700" fill="#059669">• Active Validation &amp; Reassurance</text>
-  <text x="610" y="388" font-size="9" font-weight="600" fill="#6B7280">24/7 Active</text>
+  <!-- Left Chat Stream -->
+  <rect x="65" y="360" width="600" height="275" rx="16" fill="#FAF8F5" stroke="#E3E8E3" stroke-width="1"/>
+  <rect x="65" y="360" width="600" height="38" rx="16" fill="#FFFFFF"/>
+  <text x="80" y="384" font-size="11" font-weight="700" fill="#143224">🤖 Care Companion Agent</text>
+  <text x="240" y="384" font-size="9" font-weight="600" fill="#2D6A4F">• Active Validation &amp; Reassurance</text>
+  <text x="610" y="384" font-size="9" font-weight="500" fill="#7C9286">24/7 Active</text>
 
-  <!-- Bot Message 1 -->
-  <text x="80" y="420" font-size="8" font-weight="700" fill="#6B7280">Care Companion • Just now</text>
-  <rect x="80" y="428" width="530" height="52" fill="#FFF" stroke="#000" stroke-width="2" filter="url(#shadow4)"/>
-  <text x="92" y="446" font-size="10" font-weight="700">We've received your intake and reserved your request in the care queue. You are not</text>
-  <text x="92" y="460" font-size="10" font-weight="700">alone in this, and taking this step to reach out took courage. I'm here as your Care</text>
-  <text x="92" y="474" font-size="10" font-weight="700">Companion while you wait for your appointment.</text>
+  <!-- Chat Messages -->
+  <text x="80" y="415" font-size="8" font-weight="500" fill="#7C9286">Care Companion • Just now</text>
+  <rect x="80" y="422" width="530" height="52" rx="14" fill="#FFFFFF" stroke="#E3E8E3" stroke-width="1"/>
+  <text x="92" y="440" font-size="10" font-weight="500" fill="#143224">We've received your intake and reserved your request in the care queue. You are not</text>
+  <text x="92" y="454" font-size="10" font-weight="500" fill="#143224">alone in this, and taking this step to reach out took courage. I'm here as your Care</text>
+  <text x="92" y="468" font-size="10" font-weight="500" fill="#143224">Companion while you wait for your appointment.</text>
 
-  <!-- Bot Message 2 -->
-  <text x="80" y="498" font-size="8" font-weight="700" fill="#6B7280">Care Companion • Just now</text>
-  <rect x="80" y="506" width="530" height="42" fill="#FFF" stroke="#000" stroke-width="2" filter="url(#shadow4)"/>
-  <text x="92" y="524" font-size="10" font-weight="700">While your assigned advisor prepares your intake file, would you like a quick 60-second</text>
-  <text x="92" y="538" font-size="10" font-weight="700">grounding exercise, or do you have questions about what to expect?</text>
+  <text x="80" y="492" font-size="8" font-weight="500" fill="#7C9286">Care Companion • Just now</text>
+  <rect x="80" y="498" width="530" height="42" rx="14" fill="#FFFFFF" stroke="#E3E8E3" stroke-width="1"/>
+  <text x="92" y="515" font-size="10" font-weight="500" fill="#143224">While your assigned advisor prepares your intake file, would you like a quick 60-second</text>
+  <text x="92" y="529" font-size="10" font-weight="500" fill="#143224">grounding exercise, or do you have questions about what to expect?</text>
 
   <!-- Quick Action Chips -->
-  <rect x="80" y="560" width="130" height="24" fill="#BAE6FD" stroke="#000"/>
-  <text x="88" y="576" font-size="8" font-weight="900">🌬️ BOX BREATHING (60s)</text>
-  <rect x="220" y="560" width="140" height="24" fill="#DDD6FE" stroke="#000"/>
-  <text x="228" y="576" font-size="8" font-weight="900">👁️ 5-4-3-2-1 GROUNDING</text>
-  <rect x="370" y="560" width="150" height="24" fill="#FED7AA" stroke="#000"/>
-  <text x="378" y="576" font-size="8" font-weight="900">📋 WHAT SHOULD I BRING?</text>
+  <rect x="80" y="555" width="130" height="24" rx="12" fill="#FAF8F5" stroke="#DCE4DD"/>
+  <text x="90" y="571" font-size="8" font-weight="700" fill="#1B4332">🌬️ Box Breathing (60s)</text>
+  <rect x="220" y="555" width="140" height="24" rx="12" fill="#FAF8F5" stroke="#DCE4DD"/>
+  <text x="230" y="571" font-size="8" font-weight="700" fill="#2C4A63">👁️ 5-4-3-2-1 Grounding</text>
+  <rect x="370" y="555" width="150" height="24" rx="12" fill="#FAF8F5" stroke="#DCE4DD"/>
+  <text x="380" y="571" font-size="8" font-weight="700" fill="#7C5315">📋 What should I bring?</text>
 
-  <!-- Chat Input -->
-  <rect x="80" y="595" width="500" height="30" fill="#FFF" stroke="#000" stroke-width="1.5"/>
-  <text x="90" y="614" font-size="10" font-weight="600" fill="#9CA3AF">Talk with your Care Companion while waiting...</text>
-  <rect x="590" y="595" width="65" height="30" fill="#FFE55C" stroke="#000" stroke-width="2"/>
-  <text x="612" y="614" font-size="10" font-weight="900">SEND</text>
+  <!-- Input -->
+  <rect x="80" y="590" width="500" height="32" rx="10" fill="#FFFFFF" stroke="#DCE4DD" stroke-width="1"/>
+  <text x="95" y="610" font-size="10" font-weight="500" fill="#8D9F95">Talk with your Care Companion while waiting...</text>
+  <rect x="590" y="590" width="65" height="32" rx="10" fill="#2D6A4F"/>
+  <text x="612" y="610" font-size="10" font-weight="700" fill="#FFFFFF">Send</text>
 
-  <!-- Right: 60s Micro-Coping Tool -->
-  <rect x="685" y="365" width="450" height="270" fill="#FFFFFF" stroke="#000" stroke-width="2.5" filter="url(#shadow4)"/>
-  <rect x="685" y="365" width="450" height="38" fill="#FFF" stroke="#000" stroke-width="2"/>
-  <text x="700" y="388" font-size="11" font-weight="900">⚡ INTERACTIVE 60S MICRO-COPING</text>
-  <rect x="990" y="373" width="90" height="22" fill="#F3F4F6" stroke="#000"/>
-  <text x="1000" y="388" font-size="8" font-weight="900">INSTANT RELIEF</text>
+  <!-- Right: Somatic 60s Micro-Coping -->
+  <rect x="685" y="360" width="450" height="275" rx="16" fill="#FAF8F5" stroke="#E3E8E3" stroke-width="1"/>
+  <text x="700" y="384" font-size="11" font-weight="700" fill="#143224">⚡ Interactive 60s Micro-Coping</text>
+  <rect x="990" y="368" width="130" height="20" rx="10" fill="#E8F3EE" stroke="#C5DEC8"/>
+  <text x="1002" y="382" font-size="8" font-weight="700" fill="#2D6A4F">Instant Somatic Relief</text>
 
-  <!-- Tabs -->
-  <rect x="700" y="412" width="110" height="24" fill="#BAE6FD" stroke="#000" stroke-width="2"/>
-  <text x="712" y="428" font-size="9" font-weight="900">BOX BREATHING</text>
-  <rect x="818" y="412" width="115" height="24" fill="#FFF" stroke="#000"/>
-  <text x="825" y="428" font-size="9" font-weight="900">5-4-3-2-1 SENSORY</text>
-  <rect x="940" y="412" width="110" height="24" fill="#FFF" stroke="#000"/>
-  <text x="952" y="428" font-size="9" font-weight="900">MUSCLE RELEASE</text>
+  <!-- Sub Tabs -->
+  <rect x="700" y="405" width="115" height="24" rx="8" fill="#FFFFFF" stroke="#2D6A4F" stroke-width="1"/>
+  <text x="718" y="421" font-size="9" font-weight="700" fill="#1B4332">Box Breathing</text>
+  <rect x="825" y="405" width="115" height="24" rx="8" fill="#FFFFFF" stroke="#E3E8E3"/>
+  <text x="838" y="421" font-size="9" font-weight="600" fill="#658273">5-4-3-2-1 Sensory</text>
+  <rect x="950" y="405" width="115" height="24" rx="8" fill="#FFFFFF" stroke="#E3E8E3"/>
+  <text x="965" y="421" font-size="9" font-weight="600" fill="#658273">Muscle Release</text>
 
-  <!-- Breathing Tool Body -->
-  <rect x="700" y="445" width="420" height="175" fill="#BAE6FD" stroke="#000" stroke-width="2"/>
-  <text x="820" y="465" font-size="10" font-weight="900">BOX BREATHING PROTOCOL (4-4-4-4)</text>
+  <!-- Breathing Body with Circle Mandala -->
+  <rect x="700" y="440" width="420" height="180" rx="16" fill="#FFFFFF" stroke="#C5DEC8" stroke-width="1"/>
+  <text x="825" y="460" font-size="10" font-weight="700" fill="#143224">Box Breathing Protocol (4-4-4-4)</text>
 
-  <!-- Center Breathing Visual Box -->
-  <rect x="850" y="480" width="110" height="85" fill="#FFF" stroke="#000" stroke-width="3" filter="url(#shadow4)"/>
-  <text x="880" y="505" font-size="10" font-weight="900">INHALE</text>
-  <text x="890" y="535" font-size="24" font-weight="900">4s</text>
+  <!-- Circular Organic Visual Breath Coach -->
+  <circle cx="910" cy="515" r="40" fill="url(#breathCircle)" stroke="#2D6A4F" stroke-width="1.5"/>
+  <text x="892" y="510" font-size="9" font-weight="700" fill="#1B4332">INHALE</text>
+  <text x="900" y="530" font-size="18" font-weight="800" fill="#143224">4s</text>
 
-  <text x="815" y="585" font-size="9" font-weight="700" fill="#1F2937">Inhale slowly through your nose...</text>
+  <text x="795" y="575" font-size="9" font-weight="500" fill="#40564C">Inhale gently through your nose, expanding your belly...</text>
 
-  <rect x="840" y="595" width="130" height="22" fill="#000"/>
-  <text x="855" y="610" font-size="9" font-weight="900" fill="#FFE55C">▶ START 60s SESSION</text>
+  <rect x="840" y="588" width="140" height="24" rx="10" fill="#2D6A4F"/>
+  <text x="856" y="604" font-size="9" font-weight="700" fill="#FFFFFF">▶ Start 60s Session</text>
 </svg>

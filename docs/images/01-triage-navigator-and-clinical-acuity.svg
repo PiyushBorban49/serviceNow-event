@@ -1,146 +1,143 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 680" width="1200" height="680" style="background:#FFFDF7; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 680" width="1200" height="680" style="background:#FAF8F5; font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
   <defs>
-    <filter id="shadow4" x="0" y="0" width="200%" height="200%">
-      <feOffset dx="4" dy="4" result="offset"/>
-      <feFlood flood-color="#000000" flood-opacity="1"/>
-      <feComposite in2="offset" in="SourceGraphic" operator="over"/>
+    <filter id="softShadow" x="-5%" y="-5%" width="115%" height="115%">
+      <feDropShadow dx="0" dy="4" stdDeviation="12" flood-color="#1B4332" flood-opacity="0.06"/>
     </filter>
-    <filter id="shadow6" x="0" y="0" width="200%" height="200%">
-      <feOffset dx="6" dy="6" result="offset"/>
-      <feFlood flood-color="#000000" flood-opacity="1"/>
-      <feComposite in2="offset" in="SourceGraphic" operator="over"/>
-    </filter>
+    <linearGradient id="primaryGreen" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#2D6A4F"/>
+      <stop offset="100%" stop-color="#1B4332"/>
+    </linearGradient>
+    <linearGradient id="calmBanner" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#EBF4EF"/>
+      <stop offset="50%" stop-color="#F2F7F4"/>
+      <stop offset="100%" stop-color="#EEF5F8"/>
+    </linearGradient>
   </defs>
 
   <!-- Top Navigation Header -->
-  <rect x="0" y="0" width="1200" height="75" fill="#FFFFFF" stroke="#000000" stroke-width="3"/>
-  <rect x="25" y="14" width="46" height="46" fill="#FFE55C" stroke="#000000" stroke-width="3" filter="url(#shadow4)"/>
-  <path d="M 40 37 L 48 45 L 60 30" stroke="#000" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+  <rect x="0" y="0" width="1200" height="75" fill="#FAF8F5" stroke="#E3E8E3" stroke-width="1"/>
+  <rect x="25" y="15" width="44" height="44" rx="14" fill="url(#primaryGreen)"/>
+  <path d="M 40 37 L 46 43 L 56 31" stroke="#FFFFFF" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
 
-  <text x="85" y="38" font-size="20" font-weight="900" fill="#000000">DHRONA</text>
-  <rect x="180" y="20" width="105" height="24" fill="#BAE6FD" stroke="#000000" stroke-width="2"/>
-  <text x="188" y="36" font-size="10" font-weight="900" fill="#000000">STUDENT SUPPORT</text>
-  <rect x="295" y="20" width="95" height="24" fill="#A7F3D0" stroke="#000000" stroke-width="2"/>
-  <text x="303" y="36" font-size="10" font-weight="900" fill="#000000">CLINICAL TRIAGE</text>
-  <text x="85" y="56" font-size="11" font-weight="700" fill="#4B5563">Multi-Need Navigator, Clinical Acuity Scoring &amp; Care Companion</text>
+  <text x="82" y="38" font-size="20" font-weight="800" fill="#143224">DHRONA</text>
+  <rect x="175" y="22" width="105" height="22" rx="11" fill="#E8F3EE" stroke="#C5DEC8" stroke-width="1"/>
+  <text x="187" y="37" font-size="10" font-weight="700" fill="#2D6A4F">Care Navigator</text>
+  <rect x="290" y="22" width="130" height="22" rx="11" fill="#EBF2F7" stroke="#CADCE9" stroke-width="1"/>
+  <text x="300" y="37" font-size="10" font-weight="700" fill="#507693">Clinical Acuity Triage</text>
+  <text x="82" y="56" font-size="11" font-weight="500" fill="#52685E">Empathetic student triage, multi-need navigation &amp; gentle companion care</text>
 
-  <!-- Nav Tabs -->
-  <rect x="440" y="20" width="115" height="34" fill="#F3F4F6" stroke="#000000" stroke-width="2"/>
-  <rect x="475" y="24" width="75" height="26" fill="#FFE55C" stroke="#000000" stroke-width="1.5"/>
-  <text x="446" y="41" font-size="9" font-weight="900">MODE:</text>
-  <text x="482" y="41" font-size="9" font-weight="900">🕵️ ANONYMOUS</text>
+  <!-- Controls on right -->
+  <rect x="660" y="20" width="115" height="34" rx="17" fill="#FFFFFF" stroke="#E3E8E3" stroke-width="1"/>
+  <circle cx="678" cy="37" r="4" fill="#2D6A4F"/>
+  <text x="690" y="42" font-size="11" font-weight="600" fill="#2D6A4F">Calm Audio: On</text>
 
-  <rect x="565" y="20" width="105" height="34" fill="#FFE55C" stroke="#000000" stroke-width="2" filter="url(#shadow4)"/>
-  <text x="578" y="42" font-size="11" font-weight="900">⚡ NAVIGATOR</text>
+  <rect x="785" y="20" width="120" height="34" rx="17" fill="#FFFFFF" stroke="#E3E8E3" stroke-width="1"/>
+  <text x="800" y="42" font-size="11" font-weight="600" fill="#40564C">🛡️ Anonymous</text>
 
-  <rect x="680" y="20" width="130" height="34" fill="#FFFFFF" stroke="#000000" stroke-width="2" filter="url(#shadow4)"/>
-  <text x="695" y="42" font-size="11" font-weight="900">🤖 CARE COMPANION</text>
-
-  <rect x="820" y="20" width="95" height="34" fill="#FFFFFF" stroke="#000000" stroke-width="2" filter="url(#shadow4)"/>
-  <text x="835" y="42" font-size="11" font-weight="900">🏛️ 12 DEPTS</text>
-
-  <rect x="925" y="20" width="100" height="34" fill="#FFFFFF" stroke="#000000" stroke-width="2" filter="url(#shadow4)"/>
-  <text x="938" y="42" font-size="11" font-weight="900">📊 ADMIN VIEW</text>
-
-  <rect x="1035" y="20" width="85" height="34" fill="#FFFFFF" stroke="#000000" stroke-width="2" filter="url(#shadow4)"/>
-  <text x="1050" y="42" font-size="11" font-weight="900">🗂️ PITCH</text>
+  <!-- Nav Segmented Tabs -->
+  <rect x="915" y="20" width="260" height="34" rx="14" fill="#EDEBE6" stroke="#DFDDD8" stroke-width="1"/>
+  <rect x="918" y="23" width="80" height="28" rx="11" fill="#FFFFFF" filter="url(#softShadow)"/>
+  <text x="930" y="41" font-size="11" font-weight="700" fill="#1B4332">Navigator</text>
+  <text x="1008" y="41" font-size="11" font-weight="600" fill="#5A6D63">Companion</text>
+  <text x="1085" y="41" font-size="11" font-weight="600" fill="#5A6D63">12 Silos</text>
+  <text x="1142" y="41" font-size="11" font-weight="600" fill="#5A6D63">Admin</text>
 
   <!-- Banner Ticker -->
-  <rect x="0" y="75" width="1200" height="42" fill="#FEF08A" stroke="#000000" stroke-width="3"/>
-  <rect x="25" y="83" width="170" height="26" fill="#000000"/>
-  <text x="35" y="100" font-size="10" font-weight="900" fill="#FFE55C">CLINICAL TRIAGE SCORING</text>
-  <text x="210" y="101" font-size="12" font-weight="800" fill="#000000">Natural Language Intake + 5 Objective Clinical Acuity Questions calibrate queue priority (P1 to P4).</text>
-  <rect x="1030" y="83" width="145" height="26" fill="#000000" stroke="#000000" stroke-width="2"/>
-  <text x="1045" y="100" font-size="11" font-weight="900" fill="#FFE55C">❓ LOAD TEST CASE</text>
+  <rect x="0" y="75" width="1200" height="38" fill="url(#calmBanner)" stroke="#DFE7E1" stroke-width="1"/>
+  <circle cx="35" cy="94" r="3.5" fill="#2D6A4F"/>
+  <text x="48" y="98" font-size="11" font-weight="600" fill="#2A4D3B">Take a slow, deep breath. You are in a safe, non-judgmental space • Share whatever is on your mind in your own words.</text>
+  <rect x="990" y="81" width="185" height="26" rx="13" fill="#FFFFFF" stroke="#C5DEC8" stroke-width="1"/>
+  <text x="1005" y="98" font-size="10" font-weight="700" fill="#1B4332">✨ Load sample multi-need</text>
 
   <!-- Step 1 Intake Container -->
-  <rect x="40" y="140" width="1120" height="260" fill="#FFFFFF" stroke="#000000" stroke-width="3" filter="url(#shadow6)"/>
-  <rect x="65" y="155" width="200" height="24" fill="#FFE55C" stroke="#000000" stroke-width="2"/>
-  <text x="75" y="171" font-size="10" font-weight="900" fill="#000000">STEP 1 • UNIVERSAL TOPIC INTAKE</text>
-  <text x="65" y="210" font-size="24" font-weight="900" fill="#000000">TELL US WHAT'S GOING ON</text>
-  <text x="65" y="230" font-size="12" font-weight="700" fill="#4B5563">Describe your concerns in plain natural language. Dhrona detects concurrent needs across all 12 silos.</text>
+  <rect x="40" y="130" width="1120" height="255" rx="24" fill="#FFFFFF" stroke="#E3E8E3" stroke-width="1" filter="url(#softShadow)"/>
+  <rect x="65" y="148" width="195" height="24" rx="12" fill="#E8F3EE"/>
+  <text x="75" y="164" font-size="10" font-weight="700" fill="#2D6A4F">Step 1 • Universal Topic Intake</text>
   
-  <rect x="915" y="160" width="220" height="34" fill="#BAE6FD" stroke="#000000" stroke-width="2" filter="url(#shadow4)"/>
-  <text x="935" y="181" font-size="11" font-weight="900" fill="#000000">LOAD COMPLEX STUDENT CASE</text>
+  <text x="65" y="200" font-size="22" font-weight="800" fill="#143224">What's weighing on you right now?</text>
+  <text x="65" y="220" font-size="12" font-weight="500" fill="#52685E">You don't need to know which office to visit. Describe your situation naturally—we connect you to all the right care.</text>
+  
+  <rect x="930" y="150" width="200" height="32" rx="12" fill="#F2F7F4" stroke="#CDE0D4" stroke-width="1"/>
+  <text x="948" y="171" font-size="11" font-weight="700" fill="#1B4332">"I Don't Know Where To Start"</text>
 
   <!-- Presets row -->
-  <rect x="65" y="250" width="210" height="50" fill="#FFE55C" stroke="#000000" stroke-width="2" filter="url(#shadow4)"/>
-  <rect x="75" y="255" width="130" height="15" fill="#000" />
-  <text x="80" y="266" font-size="8" font-weight="900" fill="#FFF">★ MULTI-NEED KILLER DEMO</text>
-  <text x="75" y="288" font-size="10" font-weight="900" fill="#000">EXAMS + ROOMMATE + TUITION</text>
+  <rect x="65" y="240" width="205" height="52" rx="16" fill="#F3FAF6" stroke="#E3E8E3" stroke-width="1"/>
+  <rect x="75" y="248" width="130" height="16" rx="8" fill="#E8F3EE"/>
+  <text x="82" y="260" font-size="8" font-weight="700" fill="#1B4332">⭐ MULTI-NEED SCENARIO</text>
+  <text x="75" y="280" font-size="11" font-weight="700" fill="#143224">Exams, Roommate &amp; Tuition</text>
 
-  <rect x="290" y="250" width="200" height="50" fill="#DDD6FE" stroke="#000000" stroke-width="2" filter="url(#shadow4)"/>
-  <rect x="300" y="255" width="70" height="15" fill="#000" />
-  <text x="305" y="266" font-size="8" font-weight="900" fill="#FFF">DUAL NEED</text>
-  <text x="300" y="288" font-size="10" font-weight="900" fill="#000">PANIC ATTACKS &amp; FAILING COURSE</text>
+  <rect x="285" y="240" width="205" height="52" rx="16" fill="#F6F9FC" stroke="#E3E8E3" stroke-width="1"/>
+  <rect x="295" y="248" width="75" height="16" rx="8" fill="#F0F4F8"/>
+  <text x="302" y="260" font-size="8" font-weight="700" fill="#2C4A63">DUAL NEED</text>
+  <text x="295" y="280" font-size="11" font-weight="700" fill="#143224">Panic Attacks &amp; Failing Course</text>
 
-  <rect x="505" y="250" width="200" height="50" fill="#FED7AA" stroke="#000000" stroke-width="2" filter="url(#shadow4)"/>
-  <rect x="515" y="255" width="70" height="15" fill="#000" />
-  <text x="520" y="266" font-size="8" font-weight="900" fill="#FFF">DUAL NEED</text>
-  <text x="515" y="288" font-size="10" font-weight="900" fill="#000">EVICTION RISK &amp; LOST CAMPUS JOB</text>
+  <rect x="505" y="240" width="205" height="52" rx="16" fill="#FCF9F0" stroke="#E3E8E3" stroke-width="1"/>
+  <rect x="515" y="248" width="85" height="16" rx="8" fill="#FDF7E7"/>
+  <text x="522" y="260" font-size="8" font-weight="700" fill="#7C5315">HOUSING &amp; AID</text>
+  <text x="515" y="280" font-size="11" font-weight="700" fill="#143224">Eviction Risk &amp; Lost Job</text>
 
-  <rect x="720" y="250" width="190" height="50" fill="#BAE6FD" stroke="#000000" stroke-width="2" filter="url(#shadow4)"/>
-  <rect x="730" y="255" width="70" height="15" fill="#000" />
-  <text x="735" y="266" font-size="8" font-weight="900" fill="#FFF">SINGLE NEED</text>
-  <text x="730" y="288" font-size="10" font-weight="900" fill="#000">ACADEMIC WORKLOAD</text>
+  <rect x="725" y="240" width="195" height="52" rx="16" fill="#F9F7FC" stroke="#E3E8E3" stroke-width="1"/>
+  <rect x="735" y="248" width="75" height="16" rx="8" fill="#F4F1FA"/>
+  <text x="742" y="260" font-size="8" font-weight="700" fill="#4A386D">ACADEMIC</text>
+  <text x="735" y="280" font-size="11" font-weight="700" fill="#143224">Study Schedule &amp; Deadlines</text>
 
-  <rect x="925" y="250" width="210" height="50" fill="#FECDD3" stroke="#000000" stroke-width="2" filter="url(#shadow4)"/>
-  <rect x="935" y="255" width="85" height="15" fill="#000" />
-  <text x="940" y="266" font-size="8" font-weight="900" fill="#FFF">🚨 SAFETY TEST</text>
-  <text x="935" y="288" font-size="10" font-weight="900" fill="#000">IMMEDIATE CRISIS INTERCEPT</text>
+  <rect x="935" y="240" width="200" height="52" rx="16" fill="#FFF6F5" stroke="#F5C7C3" stroke-width="1"/>
+  <rect x="945" y="248" width="105" height="16" rx="8" fill="#FDF0ED"/>
+  <text x="952" y="260" font-size="8" font-weight="700" fill="#9E2A2B">🚨 SAFETY INTERCEPT</text>
+  <text x="945" y="280" font-size="11" font-weight="700" fill="#143224">Immediate Crisis Support</text>
 
   <!-- Textarea -->
-  <rect x="65" y="315" width="1070" height="65" fill="#FFFDF9" stroke="#000000" stroke-width="3"/>
-  <text x="80" y="345" font-size="12" font-weight="600" fill="#6B7280" font-style="italic">Type your situation in plain words (e.g. 'I'm struggling with exams, my roommate situation is getting worse, and I'm stressed about paying tuition')...</text>
+  <rect x="65" y="305" width="1070" height="60" rx="14" fill="#FAF8F5" stroke="#DCE4DD" stroke-width="1"/>
+  <text x="82" y="338" font-size="12" font-weight="500" fill="#8D9F95">Take your time. You can write: 'I'm struggling with exams, my roommate situation is getting worse, and I'm stressed about paying tuition'...</text>
 
   <!-- Step 2 Clinical Acuity Container -->
-  <rect x="40" y="420" width="1120" height="230" fill="#FFFFFF" stroke="#000000" stroke-width="3" filter="url(#shadow6)"/>
-  <rect x="65" y="435" width="280" height="24" fill="#A7F3D0" stroke="#000000" stroke-width="2"/>
-  <text x="75" y="451" font-size="10" font-weight="900" fill="#000000">STEP 2 • CLINICAL ACUITY &amp; TRIAGE ASSESSMENT</text>
-  <text x="65" y="485" font-size="20" font-weight="900" fill="#000000">5-QUESTION CLINICAL ACUITY SCORING SYSTEM</text>
-  <text x="65" y="505" font-size="12" font-weight="700" fill="#4B5563">Calibrates objective queue priority (P1 to P4) to protect students with acute decompensation.</text>
+  <rect x="40" y="405" width="1120" height="245" rx="24" fill="#FFFFFF" stroke="#E3E8E3" stroke-width="1" filter="url(#softShadow)"/>
+  <rect x="65" y="420" width="260" height="24" rx="12" fill="#EBF2F7"/>
+  <text x="75" y="436" font-size="10" font-weight="700" fill="#345C78">Step 2 • Clinical Acuity &amp; Triage Assessment</text>
+  <text x="65" y="470" font-size="20" font-weight="800" fill="#143224">5-Question Clinical Acuity Check</text>
+  <text x="65" y="490" font-size="12" font-weight="500" fill="#52685E">Calibrates queue urgency (P1 to P4) so students experiencing acute decompensation receive priority care.</text>
 
   <!-- Score pill on right -->
-  <rect x="880" y="435" width="255" height="75" fill="#FFFDF7" stroke="#000000" stroke-width="3" filter="url(#shadow4)"/>
-  <text x="920" y="455" font-size="10" font-weight="900" fill="#6B7280">CALCULATED CLINICAL SCORE</text>
-  <text x="900" y="488" font-size="28" font-weight="900" fill="#000000">35 Pts</text>
-  <rect x="995" y="468" width="60" height="24" fill="#BAE6FD" stroke="#000000" stroke-width="1.5"/>
-  <text x="1005" y="484" font-size="11" font-weight="900" fill="#000000">P3 TIER</text>
-  <text x="895" y="504" font-size="9" font-weight="800" fill="#4B5563">P3 Standard Priority (Routine 3-5 Days)</text>
+  <rect x="880" y="420" width="255" height="70" rx="16" fill="#F5FAF7" stroke="#CDE0D4" stroke-width="1"/>
+  <text x="900" y="438" font-size="9" font-weight="700" fill="#52685E">CALCULATED ACUITY SCORE</text>
+  <text x="900" y="468" font-size="26" font-weight="800" fill="#143224">35 Pts</text>
+  <rect x="990" y="450" width="65" height="22" rx="11" fill="#E8F3EE" stroke="#C3DEC0" stroke-width="1"/>
+  <text x="1002" y="465" font-size="10" font-weight="700" fill="#1B4332">P3 Tier</text>
+  <text x="900" y="482" font-size="9" font-weight="600" fill="#52685E">P3 Standard Priority (Routine 3-5 Days)</text>
 
-  <!-- Questions Preview Cards -->
-  <rect x="65" y="525" width="200" height="105" fill="#FFFDF7" stroke="#000000" stroke-width="2" filter="url(#shadow4)"/>
-  <text x="75" y="545" font-size="9" font-weight="900" fill="#000">Q1: SAFETY (0-100 Pts)</text>
-  <text x="75" y="565" font-size="9" font-weight="700" fill="#4B5563">Thoughts of self-harm?</text>
-  <rect x="75" y="575" width="180" height="20" fill="#FFE55C" stroke="#000"/>
-  <text x="82" y="589" font-size="9" font-weight="900">✓ No (0 Pts)</text>
-  <text x="75" y="618" font-size="8" font-weight="800" fill="#DC2626">Yes = 100 Pts Instant Override</text>
+  <!-- 5 Questions Soft Cards Preview -->
+  <rect x="65" y="515" width="200" height="115" rx="14" fill="#FAF8F5" stroke="#E3E8E3" stroke-width="1"/>
+  <text x="75" y="535" font-size="10" font-weight="700" fill="#143224">Q1: Safety &amp; Self-Harm</text>
+  <text x="75" y="552" font-size="9" font-weight="500" fill="#52685E">Thoughts of self-harm?</text>
+  <rect x="75" y="565" width="180" height="24" rx="8" fill="#FFFFFF" stroke="#2D6A4F" stroke-width="1.5"/>
+  <text x="85" y="581" font-size="9" font-weight="700" fill="#1B4332">✓ No (0 Pts)</text>
+  <text x="75" y="612" font-size="8" font-weight="600" fill="#B91C1C">Yes = 100 Pts Instant Override</text>
 
-  <rect x="280" y="525" width="200" height="105" fill="#FFFDF7" stroke="#000000" stroke-width="2" filter="url(#shadow4)"/>
-  <text x="290" y="545" font-size="9" font-weight="900" fill="#000">Q2: DURATION (5-20 Pts)</text>
-  <text x="290" y="565" font-size="9" font-weight="700" fill="#4B5563">How long affecting you?</text>
-  <rect x="290" y="575" width="180" height="20" fill="#BAE6FD" stroke="#000"/>
-  <text x="297" y="589" font-size="9" font-weight="900">✓ 1-4 Weeks (10 Pts)</text>
-  <text x="290" y="618" font-size="8" font-weight="700" fill="#4B5563">Gradual buildup</text>
+  <rect x="280" y="515" width="200" height="115" rx="14" fill="#FAF8F5" stroke="#E3E8E3" stroke-width="1"/>
+  <text x="290" y="535" font-size="10" font-weight="700" fill="#143224">Q2: Time Horizon</text>
+  <text x="290" y="552" font-size="9" font-weight="500" fill="#52685E">How long affecting you?</text>
+  <rect x="290" y="565" width="180" height="24" rx="8" fill="#FFFFFF" stroke="#2D6A4F" stroke-width="1.5"/>
+  <text x="300" y="581" font-size="9" font-weight="700" fill="#1B4332">✓ 1-4 Weeks (10 Pts)</text>
+  <text x="290" y="612" font-size="8" font-weight="500" fill="#658273">Gradual buildup</text>
 
-  <rect x="495" y="525" width="200" height="105" fill="#FFFDF7" stroke="#000000" stroke-width="2" filter="url(#shadow4)"/>
-  <text x="505" y="545" font-size="9" font-weight="900" fill="#000">Q3: IMPACT (5-25 Pts)</text>
-  <text x="505" y="565" font-size="9" font-weight="700" fill="#4B5563">Functional impairment?</text>
-  <rect x="505" y="575" width="180" height="20" fill="#DDD6FE" stroke="#000"/>
-  <text x="512" y="589" font-size="9" font-weight="900">✓ Moderate (10 Pts)</text>
-  <text x="505" y="618" font-size="8" font-weight="700" fill="#4B5563">Struggling with sleep/study</text>
+  <rect x="495" y="515" width="200" height="115" rx="14" fill="#FAF8F5" stroke="#E3E8E3" stroke-width="1"/>
+  <text x="505" y="535" font-size="10" font-weight="700" fill="#143224">Q3: Daily Impact</text>
+  <text x="505" y="552" font-size="9" font-weight="500" fill="#52685E">Functional impairment?</text>
+  <rect x="505" y="565" width="180" height="24" rx="8" fill="#FFFFFF" stroke="#2D6A4F" stroke-width="1.5"/>
+  <text x="515" y="581" font-size="9" font-weight="700" fill="#1B4332">✓ Moderate (10 Pts)</text>
+  <text x="505" y="612" font-size="8" font-weight="500" fill="#658273">Sleep and focus challenges</text>
 
-  <rect x="710" y="525" width="200" height="105" fill="#FFFDF7" stroke="#000000" stroke-width="2" filter="url(#shadow4)"/>
-  <text x="720" y="545" font-size="9" font-weight="900" fill="#000">Q4: TRIGGERS (0-30 Pts)</text>
-  <text x="720" y="565" font-size="9" font-weight="700" fill="#4B5563">External compound factors?</text>
-  <rect x="720" y="575" width="180" height="20" fill="#FED7AA" stroke="#000"/>
-  <text x="727" y="589" font-size="9" font-weight="900">✓ Deadline/Grades (+5 Pts)</text>
-  <text x="720" y="618" font-size="8" font-weight="700" fill="#4B5563">Housing/Trauma flags</text>
+  <rect x="710" y="515" width="200" height="115" rx="14" fill="#FAF8F5" stroke="#E3E8E3" stroke-width="1"/>
+  <text x="720" y="535" font-size="10" font-weight="700" fill="#143224">Q4: External Triggers</text>
+  <text x="720" y="552" font-size="9" font-weight="500" fill="#52685E">Impending acute factors?</text>
+  <rect x="720" y="565" width="180" height="24" rx="8" fill="#FFFFFF" stroke="#2D6A4F" stroke-width="1.5"/>
+  <text x="730" y="581" font-size="9" font-weight="700" fill="#1B4332">✓ Deadlines (+5 Pts)</text>
+  <text x="720" y="612" font-size="8" font-weight="500" fill="#658273">Aid loss / housing flags</text>
 
-  <rect x="925" y="525" width="210" height="105" fill="#FFFDF7" stroke="#000000" stroke-width="2" filter="url(#shadow4)"/>
-  <text x="935" y="545" font-size="9" font-weight="900" fill="#000">Q5: DISTRESS (5-20 Pts)</text>
-  <text x="935" y="565" font-size="9" font-weight="700" fill="#4B5563">Scale 1-4 breaking point?</text>
-  <rect x="935" y="575" width="190" height="20" fill="#FEF08A" stroke="#000"/>
-  <text x="942" y="589" font-size="9" font-weight="900">✓ 2 - Moderate (10 Pts)</text>
-  <text x="935" y="618" font-size="8" font-weight="700" fill="#4B5563">Overwhelmed, need support soon</text>
+  <rect x="925" y="515" width="210" height="115" rx="14" fill="#FAF8F5" stroke="#E3E8E3" stroke-width="1"/>
+  <text x="935" y="535" font-size="10" font-weight="700" fill="#143224">Q5: Distress Level</text>
+  <text x="935" y="552" font-size="9" font-weight="500" fill="#52685E">Breaking point scale 1-4</text>
+  <rect x="935" y="565" width="190" height="24" rx="8" fill="#FFFFFF" stroke="#2D6A4F" stroke-width="1.5"/>
+  <text x="945" y="581" font-size="9" font-weight="700" fill="#1B4332">✓ 2 - Moderate (10 Pts)</text>
+  <text x="935" y="612" font-size="8" font-weight="500" fill="#658273">Overwhelmed, need support</text>
 </svg>

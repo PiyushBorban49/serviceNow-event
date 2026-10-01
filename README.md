@@ -1,6 +1,6 @@
-# 🎓 DHRONA — Student Support Navigator & AI Triage (Track 01)
+# 🌿 DHRONA — Compassionate Student Support & AI Care Navigator (Track 01)
 
-> **One intelligent front-door to every university department.**  
+> **One empathetic front-door to every university department.**  
 > *Understand the student → Assess urgency → Detect multiple concurrent needs → One-click handoff → Reassurance companion while waiting.*
 
 ---
@@ -18,6 +18,25 @@ Traditional universities operate **12+ separate administrative silos** (Counsell
 
 ---
 
+## 🎨 Mental Health Color Psychology & UI/UX Design System
+
+Unlike generic administrative software with harsh jarring colors or hyper-stimulating neon tones, DHRONA is built upon **evidence-based biophilic design principles** proven to reduce nervous system arousal and secondary anxiety:
+
+### 1. The Therapeutic Color Palette
+* **Deep Forest & Sage Green (`#1B4332`, `#2D6A4F`, `#E8F3EE`)**:
+  * *Psychological Mechanism*: Green wavelengths (520–570 nm) are the most relaxed for human retinal cones, activating parasympathetic vagal pathways that lower blood pressure, reduce muscle tension, and induce emotional safety.
+* **Warm Mineral Blue & Mist (`#2C4A63`, `#EBF2F7`, `#CADCE9`)**:
+  * *Psychological Mechanism*: Invokes open skies and clear water, promoting cognitive decompression and rational problem-solving during panic episodes.
+* **Warm Oat & Linen Canvas (`#FAF8F5`, `#FAF6F0`)**:
+  * *Psychological Mechanism*: Replaces stark, blinding pure-white `#FFFFFF` with warm, natural organic parchment tones, minimizing eye strain and hyper-vigilance.
+* **Soft Terracotta Coral (`#9E2A2B`, `#FDF0ED`)**:
+  * *Psychological Mechanism*: Gently conveys urgency and critical alerts without triggering visceral adrenaline surges or fight-or-flight shock.
+
+### 2. Built-in Somatic Down-Regulation (Web Audio API)
+* Integrated **pink noise / soft rain generator** synthesizes ambient soundscapes in real-time in the browser with zero external assets, helping students regulate breathing while completing their intake.
+
+---
+
 ## 📸 Product Screenshots & Architecture Views
 
 ### 1. Multi-Need Topic Intake & 5-Question Clinical Acuity Scoring
@@ -28,7 +47,7 @@ Traditional universities operate **12+ separate administrative silos** (Counsell
 
 ### 2. The Temporary Reassurance Chatbot (Companion Mode)
 ![The Temporary Reassurance Chatbot](./docs/images/02-care-companion-chatbot.svg)
-*Figure 2: Active validation virtual agent for students in waiting queues. Features daily automated SMS check-ins, a prominent "My situation has worsened" dynamic re-triage escalation button, and interactive 60-second micro-coping tools (Box Breathing, 5-4-3-2-1 Sensory Grounding, Progressive Muscle Relaxation).*
+*Figure 2: Active validation virtual agent for students in waiting queues. Features daily automated SMS check-ins, a prominent "My situation has worsened" dynamic re-triage escalation button, and interactive 60-second micro-coping tools (Circular Breath Mandala, 5-4-3-2-1 Sensory Grounding, Progressive Muscle Relaxation).*
 
 ---
 
@@ -43,7 +62,9 @@ Traditional universities operate **12+ separate administrative silos** (Counsell
 | Tier | Technologies | Purpose |
 | :--- | :--- | :--- |
 | **Web Frontend** | `React 19`, `TypeScript`, `Vite` | High-performance, reactive single-page client interface |
-| **UI Design System** | `Tailwind CSS`, Neobrutalism Design System | High-contrast brutalist outlines, tactile hover states, pastel color-blocking |
+| **Typography** | `Plus Jakarta Sans`, `Outfit`, `Fraunces` | Warm humanist typography designed for legibility and emotional calmness |
+| **UI Styling** | `Tailwind CSS`, Biophilic Soft-Card Design | Organic rounded-3xl cards, subtle border radiuses, soft ambient shadows |
+| **Audio Therapy** | `Web Audio API` (Biquad Filter + Pink Noise) | Real-time browser-synthesized pink noise and rain soundscapes |
 | **Component Icons** | `Lucide React` | Semantic SVG icons for departments, emergency services, and tools |
 | **Python Application** | `Streamlit 1.32+`, `Python 3.10+` | Full-stack interactive Python demonstration suite |
 | **LLM Inference** | `Groq Cloud API` (`llama-3.3-70b-versatile`) | Ultra-fast (&lt; 300ms) structured JSON extraction and multi-need classification |
@@ -97,10 +118,27 @@ Waiting for an appointment can cause secondary anxiety. When placed in P2, P3, o
 * **Active Validation**: *"We've received your intake and reserved your request. You are not alone in this..."*
 * **Dynamic Re-Triage**: Prominent **"My situation has worsened"** button to re-run assessment and bump to P1.
 * **60-Second Micro-Coping**:
-  * 🌬️ **Box Breathing (4-4-4-4)**: Real-time visual geometric box timer.
+  * 🌬️ **Box Breathing (4-4-4-4)**: Real-time visual geometric breath mandala with expanding/contracting soft emerald pulse.
   * 👁️ **5-4-3-2-1 Sensory Grounding**: Step-by-step physical environment checklist.
   * 🧘 **Progressive Muscle Relaxation (PMR)**: Guided release for shoulders, jaw, and hands.
 * **Daily Warm Check-Ins**: Simulated automated SMS/App Push check-in cards.
+
+---
+
+## 📚 Recommended Resources & Design Principles for Mental Health UI
+
+If you want to continue enhancing mental health and healthcare user interfaces, here are the most effective clinical and UX frameworks to explore:
+
+1. **Color & Neuroaesthetics**:
+   * *Biophilic Design Patterns (Terrapin Bright Green)*: Visual connections with natural greens, soft lighting, and wood/earth undertones.
+   * *Circadian Light & Wavelengths*: Avoiding high-energy blue-violet spikes (&gt;480nm) during evening hours.
+2. **Clinical Grounding Methodologies**:
+   * *Polyvagal Theory (Dr. Stephen Porges)*: Down-regulating sympathetic fight-or-flight through extended exhalation (such as 4s inhale, 4s hold, 6s exhale).
+   * *Progressive Muscle Relaxation (Edmund Jacobson)*: Systematic tensing and releasing of muscle groups to break somatic panic loops.
+3. **Frontend Component Ecosystems**:
+   * **Radix UI / Tailwind**: Headless, fully accessible ARIA-compliant primitives.
+   * **Web Audio API**: Browser-native pink/brown noise generation for focus and calming.
+   * **Lucide React**: Clean, non-threatening line iconography.
 
 ---
 
@@ -157,35 +195,6 @@ echo "GROQ_API_KEY=gsk_your_key_here" >> .env
 
 # 4. Launch the Streamlit application
 streamlit run app.py
-```
-*(Note: If no Groq API key is provided, DHRONA automatically operates in deterministic offline fallback mode with 100% uptime for pitch presentations).*
-
----
-
-## 📂 Repository File Structure
-
-```text
-serviceNow-event/
-├── docs/
-│   └── images/
-│       ├── 01-triage-navigator-and-clinical-acuity.svg   # Intake & clinical score UI
-│       ├── 02-care-companion-chatbot.svg                # Care Companion & micro-coping UI
-│       └── 03-admin-operations-intelligence.svg         # Campus operations analytics UI
-├── src/
-│   ├── App.tsx             # Complete React Neobrutalism application (5 tabs, modals, timer)
-│   ├── services/
-│   │   └── triage.ts       # Multi-need classifier, clinical scoring engine, department routes
-│   ├── main.tsx            # React application entry point
-│   └── index.css           # Tailwind CSS imports & brutalist style definitions
-├── app.py                  # Streamlit full-featured interactive application
-├── triage.py               # Groq LLM API caller & multi-need fallback parser
-├── routing.py              # Department directory & routing dictionary
-├── safety.py               # Layer 1 deterministic safety keyword interceptor
-├── config.py               # Model and environment loader
-├── package.json            # Node.js project manifest & dependencies
-├── requirements.txt        # Python pip dependencies
-├── vite.config.ts          # Vite build & development server config
-└── README.md               # Full architecture & project documentation
 ```
 
 ---
