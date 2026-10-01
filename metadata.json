@@ -1,0 +1,6 @@
+{
+  "name": "ServiceNow Event Manager",
+  "description": "Interactive ServiceNow Event Management workbench, payload tester, ITOM event pipeline simulator, and REST API integration hub.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
