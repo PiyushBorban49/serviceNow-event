@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   HeartHandshake, 
   Brain, 
@@ -28,13 +28,19 @@ import {
   Zap, 
   HelpCircle, 
   FileText, 
-  UserCheck, 
   Lock, 
-  Share2, 
-  ExternalLink,
-  Sliders,
-  BarChart3,
-  Bookmark
+  BarChart3, 
+  Bookmark,
+  MessageSquare,
+  Play,
+  Pause,
+  RotateCcw,
+  Volume2,
+  Smile,
+  Shield,
+  Bot,
+  Activity,
+  ArrowUpRight
 } from 'lucide-react';
 import { 
   classifyMultiNeedMessage, 
@@ -46,13 +52,21 @@ import {
   UniversityRoute 
 } from './services/triage';
 
+interface ChatMessage {
+  id: string;
+  sender: 'bot' | 'user';
+  text: string;
+  time: string;
+  actionType?: 'exercise' | 'escalation' | 'general';
+}
+
 const DEMO_PRESETS = [
   {
     id: "preset_multi",
     title: "Multi-Need: Exams + Roommate + Tuition",
     category: "3 Needs Detected",
     badge: "⭐ Multi-Need Killer Demo",
-    bg: "bg-[#FFE55C]", // vibrant yellow
+    bg: "bg-[#FFE55C]",
     hover: "hover:bg-[#FACC15]",
     text: "I'm struggling with exams, my roommate situation is getting worse every day, and I'm stressed about paying my tuition next month. I don't know who to talk to."
   },
@@ -61,7 +75,7 @@ const DEMO_PRESETS = [
     title: "Dual: Panic Attacks & Failing Course",
     category: "2 Needs Detected",
     badge: "Dual Need",
-    bg: "bg-[#DDD6FE]", // pastel purple
+    bg: "bg-[#DDD6FE]",
     hover: "hover:bg-[#C4B5FD]",
     text: "I haven't slept in three days because I'm failing Organic Chemistry. I'm having panic attacks before every lab lecture."
   },
@@ -70,7 +84,7 @@ const DEMO_PRESETS = [
     title: "Dual: Eviction Risk & Lost Campus Job",
     category: "2 Needs Detected",
     badge: "Dual Need",
-    bg: "bg-[#FED7AA]", // pastel orange
+    bg: "bg-[#FED7AA]",
     hover: "hover:bg-[#FDBA74]",
     text: "My landlord threatened to evict me and I just lost my on-campus dining hall job. I have no money for rent or food."
   },
@@ -79,7 +93,7 @@ const DEMO_PRESETS = [
     title: "Single: Academic Workload",
     category: "1 Need",
     badge: "Single Need",
-    bg: "bg-[#BAE6FD]", // pastel blue
+    bg: "bg-[#BAE6FD]",
     hover: "hover:bg-[#7DD3FC]",
     text: "I am having trouble organizing my study schedule and balancing four heavy project deadlines this month."
   },
@@ -88,21 +102,22 @@ const DEMO_PRESETS = [
     title: "Safety: Immediate Crisis Intercept",
     category: "Emergency",
     badge: "🚨 Safety Test",
-    bg: "bg-[#FECDD3]", // pastel red
+    bg: "bg-[#FECDD3]",
     hover: "hover:bg-[#FDA4AF]",
     text: "I feel like hurting myself and I don't know what to do."
   }
 ];
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState<'triage' | 'departments' | 'admin' | 'architecture'>('triage');
+  const [activeTab, setActiveTab] = useState<'triage' | 'companion' | 'departments' | 'admin' | 'architecture'>('triage');
   const [inputText, setInputText] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [triageResult, setTriageResult] = useState<MultiNeedTriageResult | null>(null);
 
-  // Student Identity Mode (Anonymous vs Authenticated)
+  // Student Identity Mode
   const [isAnonymous, setIsAnonymous] = useState(true);
   const [studentId, setStudentId] = useState('STU-2026-8491');
+  const studentName = isAnonymous ? 'Student' : 'Alex';
 
   // Consent & Handoff Slip State
   const [handoffModalOpen, setHandoffModalOpen] = useState(false);
@@ -119,6 +134,131 @@ export default function App() {
   const [bookingModalOpen, setBookingModalOpen] = useState(false);
   const [bookingTargetService, setBookingTargetService] = useState<string>('');
   const [bookingConfirmed, setBookingConfirmed] = useState(false);
+
+  // ========================================================
+  // REASSURANCE CHATBOT (COMPANION MODE) STATE
+  // ========================================================
+  const [queueTier, setQueueTier] = useState<'P3' | 'P2' | 'P1'>('P3');
+  const [queueDays, setQueueDays] = useState(2);
+  const [queueTicketId] = useState('DH-8291');
+  const [chatInput, setChatInput] = useState('');
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([
+    {
+      id: 'm1',
+      sender: 'bot',
+      text: "We've received your intake and reserved your request in the care queue. You are not alone in this, and taking this step to reach out took courage. I'm here as your Care Companion while you wait for your appointment.",
+      time: 'Just now'
+    },
+    {
+      id: 'm2',
+      sender: 'bot',
+      text: "While your assigned advisor prepares your intake file, would you like a quick 60-second grounding exercise, or do you have questions about what to expect?",
+      time: 'Just now'
+    }
+  ]);
+
+  // Interactive Exercises State
+  const [activeExercise, setActiveExercise] = useState<'breathing' | 'sensory' | 'muscle' | null>(null);
+  const [breathingPhase, setBreathingPhase] = useState<'Inhale' | 'Hold' | 'Exhale' | 'Rest'>('Inhale');
+  const [breathingTimer, setBreathingTimer] = useState(4);
+  const [isBreathingActive, setIsBreathingActive] = useState(false);
+  const [breathCycles, setBreathCycles] = useState(0);
+
+  // Sensory Grounding State
+  const [sensorySteps, setSensorySteps] = useState([
+    { id: 5, label: "5 things you can SEE around you", done: false, prompt: "Look for distinct colors or small physical details" },
+    { id: 4, label: "4 things you can physically TOUCH", done: false, prompt: "Feel your desk, fabric of your clothes, or chair" },
+    { id: 3, label: "3 things you can HEAR right now", done: false, prompt: "Listen for air vents, distant voices, or footsteps" },
+    { id: 2, label: "2 things you can SMELL", done: false, prompt: "Coffee, fresh air, paper, or hand sanitizer" },
+    { id: 1, label: "1 thing you can TASTE", done: false, prompt: "Sip of cold water or mint" }
+  ]);
+
+  // Re-Triage Escalation Modal
+  const [escalationModalOpen, setEscalationModalOpen] = useState(false);
+  const [escalationAnswers, setEscalationAnswers] = useState({
+    distressScore: 8,
+    sleepDeprived: true,
+    panicAttacks: true,
+    academicParalysis: true,
+    selfHarmThoughts: false
+  });
+  const [escalationSuccess, setEscalationSuccess] = useState(false);
+
+  // Daily Warm Check-in simulated SMS
+  const [smsAnswered, setSmsAnswered] = useState(false);
+  const [smsResponseChoice, setSmsResponseChoice] = useState('');
+
+  // Breathing Timer Effect
+  useEffect(() => {
+    let interval: any = null;
+    if (isBreathingActive) {
+      interval = setInterval(() => {
+        setBreathingTimer((prev) => {
+          if (prev > 1) return prev - 1;
+          // Transition to next phase
+          if (breathingPhase === 'Inhale') {
+            setBreathingPhase('Hold');
+            return 4;
+          } else if (breathingPhase === 'Hold') {
+            setBreathingPhase('Exhale');
+            return 4;
+          } else if (breathingPhase === 'Exhale') {
+            setBreathingPhase('Rest');
+            return 4;
+          } else {
+            setBreathingPhase('Inhale');
+            setBreathCycles((c) => c + 1);
+            return 4;
+          }
+        });
+      }, 1000);
+    }
+    return () => clearInterval(interval);
+  }, [isBreathingActive, breathingPhase]);
+
+  const handleSendMessage = (customText?: string) => {
+    const text = customText || chatInput;
+    if (!text.trim()) return;
+
+    const userMsg: ChatMessage = {
+      id: `u-${Date.now()}`,
+      sender: 'user',
+      text,
+      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    };
+
+    setChatMessages((prev) => [...prev, userMsg]);
+    if (!customText) setChatInput('');
+
+    // Simulate empathetic response from companion bot
+    setTimeout(() => {
+      const lower = text.toLowerCase();
+      let botResponse = "";
+
+      if (detectCrisis(text) || lower.includes("hurt") || lower.includes("harm") || lower.includes("die")) {
+        botResponse = "I hear how much pain you're experiencing right now, and I care deeply about your immediate safety. Because your wellbeing is paramount, I am activating our direct 24/7 Crisis Response protocol. Please reach out to (555) 911-HELP or dial 988 right now.";
+        setQueueTier('P1');
+      } else if (lower.includes("how long") || lower.includes("wait") || lower.includes("appointment")) {
+        botResponse = `Your intake is confirmed in our ${queueTier} queue. The care team at Counselling Services has your file, and your reserved window is in ${queueDays} days. If your symptoms worsen at any point, click the 'My situation has worsened' button above to request an on-call priority bump.`;
+      } else if (lower.includes("prepare") || lower.includes("bring") || lower.includes("expect")) {
+        botResponse = "You don't need to prepare a formal presentation or worry about having the 'right' words. Bring your student ID and a water bottle. Your advisor has your pre-triaged handoff slip, so you won't have to repeat your whole story from scratch.";
+      } else if (lower.includes("anxious") || lower.includes("panic") || lower.includes("breathe") || lower.includes("grounding")) {
+        botResponse = "That acute anxiety is very real and understandable while waiting. Let's do a quick 60-second exercise together. Try clicking 'Box Breathing' or '5-4-3-2-1 Sensory Grounding' below.";
+      } else {
+        botResponse = "Thank you for sharing that with me. It is completely normal to feel unsettled while in the waiting window. Your concerns are valid, and support is already in motion. Would you like to practice a quick grounding micro-exercise right now?";
+      }
+
+      setChatMessages((prev) => [
+        ...prev,
+        {
+          id: `b-${Date.now()}`,
+          sender: 'bot',
+          text: botResponse,
+          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        }
+      ]);
+    }, 450);
+  };
 
   const handleTriage = (textToAnalyze?: string) => {
     const text = textToAnalyze !== undefined ? textToAnalyze : inputText;
@@ -161,10 +301,34 @@ export default function App() {
     setBookingConfirmed(false);
   };
 
+  // Re-triage submission
+  const handleEscalationSubmit = () => {
+    if (escalationAnswers.selfHarmThoughts) {
+      alert("Immediate safety concern reported. Directing to Emergency Crisis dispatch immediately: 988 or (555) 911-HELP.");
+    }
+    setQueueTier('P1');
+    setQueueDays(0);
+    setEscalationSuccess(true);
+    setTimeout(() => {
+      setEscalationSuccess(false);
+      setEscalationModalOpen(false);
+      // Post note in chat
+      setChatMessages((prev) => [
+        ...prev,
+        {
+          id: `esc-${Date.now()}`,
+          sender: 'bot',
+          text: "🚨 Escalation Alert Processed: Your status has been elevated to P1 (Same-Day On-Call Priority Slot). A crisis coordinator has been notified and will contact your student account shortly.",
+          time: 'Just now'
+        }
+      ]);
+    }, 1800);
+  };
+
   return (
     <div className="min-h-screen bg-[#FFFDF7] text-[#111827] flex flex-col font-sans selection:bg-[#FFE55C] selection:text-black">
       {/* ======================================================== */}
-      {/* HEADER: DHRONA NEOBRUTALISM BRANDING                     */}
+      {/* HEADER: NEOBRUTALISM TOP BAR                             */}
       {/* ======================================================== */}
       <header className="border-b-[3px] border-black bg-white sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex flex-col sm:flex-row sm:items-center justify-between gap-3 py-3 sm:py-0">
@@ -177,15 +341,15 @@ export default function App() {
                 <span className="font-black text-2xl tracking-tight uppercase text-black">
                   DHRONA
                 </span>
-                <span className="bg-[#BAE6FD] text-black text-[11px] font-black uppercase tracking-wider px-2 py-0.5 border-2 border-black shadow-[2px_2px_0px_0px_#000] rotate-[1deg]">
-                  Support Navigator
+                <span className="bg-[#BAE6FD] text-black text-[11px] font-black uppercase tracking-wider px-2.5 py-0.5 border-2 border-black shadow-[2px_2px_0px_0px_#000] rotate-[1deg]">
+                  Student Support
                 </span>
                 <span className="bg-[#A7F3D0] text-black text-[10px] font-extrabold uppercase px-2 py-0.5 border border-black hidden md:inline-block">
-                  Multi-Need Engine
+                  Companion Mode
                 </span>
               </div>
               <p className="text-xs font-bold text-gray-700">
-                Understand the student → Assess urgency → Detect multiple needs → Direct handoff
+                Triage Navigator & Reassurance Care Companion
               </p>
             </div>
           </div>
@@ -216,6 +380,20 @@ export default function App() {
               >
                 <Zap className="w-3.5 h-3.5 stroke-[2.5]" />
                 <span>Navigator</span>
+              </button>
+
+              {/* NEW TAB: REASSURANCE CHATBOT (COMPANION MODE) */}
+              <button
+                onClick={() => setActiveTab('companion')}
+                className={`px-3 py-1.5 text-xs font-black uppercase tracking-wider border-2 border-black transition-all flex items-center space-x-1.5 ${
+                  activeTab === 'companion'
+                    ? 'bg-[#DDD6FE] translate-x-0.5 translate-y-0.5 shadow-[2px_2px_0px_0px_#000]'
+                    : 'bg-white hover:bg-purple-100 shadow-[3px_3px_0px_0px_#000]'
+                }`}
+              >
+                <Bot className="w-3.5 h-3.5 stroke-[2.5] text-purple-900" />
+                <span>Care Companion</span>
+                <span className="w-2 h-2 rounded-full bg-emerald-500 border border-black animate-pulse"></span>
               </button>
 
               <button
@@ -261,24 +439,24 @@ export default function App() {
       {/* ======================================================== */}
       {/* PROBLEM BANNER TICKER                                    */}
       {/* ======================================================== */}
-      <div className="bg-[#FEF08A] border-b-[3px] border-black py-2.5 px-4">
+      <div className="bg-[#FEF08A] border-b-[3px] border-black py-2 px-4">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-3">
           <div className="flex items-center space-x-2">
-            <span className="bg-black text-[#FFE55C] font-black text-xs px-2.5 py-1 uppercase tracking-wider">
-              The Campus Silo Problem
+            <span className="bg-black text-[#FFE55C] font-black text-xs px-2.5 py-0.5 uppercase tracking-wider">
+              Care Continuity
             </span>
             <span className="text-xs sm:text-sm font-extrabold text-black">
-              Students rarely have just one problem. DHRONA maps multi-faceted situations into one unified plan.
+              Waiting for an appointment shouldn't cause secondary anxiety. Companion Mode bridges the gap.
             </span>
           </div>
 
           <div className="flex items-center space-x-2">
             <button
-              onClick={handleIDontKnowWhereToStart}
-              className="bg-black hover:bg-gray-800 text-[#FFE55C] font-black text-xs uppercase px-3 py-1.5 border-2 border-black shadow-[3px_3px_0px_0px_#000] hover:translate-x-[-1px] hover:translate-y-[-1px] active:translate-x-0.5 active:translate-y-0.5 transition-all flex items-center space-x-1.5"
+              onClick={() => setActiveTab('companion')}
+              className="bg-[#DDD6FE] hover:bg-purple-200 text-black font-black text-xs uppercase px-3 py-1 border-2 border-black shadow-[2px_2px_0px_0px_#000] flex items-center space-x-1"
             >
-              <HelpCircle className="w-3.5 h-3.5" />
-              <span>"I Don't Know Where To Start" (Click Me)</span>
+              <Bot className="w-3.5 h-3.5" />
+              <span>Open Companion Mode Chat</span>
             </button>
           </div>
         </div>
@@ -294,7 +472,6 @@ export default function App() {
         {/* ======================================================== */}
         {activeTab === 'triage' && (
           <div className="space-y-8">
-            
             {/* INTAKE FORM */}
             <div className="bg-white border-[3px] border-black shadow-[8px_8px_0px_0px_#000] p-6 sm:p-8 space-y-6">
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b-2 border-black pb-4">
@@ -320,7 +497,7 @@ export default function App() {
                 </div>
               </div>
 
-              {/* 1-Click Presets for Hackathon Pitch */}
+              {/* 1-Click Presets */}
               <div>
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-xs font-black uppercase tracking-wider text-black flex items-center space-x-1.5">
@@ -399,13 +576,9 @@ export default function App() {
               </div>
             </div>
 
-            {/* ======================================================== */}
-            {/* TRIAGE OUTPUT: MULTI-NEED SUPPORT NAVIGATOR               */}
-            {/* ======================================================== */}
+            {/* TRIAGE RESULT DISPLAY */}
             {triageResult && (
               <div className="space-y-8 animate-fadeIn">
-                
-                {/* CASE 1: CRISIS SAFETY INTERCEPT */}
                 {triageResult.crisis_flag ? (
                   <div className="bg-[#FF4949] border-[4px] border-black shadow-[10px_10px_0px_0px_#000] p-6 sm:p-8 space-y-6 text-black">
                     <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b-[3px] border-black pb-5">
@@ -500,10 +673,8 @@ export default function App() {
                     </div>
                   </div>
                 ) : (
-                  /* CASE 2: SMART MULTI-NEED SUPPORT PLAN */
                   <div className="space-y-8">
-                    
-                    {/* SUPPORT NAVIGATOR HERO HEADER (Feature 1) */}
+                    {/* SUPPORT NAVIGATOR HERO HEADER */}
                     <div className="bg-white border-[4px] border-black shadow-[8px_8px_0px_0px_#000] p-6 sm:p-8 space-y-4">
                       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b-2 border-black pb-4">
                         <div>
@@ -521,7 +692,6 @@ export default function App() {
                           </h3>
                         </div>
 
-                        {/* Overall Urgency Badge */}
                         <div className="bg-[#FFFDF7] border-2 border-black p-3 shadow-[3px_3px_0px_0px_#000] text-right">
                           <span className="text-[10px] font-black uppercase text-gray-600 block">Overall Urgency Level</span>
                           <span className={`text-sm font-black uppercase px-2 py-0.5 border border-black inline-block mt-0.5 ${
@@ -536,22 +706,32 @@ export default function App() {
                         </div>
                       </div>
 
-                      {/* Visual Pipeline Flow */}
-                      <div className="bg-[#F3F4F6] border-2 border-black p-4 space-y-2">
-                        <div className="text-[10px] font-black uppercase text-gray-600">The Journey From 1 Input To Multi-Department Action</div>
-                        <div className="flex flex-wrap items-center gap-2 text-xs font-bold">
-                          <span className="bg-white border border-black px-2.5 py-1">Student Inquiry</span>
-                          <span className="font-mono text-base font-black">→</span>
-                          <span className="bg-[#FFE55C] border border-black px-2.5 py-1">AI Triage ({triageResult.needs.length} Needs)</span>
-                          <span className="font-mono text-base font-black">→</span>
-                          <span className="bg-[#BAE6FD] border border-black px-2.5 py-1">Department Mapping</span>
-                          <span className="font-mono text-base font-black">→</span>
-                          <span className="bg-[#A7F3D0] border border-black px-2.5 py-1">One-Click Handoff</span>
+                      {/* Bridge to Care Companion Mode Banner */}
+                      <div className="bg-[#DDD6FE] border-2 border-black p-4 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-[3px_3px_0px_0px_#000]">
+                        <div className="flex items-center space-x-3">
+                          <div className="w-10 h-10 bg-white border-2 border-black flex items-center justify-center font-bold">
+                            <Bot className="w-6 h-6 text-purple-900" />
+                          </div>
+                          <div>
+                            <div className="text-xs font-black uppercase text-black">
+                              Waiting for your appointment?
+                            </div>
+                            <div className="text-xs font-bold text-purple-900">
+                              Activate the Temporary Reassurance Chatbot (Companion Mode) for grounding exercises and dynamic re-triage.
+                            </div>
+                          </div>
                         </div>
+
+                        <button
+                          onClick={() => setActiveTab('companion')}
+                          className="px-4 py-2 bg-black text-[#FFE55C] font-black uppercase text-xs border-2 border-black shadow-[2px_2px_0px_0px_#000] hover:bg-gray-800 transition shrink-0"
+                        >
+                          Switch to Companion Mode →
+                        </button>
                       </div>
                     </div>
 
-                    {/* MULTI-NEED DEPARTMENT CARDS (Features 1, 2, 3, 9) */}
+                    {/* MULTI-NEED DEPARTMENT CARDS */}
                     <div className="space-y-6">
                       <div className="flex items-center justify-between">
                         <h4 className="text-lg font-black uppercase tracking-wider text-black flex items-center space-x-2">
@@ -559,7 +739,7 @@ export default function App() {
                           <span>Detected Support Pathways ({triageResult.needs.length})</span>
                         </h4>
                         <span className="text-xs font-bold text-gray-500 font-mono">
-                          Each department receives a targeted handoff slip
+                          Coordinated across campus silos
                         </span>
                       </div>
 
@@ -574,7 +754,6 @@ export default function App() {
                               key={need.category}
                               className="bg-white border-[3px] border-black shadow-[6px_6px_0px_0px_#000] p-6 space-y-5"
                             >
-                              {/* Header for this need */}
                               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b-2 border-black pb-4">
                                 <div className="flex items-center space-x-3">
                                   <div className={`w-9 h-9 ${accentBg} border-2 border-black shadow-[2px_2px_0px_0px_#000] flex items-center justify-center font-black text-base`}>
@@ -603,7 +782,7 @@ export default function App() {
                                 </div>
                               </div>
 
-                              {/* FEATURE 2: "WHY AM I BEING ROUTED HERE?" EXPLAINABLE RECOMMENDATION */}
+                              {/* WHY WE RECOMMEND THIS */}
                               <div className="bg-[#FFFDF7] border-2 border-black shadow-[3px_3px_0px_0px_#000] p-4 space-y-2">
                                 <div className="flex items-center justify-between">
                                   <span className="text-xs font-black uppercase tracking-wider text-black flex items-center space-x-1.5">
@@ -632,7 +811,6 @@ export default function App() {
                                 </p>
                               </div>
 
-                              {/* Department Info & Tangible Immediate Resources */}
                               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="space-y-2">
                                   <div className="text-[11px] font-black uppercase text-gray-700">Campus Location & Contacts</div>
@@ -643,7 +821,6 @@ export default function App() {
                                   </div>
                                 </div>
 
-                                {/* FEATURE 9: IMMEDIATE RESOURCE RECOMMENDATIONS */}
                                 <div className="space-y-2">
                                   <div className="text-[11px] font-black uppercase text-gray-700">Immediate Self-Service Resources</div>
                                   <div className="bg-[#F3F4F6] border-2 border-black p-3 text-xs space-y-1.5">
@@ -659,7 +836,6 @@ export default function App() {
                                 </div>
                               </div>
 
-                              {/* Action button for this specific service */}
                               <div className="flex items-center justify-between pt-1">
                                 <span className="text-xs font-bold text-gray-600">
                                   Priority Policy: {route.priorityNote || 'Priority intake available'}
@@ -678,9 +854,7 @@ export default function App() {
                       </div>
                     </div>
 
-                    {/* ======================================================== */}
-                    {/* FEATURES 3, 4, 10, 12: UNIFIED HANDOFF SLIP & FOLLOW-UP  */}
-                    {/* ======================================================== */}
+                    {/* UNIFIED HANDOFF SLIP & FOLLOW-UP */}
                     <div className="bg-[#FFE55C] border-[4px] border-black shadow-[8px_8px_0px_0px_#000] p-6 sm:p-8 space-y-6">
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b-2 border-black pb-4">
                         <div>
@@ -704,33 +878,6 @@ export default function App() {
                         </button>
                       </div>
 
-                      {/* FEATURE 12: "WHAT HAPPENS NEXT?" STEP ROADMAP */}
-                      <div className="bg-white border-2 border-black shadow-[3px_3px_0px_0px_#000] p-5 space-y-3">
-                        <div className="text-xs font-black uppercase tracking-wider text-black flex items-center space-x-1.5">
-                          <CheckCircle2 className="w-4 h-4 text-emerald-600 stroke-[3]" />
-                          <span>What Happens Next?</span>
-                        </div>
-                        <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 text-xs">
-                          <div className="bg-[#F3F4F6] border border-black p-3 space-y-1">
-                            <div className="font-black text-black">1. Consent Approval</div>
-                            <p className="text-gray-700 text-[11px]">You approve which concerns are transmitted to advisors.</p>
-                          </div>
-                          <div className="bg-[#F3F4F6] border border-black p-3 space-y-1">
-                            <div className="font-black text-black">2. Handoff Dispatched</div>
-                            <p className="text-gray-700 text-[11px]">Assigned duty advisors at each service review your summary.</p>
-                          </div>
-                          <div className="bg-[#F3F4F6] border border-black p-3 space-y-1">
-                            <div className="font-black text-black">3. Coordinated Slots</div>
-                            <p className="text-gray-700 text-[11px]">Fast-track intake windows open with zero duplicate paperwork.</p>
-                          </div>
-                          <div className="bg-[#F3F4F6] border border-black p-3 space-y-1">
-                            <div className="font-black text-black">4. Check-in Journey</div>
-                            <p className="text-gray-700 text-[11px]">Automated follow-up checks that you received effective care.</p>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* FEATURE 10: FOLLOW-UP SCHEDULER */}
                       <div className="bg-white border-2 border-black shadow-[3px_3px_0px_0px_#000] p-5 space-y-3">
                         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                           <div>
@@ -783,7 +930,399 @@ export default function App() {
         )}
 
         {/* ======================================================== */}
-        {/* TAB 2: THE 12 CAMPUS DEPARTMENTS DIRECTORY                */}
+        {/* TAB 2: REASSURANCE CHATBOT (COMPANION MODE) (USER IMAGE) */}
+        {/* ======================================================== */}
+        {activeTab === 'companion' && (
+          <div className="space-y-6 animate-fadeIn">
+            {/* COMPANION HEADER & QUEUE STATUS CARD */}
+            <div className="bg-white border-[4px] border-black shadow-[8px_8px_0px_0px_#000] p-6 sm:p-8 space-y-6">
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b-2 border-black pb-5">
+                <div>
+                  <div className="flex items-center space-x-2 mb-1.5">
+                    <span className="bg-[#DDD6FE] text-black font-black text-xs uppercase px-2.5 py-0.5 border-2 border-black shadow-[2px_2px_0px_0px_#000]">
+                      Companion Mode Active
+                    </span>
+                    <span className="text-xs font-bold text-gray-500">•</span>
+                    <span className="text-xs font-mono font-bold text-gray-700">Ticket #{queueTicketId}</span>
+                  </div>
+                  <h2 className="text-2xl sm:text-3xl font-black text-black uppercase tracking-tight">
+                    The Temporary Reassurance Chatbot
+                  </h2>
+                  <p className="text-xs sm:text-sm font-bold text-gray-700 mt-1 max-w-2xl leading-relaxed">
+                    For students placed in P2, P3, or P4 queues, waiting for an appointment can cause secondary anxiety. 
+                    Your Care Companion Virtual Agent is active with validation, grounding tools, and dynamic re-triage.
+                  </p>
+                </div>
+
+                {/* Queue Status Box & Escalation Button */}
+                <div className="flex flex-col items-end gap-2 shrink-0">
+                  <div className="bg-[#F3F4F6] border-2 border-black p-3 text-right shadow-[3px_3px_0px_0px_#000] w-full sm:w-auto">
+                    <div className="text-[10px] font-black uppercase text-gray-600">Active Queue Status</div>
+                    <div className="text-sm font-black text-black mt-0.5">
+                      {queueTier} Queue ({queueDays === 0 ? 'Today Priority' : `In ${queueDays} Days`})
+                    </div>
+                    <div className="text-[10px] font-semibold text-gray-600">Counselling & Psychological Services</div>
+                  </div>
+
+                  {/* PROMINENT RE-TRIAGE ESCALATION BUTTON (CAPABILITY 3) */}
+                  <button
+                    onClick={() => setEscalationModalOpen(true)}
+                    className="w-full sm:w-auto py-2.5 px-4 bg-[#FF4949] hover:bg-red-600 text-white font-black text-xs uppercase tracking-wider border-2 border-black shadow-[4px_4px_0px_0px_#000] active:translate-x-0.5 active:translate-y-0.5 active:shadow-[1px_1px_0px_0px_#000] transition-all flex items-center justify-center space-x-1.5"
+                  >
+                    <AlertTriangle className="w-4 h-4 stroke-[3]" />
+                    <span>"My Situation Has Worsened" (Escalate)</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* CAPABILITY 4: DAILY WARM CHECK-IN SIMULATION (SMS / APP NOTIFICATION) */}
+              <div className="bg-[#FEF08A] border-2 border-black p-4 space-y-2 shadow-[3px_3px_0px_0px_#000]">
+                <div className="flex items-center justify-between">
+                  <span className="text-[11px] font-black uppercase tracking-wider text-black flex items-center space-x-1.5">
+                    <Mail className="w-4 h-4 stroke-[2.5]" />
+                    <span>Daily Warm Check-in • Automated SMS & App Push</span>
+                  </span>
+                  <span className="text-[9px] font-black uppercase bg-white px-2 py-0.5 border border-black">
+                    Scheduled Daily Check-In
+                  </span>
+                </div>
+
+                <div className="bg-white border-2 border-black p-3 text-xs font-bold text-black flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div>
+                    <span className="text-gray-500 font-mono text-[10px] block">Incoming SMS from DHRONA Care:</span>
+                    "Hi {studentName}, your intake session is in {queueDays} days. How are you feeling today? Tap here if you need a quick grounding exercise."
+                  </div>
+
+                  {!smsAnswered ? (
+                    <div className="flex flex-wrap items-center gap-1.5 shrink-0">
+                      <button
+                        onClick={() => {
+                          setSmsAnswered(true);
+                          setSmsResponseChoice("Hanging in there");
+                          handleSendMessage("I'm hanging in there, just trying to focus on classes.");
+                        }}
+                        className="px-2.5 py-1 bg-[#A7F3D0] hover:bg-green-300 text-black text-[10px] font-black uppercase border border-black"
+                      >
+                        👍 Hanging in there
+                      </button>
+                      <button
+                        onClick={() => {
+                          setSmsAnswered(true);
+                          setSmsResponseChoice("A bit overwhelmed");
+                          handleSendMessage("A bit overwhelmed today with coursework and sleep.");
+                        }}
+                        className="px-2.5 py-1 bg-[#FFE55C] hover:bg-yellow-300 text-black text-[10px] font-black uppercase border border-black"
+                      >
+                        😟 A bit overwhelmed
+                      </button>
+                      <button
+                        onClick={() => {
+                          setSmsAnswered(true);
+                          setSmsResponseChoice("Need Grounding");
+                          setActiveExercise('breathing');
+                          handleSendMessage("I need a quick grounding exercise right now.");
+                        }}
+                        className="px-2.5 py-1 bg-[#DDD6FE] hover:bg-purple-300 text-black text-[10px] font-black uppercase border border-black"
+                      >
+                        🌬️ Need 60s Grounding
+                      </button>
+                    </div>
+                  ) : (
+                    <span className="text-[10px] font-black uppercase bg-[#A7F3D0] px-2 py-1 border border-black">
+                      ✓ Responded: {smsResponseChoice}
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              {/* CHAT WINDOW & INTERACTIVE TOOLS GRID */}
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                
+                {/* Left: Chat Conversation Window (7 cols) */}
+                <div className="lg:col-span-7 bg-[#FFFDF9] border-[3px] border-black shadow-[6px_6px_0px_0px_#000] flex flex-col h-[520px]">
+                  
+                  {/* Chat Header */}
+                  <div className="p-3.5 bg-white border-b-2 border-black flex items-center justify-between">
+                    <div className="flex items-center space-x-2.5">
+                      <div className="w-8 h-8 bg-[#DDD6FE] border-2 border-black flex items-center justify-center">
+                        <Bot className="w-5 h-5 text-purple-900" />
+                      </div>
+                      <div>
+                        <div className="text-xs font-black uppercase text-black">Care Companion Agent</div>
+                        <div className="text-[10px] font-semibold text-emerald-700 flex items-center space-x-1">
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                          <span>Active Validation & Reassurance</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <span className="text-[10px] font-mono font-bold text-gray-500">24/7 Active</span>
+                  </div>
+
+                  {/* Message Stream */}
+                  <div className="flex-1 p-4 overflow-y-auto space-y-3.5">
+                    {chatMessages.map((msg) => (
+                      <div
+                        key={msg.id}
+                        className={`flex flex-col ${msg.sender === 'user' ? 'items-end' : 'items-start'}`}
+                      >
+                        <div className="flex items-center space-x-1 text-[9px] font-bold text-gray-500 mb-1">
+                          <span>{msg.sender === 'user' ? (isAnonymous ? 'You' : 'Alex') : 'Care Companion'}</span>
+                          <span>•</span>
+                          <span>{msg.time}</span>
+                        </div>
+
+                        <div
+                          className={`max-w-[85%] p-3.5 text-xs font-bold leading-relaxed border-2 border-black shadow-[3px_3px_0px_0px_#000] ${
+                            msg.sender === 'user'
+                              ? 'bg-[#FFE55C] text-black'
+                              : 'bg-white text-gray-900'
+                          }`}
+                        >
+                          {msg.text}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Quick Action Suggestion Chips */}
+                  <div className="p-2.5 bg-white border-t-2 border-black flex flex-wrap gap-1.5">
+                    <button
+                      onClick={() => {
+                        setActiveExercise('breathing');
+                        handleSendMessage("Can we do the 60-second Box Breathing exercise?");
+                      }}
+                      className="px-2.5 py-1 bg-[#BAE6FD] hover:bg-blue-200 text-black text-[10px] font-black uppercase border border-black shadow-[1px_1px_0px_0px_#000]"
+                    >
+                      🌬️ Box Breathing (60s)
+                    </button>
+                    <button
+                      onClick={() => {
+                        setActiveExercise('sensory');
+                        handleSendMessage("I'd like to try 5-4-3-2-1 Sensory Grounding.");
+                      }}
+                      className="px-2.5 py-1 bg-[#DDD6FE] hover:bg-purple-200 text-black text-[10px] font-black uppercase border border-black shadow-[1px_1px_0px_0px_#000]"
+                    >
+                      👁️ 5-4-3-2-1 Grounding
+                    </button>
+                    <button
+                      onClick={() => handleSendMessage("What should I bring to my appointment?")}
+                      className="px-2.5 py-1 bg-[#FED7AA] hover:bg-orange-200 text-black text-[10px] font-black uppercase border border-black shadow-[1px_1px_0px_0px_#000]"
+                    >
+                      📋 What should I bring?
+                    </button>
+                  </div>
+
+                  {/* Chat Input Bar */}
+                  <div className="p-3 bg-white border-t-2 border-black flex items-center space-x-2">
+                    <input
+                      type="text"
+                      value={chatInput}
+                      onChange={(e) => setChatInput(e.target.value)}
+                      onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
+                      placeholder="Talk with your Care Companion while waiting..."
+                      className="flex-1 bg-[#FFFDF9] border-2 border-black px-3 py-2 text-xs font-semibold text-black placeholder:text-gray-400 focus:outline-none"
+                    />
+                    <button
+                      onClick={() => handleSendMessage()}
+                      className="px-4 py-2 bg-[#FFE55C] hover:bg-yellow-300 text-black font-black uppercase text-xs border-2 border-black shadow-[2px_2px_0px_0px_#000] active:translate-x-0.5 active:translate-y-0.5"
+                    >
+                      <Send className="w-3.5 h-3.5 stroke-[2.5]" />
+                    </button>
+                  </div>
+                </div>
+
+                {/* Right: CAPABILITY 2: GROUNDING & MICRO-COPING EXERCISES (5 cols) */}
+                <div className="lg:col-span-5 space-y-4">
+                  
+                  {/* Tool Tabs Header */}
+                  <div className="bg-white border-[3px] border-black shadow-[4px_4px_0px_0px_#000] p-4 space-y-3">
+                    <div className="flex items-center justify-between border-b-2 border-black pb-2">
+                      <span className="text-xs font-black uppercase tracking-wider text-black flex items-center space-x-1.5">
+                        <Activity className="w-4 h-4 text-purple-700 stroke-[2.5]" />
+                        <span>Interactive 60s Micro-Coping</span>
+                      </span>
+                      <span className="text-[10px] font-bold text-gray-500 uppercase bg-[#F3F4F6] px-2 py-0.5 border border-black">
+                        Instant Relief
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-3 gap-1.5">
+                      <button
+                        onClick={() => setActiveExercise('breathing')}
+                        className={`p-2 text-[10px] font-black uppercase border-2 border-black transition ${
+                          activeExercise === 'breathing' || activeExercise === null
+                            ? 'bg-[#BAE6FD] shadow-[2px_2px_0px_0px_#000]'
+                            : 'bg-white hover:bg-gray-100'
+                        }`}
+                      >
+                        Box Breathing
+                      </button>
+                      <button
+                        onClick={() => setActiveExercise('sensory')}
+                        className={`p-2 text-[10px] font-black uppercase border-2 border-black transition ${
+                          activeExercise === 'sensory'
+                            ? 'bg-[#DDD6FE] shadow-[2px_2px_0px_0px_#000]'
+                            : 'bg-white hover:bg-gray-100'
+                        }`}
+                      >
+                        5-4-3-2-1 Sensory
+                      </button>
+                      <button
+                        onClick={() => setActiveExercise('muscle')}
+                        className={`p-2 text-[10px] font-black uppercase border-2 border-black transition ${
+                          activeExercise === 'muscle'
+                            ? 'bg-[#A7F3D0] shadow-[2px_2px_0px_0px_#000]'
+                            : 'bg-white hover:bg-gray-100'
+                        }`}
+                      >
+                        Muscle Release
+                      </button>
+                    </div>
+
+                    {/* TOOL 1: BOX BREATHING (4-4-4-4) */}
+                    {(activeExercise === 'breathing' || activeExercise === null) && (
+                      <div className="bg-[#BAE6FD] border-2 border-black p-4 space-y-4 text-center">
+                        <div className="text-xs font-black uppercase text-black">
+                          Box Breathing Protocol (4-4-4-4)
+                        </div>
+
+                        {/* Animated Visual Box */}
+                        <div className="py-2 flex flex-col items-center justify-center">
+                          <div
+                            className={`w-28 h-28 border-[4px] border-black bg-white flex flex-col items-center justify-center shadow-[4px_4px_0px_0px_#000] transition-transform duration-1000 ${
+                              isBreathingActive && breathingPhase === 'Inhale'
+                                ? 'scale-110 bg-[#FFE55C]'
+                                : isBreathingActive && breathingPhase === 'Exhale'
+                                ? 'scale-90 bg-[#BAE6FD]'
+                                : 'scale-100'
+                            }`}
+                          >
+                            <span className="text-xs font-black uppercase tracking-wider text-black">
+                              {breathingPhase}
+                            </span>
+                            <span className="text-2xl font-black font-mono text-black mt-1">
+                              {breathingTimer}s
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="text-[11px] font-bold text-gray-800">
+                          {breathingPhase === 'Inhale' && "Inhale slowly through your nose..."}
+                          {breathingPhase === 'Hold' && "Hold your breath gently..."}
+                          {breathingPhase === 'Exhale' && "Release through your mouth smoothly..."}
+                          {breathingPhase === 'Rest' && "Rest calmly before the next cycle..."}
+                        </div>
+
+                        <div className="flex items-center justify-center space-x-2 pt-1">
+                          <button
+                            onClick={() => setIsBreathingActive(!isBreathingActive)}
+                            className="px-4 py-2 bg-black text-[#FFE55C] font-black uppercase text-xs border-2 border-black shadow-[2px_2px_0px_0px_#FFF] active:translate-x-0.5 active:translate-y-0.5 transition flex items-center space-x-1.5"
+                          >
+                            {isBreathingActive ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
+                            <span>{isBreathingActive ? 'Pause' : 'Start 60s Session'}</span>
+                          </button>
+
+                          <button
+                            onClick={() => {
+                              setIsBreathingActive(false);
+                              setBreathingPhase('Inhale');
+                              setBreathingTimer(4);
+                              setBreathCycles(0);
+                            }}
+                            className="p-2 bg-white hover:bg-gray-100 text-black border-2 border-black shadow-[2px_2px_0px_0px_#000]"
+                          >
+                            <RotateCcw className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+
+                        <div className="text-[10px] font-bold text-gray-700">
+                          Cycles Completed: {breathCycles} • Proven to lower heart rate and cortisol in under 60 seconds
+                        </div>
+                      </div>
+                    )}
+
+                    {/* TOOL 2: 5-4-3-2-1 SENSORY GROUNDING */}
+                    {activeExercise === 'sensory' && (
+                      <div className="bg-[#DDD6FE] border-2 border-black p-4 space-y-3">
+                        <div className="text-xs font-black uppercase text-black flex items-center justify-between">
+                          <span>5-4-3-2-1 Sensory Reset</span>
+                          <span className="text-[10px] font-bold text-purple-900">Check off as you notice</span>
+                        </div>
+
+                        <div className="space-y-2">
+                          {sensorySteps.map((step, sIdx) => (
+                            <button
+                              key={step.id}
+                              onClick={() => {
+                                const updated = [...sensorySteps];
+                                updated[sIdx].done = !updated[sIdx].done;
+                                setSensorySteps(updated);
+                              }}
+                              className={`w-full text-left p-2.5 border-2 border-black text-xs font-bold transition flex items-start space-x-2 ${
+                                step.done ? 'bg-[#A7F3D0] line-through' : 'bg-white shadow-[2px_2px_0px_0px_#000]'
+                              }`}
+                            >
+                              <span className="font-mono font-black text-purple-900">{step.id}</span>
+                              <div className="min-w-0">
+                                <div>{step.label}</div>
+                                <div className="text-[10px] text-gray-600 font-normal">{step.prompt}</div>
+                              </div>
+                            </button>
+                          ))}
+                        </div>
+
+                        <button
+                          onClick={() => {
+                            setSensorySteps(sensorySteps.map((s) => ({ ...s, done: false })));
+                          }}
+                          className="w-full py-1.5 bg-white hover:bg-gray-100 text-black text-[10px] font-black uppercase border border-black"
+                        >
+                          Reset Checklist
+                        </button>
+                      </div>
+                    )}
+
+                    {/* TOOL 3: GUIDED MUSCLE RELAXATION */}
+                    {activeExercise === 'muscle' && (
+                      <div className="bg-[#A7F3D0] border-2 border-black p-4 space-y-3">
+                        <div className="text-xs font-black uppercase text-black">
+                          Guided Muscle Release (PMR)
+                        </div>
+
+                        <div className="space-y-2 text-xs font-bold text-black">
+                          <div className="bg-white border-2 border-black p-3 space-y-1 shadow-[2px_2px_0px_0px_#000]">
+                            <div className="font-black uppercase text-[11px] text-emerald-800">1. Shoulders & Neck</div>
+                            <p className="text-[11px] font-medium text-gray-700">
+                              Gently pull shoulders up toward your ears for 5 seconds. Now release completely. Feel the drop.
+                            </p>
+                          </div>
+
+                          <div className="bg-white border-2 border-black p-3 space-y-1 shadow-[2px_2px_0px_0px_#000]">
+                            <div className="font-black uppercase text-[11px] text-emerald-800">2. Jaw & Forehead</div>
+                            <p className="text-[11px] font-medium text-gray-700">
+                              Unclench your teeth. Let your tongue rest gently behind your bottom teeth. Smooth out your forehead.
+                            </p>
+                          </div>
+
+                          <div className="bg-white border-2 border-black p-3 space-y-1 shadow-[2px_2px_0px_0px_#000]">
+                            <div className="font-black uppercase text-[11px] text-emerald-800">3. Hands & Abdomen</div>
+                            <p className="text-[11px] font-medium text-gray-700">
+                              Unclench your fists, spread your fingers wide, and allow your stomach to soften on the exhale.
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ======================================================== */}
+        {/* TAB 3: THE 12 CAMPUS DEPARTMENTS DIRECTORY                */}
         {/* ======================================================== */}
         {activeTab === 'departments' && (
           <div className="space-y-6">
@@ -800,7 +1339,6 @@ export default function App() {
                 </p>
               </div>
 
-              {/* Grid of the 12 fragmented departments */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {ALL_12_DEPARTMENTS.map((dept, i) => {
                   const colors = ['bg-[#BAE6FD]', 'bg-[#DDD6FE]', 'bg-[#FED7AA]', 'bg-[#A7F3D0]', 'bg-[#FEF08A]', 'bg-[#FECDD3]'];
@@ -853,7 +1391,7 @@ export default function App() {
         )}
 
         {/* ======================================================== */}
-        {/* TAB 3: ADMIN DEMAND DASHBOARD (Section 13)               */}
+        {/* TAB 4: ADMIN DEMAND DASHBOARD                            */}
         {/* ======================================================== */}
         {activeTab === 'admin' && (
           <div className="space-y-6">
@@ -876,7 +1414,6 @@ export default function App() {
                 </div>
               </div>
 
-              {/* Stat Cards */}
               <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
                 <div className="bg-[#BAE6FD] border-2 border-black p-4 shadow-[3px_3px_0px_0px_#000]">
                   <span className="text-[10px] font-black uppercase text-gray-800">Total Student Inquiries</span>
@@ -903,7 +1440,6 @@ export default function App() {
                 </div>
               </div>
 
-              {/* Department Demand Bars */}
               <div className="space-y-3 pt-2">
                 <h4 className="text-sm font-black uppercase text-black">
                   Department Influx & Demand Breakdown
@@ -955,13 +1491,13 @@ export default function App() {
         )}
 
         {/* ======================================================== */}
-        {/* TAB 4: ARCHITECTURE & 1-MINUTE PITCH                     */}
+        {/* TAB 5: ARCHITECTURE & PITCH DECK                         */}
         {/* ======================================================== */}
         {activeTab === 'architecture' && (
           <div className="space-y-6">
             <div className="bg-white border-[3px] border-black shadow-[8px_8px_0px_0px_#000] p-6 sm:p-8 space-y-4">
               <span className="bg-[#A7F3D0] text-black text-xs font-black uppercase tracking-wider px-3 py-1 border-2 border-black shadow-[2px_2px_0px_0px_#000] inline-block">
-                The Pitch Strategy (Section 15)
+                The Pitch Strategy
               </span>
               <h2 className="text-2xl sm:text-3xl font-black text-black uppercase tracking-tight">
                 "Students shouldn't need to understand the university's organizational structure before they can get help."
@@ -981,9 +1517,9 @@ export default function App() {
                 </div>
 
                 <div className="bg-[#DDD6FE] border-2 border-black shadow-[3px_3px_0px_0px_#000] p-4 space-y-1">
-                  <div className="text-[10px] font-black uppercase text-gray-800">3. Multi-Need Triage</div>
-                  <div className="text-sm font-black text-black uppercase">Structured Map</div>
-                  <p className="text-xs font-bold text-gray-800">Detects concurrent academic, financial, housing, and mental needs.</p>
+                  <div className="text-[10px] font-black uppercase text-gray-800">3. Companion Bot</div>
+                  <div className="text-sm font-black text-black uppercase">Waiting Support</div>
+                  <p className="text-xs font-bold text-gray-800">Active validation, 60s micro-coping, and dynamic queue re-triage.</p>
                 </div>
 
                 <div className="bg-[#A7F3D0] border-2 border-black shadow-[3px_3px_0px_0px_#000] p-4 space-y-1">
@@ -993,78 +1529,16 @@ export default function App() {
                 </div>
               </div>
             </div>
-
-            <div className="bg-black border-[4px] border-black shadow-[10px_10px_0px_0px_#000] p-6 sm:p-8 space-y-4 text-white">
-              <div className="flex items-center justify-between border-b border-gray-700 pb-3">
-                <h3 className="text-lg font-black text-[#FFE55C] uppercase tracking-wider">
-                  Technical Architecture Specification
-                </h3>
-                <span className="text-xs font-mono font-bold text-gray-400">Streamlit / React + Groq LLM Multi-Need</span>
-              </div>
-
-              <pre className="font-mono text-xs text-[#4ADE80] bg-gray-950 p-6 border-2 border-gray-800 overflow-x-auto leading-relaxed">
-{`                    ┌─────────────────────────┐
-                    │      STUDENT INPUT      │
-                    │  (Raw Natural Language) │
-                    └────────────┬────────────┘
-                                 │
-                                 ▼
-                    ┌─────────────────────────┐
-                    │  SAFETY KEYWORD FILTER  │
-                    │  (Deterministic Layer)  │
-                    └──────┬────────────┬─────┘
-                           │            │
-                     CRISIS DETECTED   SAFE
-                           │            │
-                           ▼            ▼
-                    ┌─────────────┐  ┌─────────────────────────┐
-                    │  EMERGENCY  │  │   GROQ LLM INFERENCE    │
-                    │   ROUTING   │  │ (llama-3.3-70b-versatile│
-                    │ (988/Crisis)│  └──────────┬──────────────┘
-                    └─────────────┘             │
-                                                ▼
-                                     ┌─────────────────────────┐
-                                     │  MULTI-NEED PARSER      │
-                                     │  [Need 1, Need 2, ...]  │
-                                     └──────────┬──────────────┘
-                                                │
-                                                ▼
-                                     ┌─────────────────────────┐
-                                     │ ROUTING & EXPLANATION   │
-                                     │ "You mentioned: • ...   │
-                                     │  Why we recommend: ..." │
-                                     └──────────┬──────────────┘
-                                                │
-                     ┌──────────────────────────┼─────────────────────────┐
-                     ▼                          ▼                         ▼
-             Academic Support          Counselling Services      Financial Aid Office
-             (Library 3rd Floor)       (Wellness Center B204)    (Hall A Room 112)
-                     │                          │                         │
-                     └──────────────────────────┼─────────────────────────┘
-                                                ▼
-                                     ┌─────────────────────────┐
-                                     │  STUDENT CONSENT MODAL  │
-                                     │  ✓ Approve Sharing      │
-                                     └──────────┬──────────────┘
-                                                │
-                                                ▼
-                                     ┌─────────────────────────┐
-                                     │ ONE-CLICK HANDOFF SLIP  │
-                                     │ + SCHEDULED FOLLOW-UP   │
-                                     └─────────────────────────┘`}
-              </pre>
-            </div>
           </div>
         )}
       </main>
 
       {/* ======================================================== */}
-      {/* MODAL 1: ONE-CLICK SUPPORT HANDOFF SLIP & CONSENT        */}
+      {/* MODAL 1: HANDOFF SLIP MODAL                              */}
       {/* ======================================================== */}
       {handoffModalOpen && triageResult && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-none">
           <div className="bg-[#FFFDF7] border-[4px] border-black shadow-[12px_12px_0px_0px_#000] p-6 sm:p-8 max-w-xl w-full space-y-6">
-            
             <div className="flex items-center justify-between border-b-2 border-black pb-3">
               <div>
                 <span className="text-[10px] font-black uppercase bg-[#A7F3D0] px-2 py-0.5 border border-black">
@@ -1109,7 +1583,6 @@ export default function App() {
               </div>
             ) : (
               <div className="space-y-5">
-                {/* Handoff Preview Slip */}
                 <div className="bg-white border-2 border-black p-4 space-y-3 shadow-[3px_3px_0px_0px_#000]">
                   <div className="text-[10px] font-black uppercase text-gray-500 border-b border-gray-300 pb-1 flex justify-between">
                     <span>Generated Intake Summary</span>
@@ -1132,7 +1605,6 @@ export default function App() {
                   </div>
                 </div>
 
-                {/* FEATURE 4: CONSENT-BASED INFORMATION SHARING */}
                 <div className="bg-[#FEF08A] border-2 border-black p-4 space-y-2.5">
                   <div className="text-xs font-black uppercase text-black flex items-center space-x-1.5">
                     <Lock className="w-4 h-4 text-black stroke-[2.5]" />
@@ -1249,21 +1721,129 @@ export default function App() {
       )}
 
       {/* ======================================================== */}
+      {/* MODAL 3: DYNAMIC RE-TRIAGE ("MY SITUATION HAS WORSENED") */}
+      {/* ======================================================== */}
+      {escalationModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-none">
+          <div className="bg-[#FFFDF7] border-[4px] border-black shadow-[12px_12px_0px_0px_#000] p-6 sm:p-8 max-w-lg w-full space-y-5">
+            <div className="flex items-center justify-between border-b-2 border-black pb-3">
+              <div>
+                <span className="text-[10px] font-black uppercase bg-[#FF4949] text-white px-2 py-0.5 border border-black">
+                  Dynamic Re-Triage Protocol
+                </span>
+                <h3 className="text-xl font-black text-black uppercase mt-1">
+                  "My Situation Has Worsened"
+                </h3>
+                <p className="text-xs font-bold text-gray-700">Recalculate queue tier & priority assignment</p>
+              </div>
+              <button
+                onClick={() => setEscalationModalOpen(false)}
+                className="bg-white hover:bg-gray-100 p-1 border-2 border-black shadow-[2px_2px_0px_0px_#000]"
+              >
+                <X className="w-5 h-5 text-black stroke-[3]" />
+              </button>
+            </div>
+
+            {escalationSuccess ? (
+              <div className="py-6 text-center space-y-3 bg-[#A7F3D0] border-2 border-black p-4">
+                <div className="w-12 h-12 bg-white border-2 border-black shadow-[2px_2px_0px_0px_#000] flex items-center justify-center mx-auto">
+                  <Check className="w-7 h-7 text-black stroke-[3]" />
+                </div>
+                <h4 className="text-lg font-black text-black uppercase">Queue Upgraded to P1 Priority!</h4>
+                <p className="text-xs font-bold text-gray-800 max-w-sm mx-auto">
+                  Your ticket was elevated to <strong>P1 Priority (Same-Day On-Call Slot)</strong>. An advisor has been notified immediately.
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <p className="text-xs font-semibold text-gray-700">
+                  Please answer these 5 quick check-in questions to recalculate your triage score:
+                </p>
+
+                <div className="space-y-2.5">
+                  <div className="bg-white border border-black p-3 space-y-1">
+                    <label className="text-xs font-black uppercase text-black block">
+                      1. Current Distress Level (1 = Manageable, 10 = Acute Crisis): {escalationAnswers.distressScore}/10
+                    </label>
+                    <input
+                      type="range"
+                      min="1"
+                      max="10"
+                      value={escalationAnswers.distressScore}
+                      onChange={(e) => setEscalationAnswers({ ...escalationAnswers, distressScore: Number(e.target.value) })}
+                      className="w-full accent-black cursor-pointer"
+                    />
+                  </div>
+
+                  <label className="flex items-center space-x-2 text-xs font-bold text-black bg-white border border-black p-2.5 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={escalationAnswers.sleepDeprived}
+                      onChange={(e) => setEscalationAnswers({ ...escalationAnswers, sleepDeprived: e.target.checked })}
+                      className="w-4 h-4 border-2 border-black"
+                    />
+                    <span>2. Severe sleep loss (&gt; 48 hours without restful sleep)</span>
+                  </label>
+
+                  <label className="flex items-center space-x-2 text-xs font-bold text-black bg-white border border-black p-2.5 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={escalationAnswers.panicAttacks}
+                      onChange={(e) => setEscalationAnswers({ ...escalationAnswers, panicAttacks: e.target.checked })}
+                      className="w-4 h-4 border-2 border-black"
+                    />
+                    <span>3. Experiencing acute physical panic symptoms / shaking / chest tightness</span>
+                  </label>
+
+                  <label className="flex items-center space-x-2 text-xs font-bold text-black bg-white border border-black p-2.5 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={escalationAnswers.academicParalysis}
+                      onChange={(e) => setEscalationAnswers({ ...escalationAnswers, academicParalysis: e.target.checked })}
+                      className="w-4 h-4 border-2 border-black"
+                    />
+                    <span>4. Unable to attend classes or complete essential daily activities</span>
+                  </label>
+
+                  <label className="flex items-center space-x-2 text-xs font-bold text-red-700 bg-red-50 border border-red-400 p-2.5 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={escalationAnswers.selfHarmThoughts}
+                      onChange={(e) => setEscalationAnswers({ ...escalationAnswers, selfHarmThoughts: e.target.checked })}
+                      className="w-4 h-4 border-2 border-black"
+                    />
+                    <span>5. Experiencing thoughts of self-harm or immediate crisis (Triggers 24/7 Hotline)</span>
+                  </label>
+                </div>
+
+                <button
+                  onClick={handleEscalationSubmit}
+                  className="w-full py-3.5 bg-[#FF4949] hover:bg-red-600 text-white font-black uppercase tracking-wider text-xs border-[3px] border-black shadow-[4px_4px_0px_0px_#000] active:translate-x-0.5 active:translate-y-0.5 transition-all"
+                >
+                  Recalculate Triage & Elevate Queue Position
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* ======================================================== */}
       {/* FOOTER                                                   */}
       {/* ======================================================== */}
       <footer className="border-t-[3px] border-black py-6 bg-white mt-auto">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left">
           <div>
             <span className="font-black text-sm uppercase text-black">
-              DHRONA / STUDENT SUPPORT NAVIGATOR
+              DHRONA / STUDENT SUPPORT & CARE COMPANION
             </span>
             <span className="text-xs font-bold text-gray-600 block">
-              Track 01: Multi-Need Triage, Consent Handoff & Coordinated Campus Support
+              Track 01: Multi-Need Triage, Companion Mode Chatbot & Coordinated Campus Support
             </span>
           </div>
 
           <div className="text-xs font-bold text-gray-500">
-            Intake & Routing Assistant • Not a Clinical Diagnostic Tool
+            Intake & Reassurance Assistant • Not a Clinical Diagnostic Tool
           </div>
         </div>
       </footer>
