@@ -1,0 +1,157 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 680" width="1200" height="680" style="background:#FFFDF7; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+  <defs>
+    <filter id="shadow4" x="0" y="0" width="200%" height="200%">
+      <feOffset dx="4" dy="4" result="offset"/>
+      <feFlood flood-color="#000000" flood-opacity="1"/>
+      <feComposite in2="offset" in="SourceGraphic" operator="over"/>
+    </filter>
+    <filter id="shadow6" x="0" y="0" width="200%" height="200%">
+      <feOffset dx="6" dy="6" result="offset"/>
+      <feFlood flood-color="#000000" flood-opacity="1"/>
+      <feComposite in2="offset" in="SourceGraphic" operator="over"/>
+    </filter>
+  </defs>
+
+  <!-- Top Navigation Header -->
+  <rect x="0" y="0" width="1200" height="75" fill="#FFFFFF" stroke="#000000" stroke-width="3"/>
+  <rect x="25" y="14" width="46" height="46" fill="#FFE55C" stroke="#000000" stroke-width="3" filter="url(#shadow4)"/>
+  <path d="M 40 37 L 48 45 L 60 30" stroke="#000" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+
+  <text x="85" y="38" font-size="20" font-weight="900" fill="#000000">DHRONA</text>
+  <rect x="180" y="20" width="105" height="24" fill="#BAE6FD" stroke="#000000" stroke-width="2"/>
+  <text x="188" y="36" font-size="10" font-weight="900" fill="#000000">STUDENT SUPPORT</text>
+  <rect x="295" y="20" width="95" height="24" fill="#A7F3D0" stroke="#000000" stroke-width="2"/>
+  <text x="303" y="36" font-size="10" font-weight="900" fill="#000000">CLINICAL TRIAGE</text>
+  <text x="85" y="56" font-size="11" font-weight="700" fill="#4B5563">Multi-Need Navigator, Clinical Acuity Scoring &amp; Care Companion</text>
+
+  <!-- Nav Tabs -->
+  <rect x="440" y="20" width="115" height="34" fill="#F3F4F6" stroke="#000000" stroke-width="2"/>
+  <rect x="475" y="24" width="75" height="26" fill="#FFE55C" stroke="#000000" stroke-width="1.5"/>
+  <text x="446" y="41" font-size="9" font-weight="900">MODE:</text>
+  <text x="482" y="41" font-size="9" font-weight="900">🕵️ ANONYMOUS</text>
+
+  <rect x="565" y="20" width="105" height="34" fill="#FFFFFF" stroke="#000000" stroke-width="2" filter="url(#shadow4)"/>
+  <text x="578" y="42" font-size="11" font-weight="900">⚡ NAVIGATOR</text>
+
+  <!-- Care Companion Active -->
+  <rect x="680" y="20" width="130" height="34" fill="#DDD6FE" stroke="#000000" stroke-width="2" filter="url(#shadow4)"/>
+  <text x="692" y="42" font-size="11" font-weight="900">🤖 CARE COMPANION</text>
+  <circle cx="800" cy="37" r="3.5" fill="#10B981" stroke="#000" stroke-width="1"/>
+
+  <rect x="820" y="20" width="95" height="34" fill="#FFFFFF" stroke="#000000" stroke-width="2" filter="url(#shadow4)"/>
+  <text x="835" y="42" font-size="11" font-weight="900">🏛️ 12 DEPTS</text>
+
+  <rect x="925" y="20" width="100" height="34" fill="#FFFFFF" stroke="#000000" stroke-width="2" filter="url(#shadow4)"/>
+  <text x="938" y="42" font-size="11" font-weight="900">📊 ADMIN VIEW</text>
+
+  <rect x="1035" y="20" width="85" height="34" fill="#FFFFFF" stroke="#000000" stroke-width="2" filter="url(#shadow4)"/>
+  <text x="1050" y="42" font-size="11" font-weight="900">🗂️ PITCH</text>
+
+  <!-- Banner Ticker -->
+  <rect x="0" y="75" width="1200" height="42" fill="#FEF08A" stroke="#000000" stroke-width="3"/>
+  <rect x="25" y="83" width="170" height="26" fill="#000000"/>
+  <text x="35" y="100" font-size="10" font-weight="900" fill="#FFE55C">CLINICAL TRIAGE SCORING</text>
+  <text x="210" y="101" font-size="12" font-weight="800" fill="#000000">Natural Language Intake + 5 Objective Clinical Acuity Questions calibrate queue priority (P1 to P4).</text>
+
+  <!-- Main Card -->
+  <rect x="40" y="140" width="1120" height="515" fill="#FFFFFF" stroke="#000000" stroke-width="4" filter="url(#shadow6)"/>
+
+  <!-- Ticket & Escalation Header -->
+  <rect x="65" y="160" width="160" height="22" fill="#DDD6FE" stroke="#000" stroke-width="1.5"/>
+  <text x="73" y="175" font-size="9" font-weight="900">COMPANION MODE ACTIVE</text>
+  <text x="235" y="175" font-size="10" font-weight="700" fill="#4B5563">• Ticket #DH-8291</text>
+
+  <text x="65" y="212" font-size="24" font-weight="900">THE TEMPORARY REASSURANCE CHATBOT</text>
+  <text x="65" y="234" font-size="12" font-weight="700" fill="#4B5563">For students placed in P2, P3, or P4 queues, waiting for an appointment can cause secondary anxiety.</text>
+  <text x="65" y="250" font-size="12" font-weight="700" fill="#4B5563">Your Care Companion Virtual Agent is active with validation, grounding tools, and dynamic re-triage.</text>
+
+  <!-- Queue Status Box on Top Right -->
+  <rect x="880" y="160" width="255" height="55" fill="#F3F4F6" stroke="#000" stroke-width="2"/>
+  <text x="960" y="177" font-size="9" font-weight="900" fill="#4B5563">ACTIVE QUEUE STATUS</text>
+  <text x="915" y="196" font-size="13" font-weight="900">P3 Queue (In 2 Days)</text>
+  <text x="910" y="209" font-size="9" font-weight="600" fill="#6B7280">Counselling &amp; Psychological Services</text>
+
+  <!-- Red Escalation Button -->
+  <rect x="750" y="225" width="385" height="38" fill="#FF4949" stroke="#000" stroke-width="2.5" filter="url(#shadow4)"/>
+  <text x="790" y="249" font-size="12" font-weight="900" fill="#FFF">🚨 "MY SITUATION HAS WORSENED" (ESCALATE)</text>
+
+  <!-- Daily Warm Check-In Banner -->
+  <rect x="65" y="275" width="1070" height="75" fill="#FEF08A" stroke="#000" stroke-width="2.5" filter="url(#shadow4)"/>
+  <text x="80" y="295" font-size="11" font-weight="900">✉️ DAILY WARM CHECK-IN • AUTOMATED SMS &amp; APP PUSH</text>
+  <rect x="990" y="282" width="135" height="18" fill="#FFF" stroke="#000"/>
+  <text x="998" y="295" font-size="8" font-weight="900">SCHEDULED DAILY CHECK-IN</text>
+
+  <rect x="80" y="306" width="1040" height="36" fill="#FFF" stroke="#000" stroke-width="1.5"/>
+  <text x="90" y="322" font-size="8" font-weight="600" fill="#6B7280">Incoming SMS from DHRONA Care:</text>
+  <text x="90" y="335" font-size="10" font-weight="800">"Hi Student, your intake session is in 2 days. How are you feeling today? Tap here if you need a quick grounding exercise."</text>
+
+  <rect x="680" y="312" width="115" height="24" fill="#A7F3D0" stroke="#000"/>
+  <text x="690" y="328" font-size="9" font-weight="900">👍 HANGING IN THERE</text>
+  <rect x="805" y="312" width="115" height="24" fill="#FFE55C" stroke="#000"/>
+  <text x="815" y="328" font-size="9" font-weight="900">😟 A BIT OVERWHELMED</text>
+  <rect x="930" y="312" width="125" height="24" fill="#DDD6FE" stroke="#000"/>
+  <text x="940" y="328" font-size="9" font-weight="900">🌬️ NEED 60S GROUNDING</text>
+
+  <!-- Left: Chat Window -->
+  <rect x="65" y="365" width="600" height="270" fill="#FFFDF9" stroke="#000" stroke-width="2.5" filter="url(#shadow4)"/>
+  <rect x="65" y="365" width="600" height="38" fill="#FFF" stroke="#000" stroke-width="2"/>
+  <text x="80" y="388" font-size="11" font-weight="900">🤖 CARE COMPANION AGENT</text>
+  <text x="250" y="388" font-size="9" font-weight="700" fill="#059669">• Active Validation &amp; Reassurance</text>
+  <text x="610" y="388" font-size="9" font-weight="600" fill="#6B7280">24/7 Active</text>
+
+  <!-- Bot Message 1 -->
+  <text x="80" y="420" font-size="8" font-weight="700" fill="#6B7280">Care Companion • Just now</text>
+  <rect x="80" y="428" width="530" height="52" fill="#FFF" stroke="#000" stroke-width="2" filter="url(#shadow4)"/>
+  <text x="92" y="446" font-size="10" font-weight="700">We've received your intake and reserved your request in the care queue. You are not</text>
+  <text x="92" y="460" font-size="10" font-weight="700">alone in this, and taking this step to reach out took courage. I'm here as your Care</text>
+  <text x="92" y="474" font-size="10" font-weight="700">Companion while you wait for your appointment.</text>
+
+  <!-- Bot Message 2 -->
+  <text x="80" y="498" font-size="8" font-weight="700" fill="#6B7280">Care Companion • Just now</text>
+  <rect x="80" y="506" width="530" height="42" fill="#FFF" stroke="#000" stroke-width="2" filter="url(#shadow4)"/>
+  <text x="92" y="524" font-size="10" font-weight="700">While your assigned advisor prepares your intake file, would you like a quick 60-second</text>
+  <text x="92" y="538" font-size="10" font-weight="700">grounding exercise, or do you have questions about what to expect?</text>
+
+  <!-- Quick Action Chips -->
+  <rect x="80" y="560" width="130" height="24" fill="#BAE6FD" stroke="#000"/>
+  <text x="88" y="576" font-size="8" font-weight="900">🌬️ BOX BREATHING (60s)</text>
+  <rect x="220" y="560" width="140" height="24" fill="#DDD6FE" stroke="#000"/>
+  <text x="228" y="576" font-size="8" font-weight="900">👁️ 5-4-3-2-1 GROUNDING</text>
+  <rect x="370" y="560" width="150" height="24" fill="#FED7AA" stroke="#000"/>
+  <text x="378" y="576" font-size="8" font-weight="900">📋 WHAT SHOULD I BRING?</text>
+
+  <!-- Chat Input -->
+  <rect x="80" y="595" width="500" height="30" fill="#FFF" stroke="#000" stroke-width="1.5"/>
+  <text x="90" y="614" font-size="10" font-weight="600" fill="#9CA3AF">Talk with your Care Companion while waiting...</text>
+  <rect x="590" y="595" width="65" height="30" fill="#FFE55C" stroke="#000" stroke-width="2"/>
+  <text x="612" y="614" font-size="10" font-weight="900">SEND</text>
+
+  <!-- Right: 60s Micro-Coping Tool -->
+  <rect x="685" y="365" width="450" height="270" fill="#FFFFFF" stroke="#000" stroke-width="2.5" filter="url(#shadow4)"/>
+  <rect x="685" y="365" width="450" height="38" fill="#FFF" stroke="#000" stroke-width="2"/>
+  <text x="700" y="388" font-size="11" font-weight="900">⚡ INTERACTIVE 60S MICRO-COPING</text>
+  <rect x="990" y="373" width="90" height="22" fill="#F3F4F6" stroke="#000"/>
+  <text x="1000" y="388" font-size="8" font-weight="900">INSTANT RELIEF</text>
+
+  <!-- Tabs -->
+  <rect x="700" y="412" width="110" height="24" fill="#BAE6FD" stroke="#000" stroke-width="2"/>
+  <text x="712" y="428" font-size="9" font-weight="900">BOX BREATHING</text>
+  <rect x="818" y="412" width="115" height="24" fill="#FFF" stroke="#000"/>
+  <text x="825" y="428" font-size="9" font-weight="900">5-4-3-2-1 SENSORY</text>
+  <rect x="940" y="412" width="110" height="24" fill="#FFF" stroke="#000"/>
+  <text x="952" y="428" font-size="9" font-weight="900">MUSCLE RELEASE</text>
+
+  <!-- Breathing Tool Body -->
+  <rect x="700" y="445" width="420" height="175" fill="#BAE6FD" stroke="#000" stroke-width="2"/>
+  <text x="820" y="465" font-size="10" font-weight="900">BOX BREATHING PROTOCOL (4-4-4-4)</text>
+
+  <!-- Center Breathing Visual Box -->
+  <rect x="850" y="480" width="110" height="85" fill="#FFF" stroke="#000" stroke-width="3" filter="url(#shadow4)"/>
+  <text x="880" y="505" font-size="10" font-weight="900">INHALE</text>
+  <text x="890" y="535" font-size="24" font-weight="900">4s</text>
+
+  <text x="815" y="585" font-size="9" font-weight="700" fill="#1F2937">Inhale slowly through your nose...</text>
+
+  <rect x="840" y="595" width="130" height="22" fill="#000"/>
+  <text x="855" y="610" font-size="9" font-weight="900" fill="#FFE55C">▶ START 60s SESSION</text>
+</svg>
