@@ -100,6 +100,73 @@ with tab_navigator:
         placeholder="e.g. I'm struggling with exams, my roommate situation is getting worse, and I'm stressed about paying tuition..."
     )
 
+    # 5 CLINICAL ACUITY ASSESSMENT QUESTIONS (POINT-SCORING SYSTEM)
+    st.markdown("#### 📋 Step 2 • Clinical Acuity Assessment (5 Point-Scoring Questions)")
+    st.caption("Objective clinical triage system to calibrate queue priority (P1 to P4).")
+
+    q1_opt = st.radio(
+        "Q1: Safety & Self-Harm (Clinical Override) — Are you currently having thoughts of self-harm, suicide, or feeling unsafe?",
+        ["No (0 Pts)", "Unsure / Mild thoughts (25 Pts)", "Yes (100 Pts - INSTANT P1 OVERRIDE)"],
+        index=0
+    )
+
+    q2_opt = st.radio(
+        "Q2: Time Horizon (Duration & Onset) — How long has this situation or distress been affecting you?",
+        ["Over a month (Chronic/stable) -> 5 Pts", "1 to 4 weeks (Gradual buildup) -> 10 Pts", "3 to 7 days (Escalating) -> 15 Pts", "Fell apart suddenly in the last 48 hours (Acute crisis) -> 20 Pts"],
+        index=1
+    )
+
+    q3_opt = st.radio(
+        "Q3: Daily Functional Impact — How severely is this impacting your ability to function today? (e.g., sleeping, eating, attending class)",
+        ["Minimal: I'm managing, but under stress. -> 5 Pts", "Moderate: Struggling to focus, sleep, or study, but getting by. -> 10 Pts", "Severe: Skipping classes, unable to eat/sleep, isolating in my room. -> 20 Pts", "Total Shutdown: I am completely unable to perform basic daily routines. -> 25 Pts"],
+        index=1
+    )
+
+    st.markdown("**Q4: Compound Pressures & Trigger Factors — Are any critical external triggers adding immediate pressure?**")
+    q4_t1 = st.checkbox("Impending deadline / Failing grades (+5 Pts)", value=True)
+    q4_t2 = st.checkbox("Housing insecurity / Loss of financial aid (+10 Pts)", value=False)
+    q4_t3 = st.checkbox("Personal trauma / Safety / Abuse (+15 Pts)", value=False)
+
+    q5_opt = st.select_slider(
+        "Q5: Emotional Distress Level (Self-Reported) — On a scale of 1 to 4, how close do you feel to your breaking point right now?",
+        options=[
+            "1 - Low: I need guidance or advice. (5 Pts)",
+            "2 - Moderate: I feel overwhelmed and need support soon. (10 Pts)",
+            "3 - High: I am near my limit and struggling to cope. (15 Pts)",
+            "4 - Extreme: I am at my breaking point right now. (20 Pts)"
+        ],
+        value="2 - Moderate: I feel overwhelmed and need support soon. (10 Pts)"
+    )
+
+    # Calculate points
+    pts = 0
+    if "25 Pts" in q1_opt: pts += 25
+    elif "100 Pts" in q1_opt: pts += 100
+
+    if "5 Pts" in q2_opt: pts += 5
+    elif "10 Pts" in q2_opt: pts += 10
+    elif "15 Pts" in q2_opt: pts += 15
+    elif "20 Pts" in q2_opt: pts += 20
+
+    if "5 Pts" in q3_opt: pts += 5
+    elif "10 Pts" in q3_opt: pts += 10
+    elif "20 Pts" in q3_opt: pts += 20
+    elif "25 Pts" in q3_opt: pts += 25
+
+    if q4_t1: pts += 5
+    if q4_t2: pts += 10
+    if q4_t3: pts += 15
+
+    if "5 Pts" in q5_opt: pts += 5
+    elif "10 Pts" in q5_opt: pts += 10
+    elif "15 Pts" in q5_opt: pts += 15
+    elif "20 Pts" in q5_opt: pts += 20
+
+    is_p1_override = "100 Pts" in q1_opt or pts >= 65
+    tier = "P1 Emergency" if is_p1_override else "P2 Urgent" if pts >= 40 else "P3 Routine" if pts >= 20 else "P4 Self-Service"
+
+    st.info(f"📊 **Calculated Clinical Acuity Score:** `{pts} Pts` | **Queue Tier:** `{tier}`")
+
     submit = st.button("🔍 Build My Coordinated Support Plan", type="primary")
 
     if submit and student_message.strip():

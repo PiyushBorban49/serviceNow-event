@@ -1,5 +1,5 @@
 /**
- * DHRONA Student Support Triage & Multi-Need Routing Engine
+ * DHRONA Student Support Triage, Multi-Need Routing & Clinical Acuity Engine
  */
 
 export interface UniversityRoute {
@@ -29,6 +29,28 @@ export interface DetectedNeed {
   recommendedAction: string;
 }
 
+export interface ClinicalAssessmentState {
+  q1Safety: 'no' | 'unsure' | 'yes'; // 0, 25, 100
+  q2TimeHorizon: 'chronic' | 'gradual' | 'escalating' | 'acute'; // 5, 10, 15, 20
+  q3FunctionalImpact: 'minimal' | 'moderate' | 'severe' | 'shutdown'; // 5, 10, 20, 25
+  q4CompoundTriggers: string[]; // 'deadline' (5), 'housing_finaid' (10), 'trauma' (15)
+  q5DistressLevel: 1 | 2 | 3 | 4; // 5, 10, 15, 20
+}
+
+export interface ClinicalScoringResult {
+  totalScore: number;
+  queueTier: 'P1' | 'P2' | 'P3' | 'P4';
+  tierLabel: string;
+  isOverrideP1: boolean;
+  scoreBreakdown: {
+    q1Pts: number;
+    q2Pts: number;
+    q3Pts: number;
+    q4Pts: number;
+    q5Pts: number;
+  };
+}
+
 export interface MultiNeedTriageResult {
   needs: DetectedNeed[];
   primaryCategory: string;
@@ -36,6 +58,7 @@ export interface MultiNeedTriageResult {
   crisis_flag: boolean;
   crisisMessage?: string;
   studentSummary: string;
+  clinicalScore?: ClinicalScoringResult;
   timestamp: string;
 }
 
@@ -62,6 +85,69 @@ export function detectCrisis(text: string): boolean {
   if (!text) return false;
   const lower = text.toLowerCase();
   return CRISIS_TERMS.some(term => lower.includes(term));
+}
+
+/**
+ * Calculates the exact Clinical Acuity Score and Queue Tier based on the 5-question intake
+ */
+export function calculateClinicalScore(assessment: ClinicalAssessmentState): ClinicalScoringResult {
+  let q1Pts = 0;
+  if (assessment.q1Safety === 'unsure') q1Pts = 25;
+  if (assessment.q1Safety === 'yes') q1Pts = 100;
+
+  let q2Pts = 5;
+  if (assessment.q2TimeHorizon === 'gradual') q2Pts = 10;
+  if (assessment.q2TimeHorizon === 'escalating') q2Pts = 15;
+  if (assessment.q2TimeHorizon === 'acute') q2Pts = 20;
+
+  let q3Pts = 5;
+  if (assessment.q3FunctionalImpact === 'moderate') q3Pts = 10;
+  if (assessment.q3FunctionalImpact === 'severe') q3Pts = 20;
+  if (assessment.q3FunctionalImpact === 'shutdown') q3Pts = 25;
+
+  let q4Pts = 0;
+  if (assessment.q4CompoundTriggers.includes('deadline')) q4Pts += 5;
+  if (assessment.q4CompoundTriggers.includes('housing_finaid')) q4Pts += 10;
+  if (assessment.q4CompoundTriggers.includes('trauma')) q4Pts += 15;
+
+  let q5Pts = 5;
+  if (assessment.q5DistressLevel === 2) q5Pts = 10;
+  if (assessment.q5DistressLevel === 3) q5Pts = 15;
+  if (assessment.q5DistressLevel === 4) q5Pts = 20;
+
+  const totalScore = q1Pts + q2Pts + q3Pts + q4Pts + q5Pts;
+  const isOverrideP1 = assessment.q1Safety === 'yes' || totalScore >= 65;
+
+  let queueTier: 'P1' | 'P2' | 'P3' | 'P4' = 'P3';
+  let tierLabel = 'P3 Routine Queue (3-5 Days)';
+
+  if (isOverrideP1) {
+    queueTier = 'P1';
+    tierLabel = 'P1 Emergency Priority (Immediate Care / Same-Day On-Call Slot)';
+  } else if (totalScore >= 40) {
+    queueTier = 'P2';
+    tierLabel = 'P2 Urgent Priority (24-48 Hour Fast-Track)';
+  } else if (totalScore >= 20) {
+    queueTier = 'P3';
+    tierLabel = 'P3 Standard Priority (Routine 3-5 Days)';
+  } else {
+    queueTier = 'P4';
+    tierLabel = 'P4 Low Acuity (Self-Service Resources & Drop-in)';
+  }
+
+  return {
+    totalScore,
+    queueTier,
+    tierLabel,
+    isOverrideP1,
+    scoreBreakdown: {
+      q1Pts,
+      q2Pts,
+      q3Pts,
+      q4Pts,
+      q5Pts
+    }
+  };
 }
 
 export const ROUTES: Record<string, UniversityRoute> = {
@@ -219,25 +305,31 @@ export function getRoute(category: string): UniversityRoute {
 }
 
 /**
- * Intelligent Multi-Need Triage Classifier
- * Identifies 1 to 4 distinct domain needs simultaneously from one single student statement.
+ * Intelligent Multi-Need Triage Classifier combined with Clinical Acuity Assessment
  */
-export function classifyMultiNeedMessage(message: string): MultiNeedTriageResult {
+export function classifyMultiNeedMessage(
+  message: string, 
+  clinicalAssessment?: ClinicalAssessmentState
+): MultiNeedTriageResult {
   const text = message.toLowerCase();
+  const clinicalScore = clinicalAssessment ? calculateClinicalScore(clinicalAssessment) : undefined;
 
   // Layer 1: Deterministic Crisis Check
-  if (detectCrisis(message)) {
+  const hasSafetyKeyword = detectCrisis(message);
+  const isClinicalQ1Yes = clinicalAssessment?.q1Safety === 'yes';
+
+  if (hasSafetyKeyword || isClinicalQ1Yes) {
     const crisisNeed: DetectedNeed = {
       category: 'mental_wellbeing',
       title: 'Emergency Mental Health & Crisis Care',
       urgency: 'high',
       confidence: 0.99,
       extractedPoints: [
-        "Immediate safety concern detected",
-        "Direct crisis/self-harm phrasing present",
-        "Urgent emotional distress requiring human intervention"
+        "Immediate safety concern detected (Q1 Override: 100 Pts)",
+        "Direct crisis/self-harm indicators reported",
+        "Immediate clinical stabilization required"
       ],
-      whyRecommended: "Your message contains direct indicators of crisis or self-harm. Human safety responders are on standby immediately.",
+      whyRecommended: "Safety check or Clinical Q1 Override triggered. Licensed human crisis responders are dispatched immediately.",
       route: ROUTES.mental_wellbeing,
       recommendedAction: "Connect immediately to 24/7 Campus Crisis & Emergency Care"
     };
@@ -248,7 +340,8 @@ export function classifyMultiNeedMessage(message: string): MultiNeedTriageResult
       overallUrgency: 'high',
       crisis_flag: true,
       crisisMessage: "Immediate Safety Protocol Activated: AI conversational flow suspended. Direct connection to confidential emergency responders.",
-      studentSummary: "Immediate safety/crisis support requested.",
+      studentSummary: "Immediate safety/crisis support requested (Clinical P1 Override).",
+      clinicalScore,
       timestamp: new Date().toLocaleTimeString()
     };
   }
@@ -261,17 +354,17 @@ export function classifyMultiNeedMessage(message: string): MultiNeedTriageResult
     "study", "studying", "workload", "course", "courses", "professor", "gpa",
     "homework", "deadline", "deadlines", "assignment", "assignments", "academic",
     "syllabus", "semester"
-  ].some(k => text.includes(k));
+  ].some(k => text.includes(k)) || clinicalAssessment?.q4CompoundTriggers.includes('deadline');
 
   if (hasAcademic) {
     const points: string[] = [];
     if (text.includes("exam")) points.push("Upcoming exam pressure & scheduling");
     if (text.includes("fail") || text.includes("falling")) points.push("Concerns about failing classes or GPA decline");
     if (text.includes("workload") || text.includes("overwhelm")) points.push("Managing cumulative academic coursework");
-    if (text.includes("deadline") || text.includes("assignment")) points.push("Approaching assignment deadlines");
+    if (text.includes("deadline") || clinicalAssessment?.q4CompoundTriggers.includes('deadline')) points.push("Critical approaching assignment/exam deadlines (Q4 trigger)");
     if (points.length === 0) points.push("General coursework and study organization");
 
-    const isUrgent = text.includes("fail") || text.includes("next week") || text.includes("overwhelm");
+    const isUrgent = text.includes("fail") || text.includes("next week") || (clinicalScore && clinicalScore.totalScore >= 40);
 
     detectedNeeds.push({
       category: 'academic',
@@ -279,7 +372,7 @@ export function classifyMultiNeedMessage(message: string): MultiNeedTriageResult
       urgency: isUrgent ? 'medium' : 'low',
       confidence: 0.93,
       extractedPoints: points,
-      whyRecommended: "You mentioned difficulty organizing class workload, impending exams, and worries regarding academic standing. The Academic Success Center can restructure your study plan or coordinate exam extensions.",
+      whyRecommended: "You noted academic pressure, impending deadlines, and GPA concerns. The Academic Success Center can restructure your study plan or coordinate exam accommodations.",
       route: ROUTES.academic,
       recommendedAction: "Schedule workload restructuring consultation with Academic Advisor"
     });
@@ -290,12 +383,12 @@ export function classifyMultiNeedMessage(message: string): MultiNeedTriageResult
     "sleep", "sleeping", "stress", "stressed", "anxious", "anxiety", "depress",
     "depressed", "mental", "panic", "crying", "burnout", "exhausted", "lonely",
     "breakdown", "overwhelmed"
-  ].some(k => text.includes(k));
+  ].some(k => text.includes(k)) || (clinicalAssessment && clinicalAssessment.q5DistressLevel >= 2);
 
   if (hasWellbeing) {
     const points: string[] = [];
-    if (text.includes("sleep")) points.push("Prolonged sleep disruption & insomnia");
-    if (text.includes("stress")) points.push("Elevated emotional and physiological stress");
+    if (text.includes("sleep") || clinicalAssessment?.q3FunctionalImpact === 'severe' || clinicalAssessment?.q3FunctionalImpact === 'shutdown') points.push("Prolonged sleep disruption & functional impairment (Q3)");
+    if (text.includes("stress") || (clinicalAssessment && clinicalAssessment.q5DistressLevel >= 3)) points.push(`High self-reported emotional distress (Q5: ${clinicalAssessment?.q5DistressLevel || 3}/4)`);
     if (text.includes("anxious") || text.includes("anxiety") || text.includes("panic")) points.push("Acute anxiety symptoms or panic sensations");
     if (text.includes("burnout") || text.includes("exhausted")) points.push("Exhaustion and cognitive burnout");
     if (points.length === 0) points.push("Emotional distress and mental wellbeing concerns");
@@ -303,10 +396,10 @@ export function classifyMultiNeedMessage(message: string): MultiNeedTriageResult
     detectedNeeds.push({
       category: 'mental_wellbeing',
       title: 'Mental Health & Counselling',
-      urgency: 'medium',
+      urgency: (clinicalScore && clinicalScore.totalScore >= 40) ? 'medium' : 'medium',
       confidence: 0.95,
       extractedPoints: points,
-      whyRecommended: "You mentioned ongoing sleep disruption and feeling severely overwhelmed. Speaking with a confidential counselor can help stabilize anxiety and prevent burnout.",
+      whyRecommended: "You reported emotional distress, sleep disruption, or approaching breaking point limit. Speaking with a confidential counselor can help stabilize anxiety and prevent burnout.",
       route: ROUTES.mental_wellbeing,
       recommendedAction: "Book priority confidential intake session with Counselling Services"
     });
@@ -316,12 +409,12 @@ export function classifyMultiNeedMessage(message: string): MultiNeedTriageResult
   const hasFinancial = [
     "rent", "money", "afford", "tuition", "aid", "scholarship", "loan", "loans",
     "broke", "job", "financial", "fee", "fees", "bills", "cost", "pay"
-  ].some(k => text.includes(k));
+  ].some(k => text.includes(k)) || clinicalAssessment?.q4CompoundTriggers.includes('housing_finaid');
 
   if (hasFinancial) {
     const points: string[] = [];
     if (text.includes("tuition") || text.includes("fee")) points.push("Imminent tuition payment deadlines");
-    if (text.includes("rent") || text.includes("groceries") || text.includes("broke")) points.push("Emergency living expense shortage");
+    if (text.includes("rent") || text.includes("groceries") || text.includes("broke") || clinicalAssessment?.q4CompoundTriggers.includes('housing_finaid')) points.push("Emergency living expense shortage & loss of aid (Q4 trigger)");
     if (text.includes("job") || text.includes("lost")) points.push("Loss of student employment income");
     if (points.length === 0) points.push("Financial hardship or grant inquiries");
 
@@ -341,12 +434,12 @@ export function classifyMultiNeedMessage(message: string): MultiNeedTriageResult
   const hasHousing = [
     "roommate", "roommates", "dorm", "housing", "landlord", "evict", "eviction",
     "lease", "apartment", "residence", "room", "living situation"
-  ].some(k => text.includes(k));
+  ].some(k => text.includes(k)) || clinicalAssessment?.q4CompoundTriggers.includes('housing_finaid');
 
   if (hasHousing) {
     const points: string[] = [];
     if (text.includes("roommate")) points.push("Roommate friction and living space conflict");
-    if (text.includes("evict") || text.includes("lease")) points.push("Housing security or lease termination risk");
+    if (text.includes("evict") || text.includes("lease") || clinicalAssessment?.q4CompoundTriggers.includes('housing_finaid')) points.push("Housing insecurity or lease termination risk (Q4 trigger)");
     if (text.includes("dorm") || text.includes("housing")) points.push("On-campus dorm assignment challenges");
     if (points.length === 0) points.push("Residential stability concerns");
 
@@ -356,7 +449,7 @@ export function classifyMultiNeedMessage(message: string): MultiNeedTriageResult
       urgency: 'medium',
       confidence: 0.92,
       extractedPoints: points,
-      whyRecommended: "You noted interpersonal living friction with a roommate and worry about losing housing. The Housing Office offers neutral mediation and emergency room swaps.",
+      whyRecommended: "You noted interpersonal living friction with a roommate and worry about housing stability. The Housing Office offers neutral mediation and emergency room swaps.",
       route: ROUTES.housing,
       recommendedAction: "Request confidential roommate mediation or room reassignment"
     });
@@ -388,7 +481,7 @@ export function classifyMultiNeedMessage(message: string): MultiNeedTriageResult
   const hasHarassment = [
     "harass", "harassment", "stalk", "stalking", "threat", "threatened",
     "unsafe", "assault", "title ix", "abusive", "uncomfortable"
-  ].some(k => text.includes(k));
+  ].some(k => text.includes(k)) || clinicalAssessment?.q4CompoundTriggers.includes('trauma');
 
   if (hasHarassment) {
     detectedNeeds.push({
@@ -397,10 +490,10 @@ export function classifyMultiNeedMessage(message: string): MultiNeedTriageResult
       urgency: 'high',
       confidence: 0.97,
       extractedPoints: [
-        "Interpersonal harassment or stalking concern",
+        "Interpersonal harassment, stalking or abuse concern (Q4 trigger)",
         "Campus safety & personal security threat"
       ],
-      whyRecommended: "You mentioned feeling unsafe or harassed on campus. The Title IX Office provides immediate protective measures and confidential advocacy.",
+      whyRecommended: "You mentioned feeling unsafe, abused, or harassed. The Title IX Office provides immediate protective measures and confidential advocacy.",
       route: ROUTES.harassment,
       recommendedAction: "Connect with Confidential Campus Safety & Title IX Advocate"
     });
@@ -420,14 +513,21 @@ export function classifyMultiNeedMessage(message: string): MultiNeedTriageResult
     });
   }
 
-  // Determine overall urgency
-  const hasHigh = detectedNeeds.some(n => n.urgency === 'high');
-  const hasMedium = detectedNeeds.some(n => n.urgency === 'medium');
-  const overallUrgency = hasHigh ? 'high' : hasMedium ? 'medium' : 'low';
+  // Determine overall urgency using clinical score if provided
+  let overallUrgency: 'low' | 'medium' | 'high' = 'low';
+  if (clinicalScore) {
+    if (clinicalScore.queueTier === 'P1') overallUrgency = 'high';
+    else if (clinicalScore.queueTier === 'P2') overallUrgency = 'medium';
+    else if (clinicalScore.queueTier === 'P3') overallUrgency = 'medium';
+    else overallUrgency = 'low';
+  } else {
+    const hasHigh = detectedNeeds.some(n => n.urgency === 'high');
+    const hasMed = detectedNeeds.some(n => n.urgency === 'medium');
+    overallUrgency = hasHigh ? 'high' : hasMed ? 'medium' : 'low';
+  }
 
-  // Generate concise student summary for the one-click handoff
   const needTitles = detectedNeeds.map(n => n.title).join(", ");
-  const studentSummary = `Student reported simultaneous concerns across: ${needTitles}. Core indicators include: ${detectedNeeds.flatMap(n => n.extractedPoints).slice(0, 3).join("; ")}.`;
+  const studentSummary = `Student reported simultaneous concerns across: ${needTitles}. Clinical Score: ${clinicalScore ? clinicalScore.totalScore : 'Standard'} Pts (${clinicalScore ? clinicalScore.queueTier : 'P3'} Queue).`;
 
   return {
     needs: detectedNeeds,
@@ -435,6 +535,7 @@ export function classifyMultiNeedMessage(message: string): MultiNeedTriageResult
     overallUrgency,
     crisis_flag: false,
     studentSummary,
+    clinicalScore,
     timestamp: new Date().toLocaleTimeString()
   };
 }

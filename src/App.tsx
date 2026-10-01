@@ -40,16 +40,19 @@ import {
   Shield,
   Bot,
   Activity,
-  ArrowUpRight
+  Sliders
 } from 'lucide-react';
 import { 
   classifyMultiNeedMessage, 
+  calculateClinicalScore,
   detectCrisis, 
   getRoute, 
   ALL_12_DEPARTMENTS, 
   MultiNeedTriageResult, 
   DetectedNeed, 
-  UniversityRoute 
+  UniversityRoute,
+  ClinicalAssessmentState,
+  ClinicalScoringResult
 } from './services/triage';
 
 interface ChatMessage {
@@ -68,7 +71,14 @@ const DEMO_PRESETS = [
     badge: "⭐ Multi-Need Killer Demo",
     bg: "bg-[#FFE55C]",
     hover: "hover:bg-[#FACC15]",
-    text: "I'm struggling with exams, my roommate situation is getting worse every day, and I'm stressed about paying my tuition next month. I don't know who to talk to."
+    text: "I'm struggling with exams, my roommate situation is getting worse every day, and I'm stressed about paying my tuition next month. I don't know who to talk to.",
+    assessment: {
+      q1Safety: 'no' as const,
+      q2TimeHorizon: 'gradual' as const,
+      q3FunctionalImpact: 'moderate' as const,
+      q4CompoundTriggers: ['deadline', 'housing_finaid'],
+      q5DistressLevel: 3 as const
+    }
   },
   {
     id: "preset_wellbeing_academic",
@@ -77,7 +87,14 @@ const DEMO_PRESETS = [
     badge: "Dual Need",
     bg: "bg-[#DDD6FE]",
     hover: "hover:bg-[#C4B5FD]",
-    text: "I haven't slept in three days because I'm failing Organic Chemistry. I'm having panic attacks before every lab lecture."
+    text: "I haven't slept in three days because I'm failing Organic Chemistry. I'm having panic attacks before every lab lecture.",
+    assessment: {
+      q1Safety: 'unsure' as const,
+      q2TimeHorizon: 'escalating' as const,
+      q3FunctionalImpact: 'severe' as const,
+      q4CompoundTriggers: ['deadline'],
+      q5DistressLevel: 3 as const
+    }
   },
   {
     id: "preset_housing_financial",
@@ -86,7 +103,14 @@ const DEMO_PRESETS = [
     badge: "Dual Need",
     bg: "bg-[#FED7AA]",
     hover: "hover:bg-[#FDBA74]",
-    text: "My landlord threatened to evict me and I just lost my on-campus dining hall job. I have no money for rent or food."
+    text: "My landlord threatened to evict me and I just lost my on-campus dining hall job. I have no money for rent or food.",
+    assessment: {
+      q1Safety: 'no' as const,
+      q2TimeHorizon: 'acute' as const,
+      q3FunctionalImpact: 'severe' as const,
+      q4CompoundTriggers: ['housing_finaid'],
+      q5DistressLevel: 3 as const
+    }
   },
   {
     id: "preset_academic",
@@ -95,7 +119,14 @@ const DEMO_PRESETS = [
     badge: "Single Need",
     bg: "bg-[#BAE6FD]",
     hover: "hover:bg-[#7DD3FC]",
-    text: "I am having trouble organizing my study schedule and balancing four heavy project deadlines this month."
+    text: "I am having trouble organizing my study schedule and balancing four heavy project deadlines this month.",
+    assessment: {
+      q1Safety: 'no' as const,
+      q2TimeHorizon: 'chronic' as const,
+      q3FunctionalImpact: 'minimal' as const,
+      q4CompoundTriggers: ['deadline'],
+      q5DistressLevel: 1 as const
+    }
   },
   {
     id: "preset_crisis",
@@ -104,7 +135,14 @@ const DEMO_PRESETS = [
     badge: "🚨 Safety Test",
     bg: "bg-[#FECDD3]",
     hover: "hover:bg-[#FDA4AF]",
-    text: "I feel like hurting myself and I don't know what to do."
+    text: "I feel like hurting myself and I don't know what to do.",
+    assessment: {
+      q1Safety: 'yes' as const,
+      q2TimeHorizon: 'acute' as const,
+      q3FunctionalImpact: 'shutdown' as const,
+      q4CompoundTriggers: ['trauma'],
+      q5DistressLevel: 4 as const
+    }
   }
 ];
 
@@ -118,6 +156,19 @@ export default function App() {
   const [isAnonymous, setIsAnonymous] = useState(true);
   const [studentId, setStudentId] = useState('STU-2026-8491');
   const studentName = isAnonymous ? 'Student' : 'Alex';
+
+  // ========================================================
+  // 5 CLINICAL INTAKE QUESTIONS STATE (USER IMAGES)
+  // ========================================================
+  const [clinicalAssessment, setClinicalAssessment] = useState<ClinicalAssessmentState>({
+    q1Safety: 'no',
+    q2TimeHorizon: 'gradual',
+    q3FunctionalImpact: 'moderate',
+    q4CompoundTriggers: ['deadline'],
+    q5DistressLevel: 2
+  });
+
+  const liveScore: ClinicalScoringResult = calculateClinicalScore(clinicalAssessment);
 
   // Consent & Handoff Slip State
   const [handoffModalOpen, setHandoffModalOpen] = useState(false);
@@ -136,7 +187,7 @@ export default function App() {
   const [bookingConfirmed, setBookingConfirmed] = useState(false);
 
   // ========================================================
-  // REASSURANCE CHATBOT (COMPANION MODE) STATE
+  // REASSURANCE CHATBOT STATE
   // ========================================================
   const [queueTier, setQueueTier] = useState<'P3' | 'P2' | 'P1'>('P3');
   const [queueDays, setQueueDays] = useState(2);
@@ -195,7 +246,6 @@ export default function App() {
       interval = setInterval(() => {
         setBreathingTimer((prev) => {
           if (prev > 1) return prev - 1;
-          // Transition to next phase
           if (breathingPhase === 'Inhale') {
             setBreathingPhase('Hold');
             return 4;
@@ -230,7 +280,6 @@ export default function App() {
     setChatMessages((prev) => [...prev, userMsg]);
     if (!customText) setChatInput('');
 
-    // Simulate empathetic response from companion bot
     setTimeout(() => {
       const lower = text.toLowerCase();
       let botResponse = "";
@@ -260,8 +309,9 @@ export default function App() {
     }, 450);
   };
 
-  const handleTriage = (textToAnalyze?: string) => {
+  const handleTriage = (textToAnalyze?: string, customAssessment?: ClinicalAssessmentState) => {
     const text = textToAnalyze !== undefined ? textToAnalyze : inputText;
+    const assessToUse = customAssessment || clinicalAssessment;
     if (!text.trim()) return;
 
     setIsProcessing(true);
@@ -270,21 +320,43 @@ export default function App() {
     setFollowUpConfirmed(false);
 
     setTimeout(() => {
-      const res = classifyMultiNeedMessage(text);
+      const res = classifyMultiNeedMessage(text, assessToUse);
       setTriageResult(res);
       setIsProcessing(false);
+
+      if (res.clinicalScore) {
+        if (res.clinicalScore.queueTier === 'P1') {
+          setQueueTier('P1');
+          setQueueDays(0);
+        } else if (res.clinicalScore.queueTier === 'P2') {
+          setQueueTier('P2');
+          setQueueDays(1);
+        } else {
+          setQueueTier('P3');
+          setQueueDays(2);
+        }
+      }
     }, 320);
   };
 
-  const handleSelectPreset = (presetText: string) => {
-    setInputText(presetText);
-    handleTriage(presetText);
+  const handleSelectPreset = (preset: typeof DEMO_PRESETS[0]) => {
+    setInputText(preset.text);
+    setClinicalAssessment(preset.assessment);
+    handleTriage(preset.text, preset.assessment);
   };
 
   const handleIDontKnowWhereToStart = () => {
     const defaultMultiSituation = "I'm struggling with exams, my roommate situation is getting worse every day, and I'm stressed about paying my tuition next month. I don't know who to talk to.";
+    const assess = {
+      q1Safety: 'no' as const,
+      q2TimeHorizon: 'gradual' as const,
+      q3FunctionalImpact: 'moderate' as const,
+      q4CompoundTriggers: ['deadline', 'housing_finaid'],
+      q5DistressLevel: 3 as const
+    };
     setInputText(defaultMultiSituation);
-    handleTriage(defaultMultiSituation);
+    setClinicalAssessment(assess);
+    handleTriage(defaultMultiSituation, assess);
   };
 
   const handleCreateHandoff = () => {
@@ -301,7 +373,6 @@ export default function App() {
     setBookingConfirmed(false);
   };
 
-  // Re-triage submission
   const handleEscalationSubmit = () => {
     if (escalationAnswers.selfHarmThoughts) {
       alert("Immediate safety concern reported. Directing to Emergency Crisis dispatch immediately: 988 or (555) 911-HELP.");
@@ -312,7 +383,6 @@ export default function App() {
     setTimeout(() => {
       setEscalationSuccess(false);
       setEscalationModalOpen(false);
-      // Post note in chat
       setChatMessages((prev) => [
         ...prev,
         {
@@ -323,6 +393,22 @@ export default function App() {
         }
       ]);
     }, 1800);
+  };
+
+  // Toggle trigger in Q4
+  const toggleQ4Trigger = (key: string) => {
+    if (key === 'none') {
+      setClinicalAssessment({ ...clinicalAssessment, q4CompoundTriggers: [] });
+      return;
+    }
+    const current = [...clinicalAssessment.q4CompoundTriggers];
+    const idx = current.indexOf(key);
+    if (idx >= 0) {
+      current.splice(idx, 1);
+    } else {
+      current.push(key);
+    }
+    setClinicalAssessment({ ...clinicalAssessment, q4CompoundTriggers: current });
   };
 
   return (
@@ -345,18 +431,16 @@ export default function App() {
                   Student Support
                 </span>
                 <span className="bg-[#A7F3D0] text-black text-[10px] font-extrabold uppercase px-2 py-0.5 border border-black hidden md:inline-block">
-                  Companion Mode
+                  Clinical Triage
                 </span>
               </div>
               <p className="text-xs font-bold text-gray-700">
-                Triage Navigator & Reassurance Care Companion
+                Multi-Need Navigator, Clinical Acuity Scoring & Care Companion
               </p>
             </div>
           </div>
 
-          {/* Navigation Controls & Identity Mode */}
           <div className="flex items-center space-x-2 self-start sm:self-auto">
-            {/* Anonymous / Authenticated Toggle */}
             <div className="hidden lg:flex items-center bg-[#F3F4F6] border-2 border-black px-2 py-1 space-x-2 shadow-[2px_2px_0px_0px_#000] mr-2">
               <span className="text-[10px] font-black uppercase text-gray-700">Mode:</span>
               <button
@@ -382,7 +466,6 @@ export default function App() {
                 <span>Navigator</span>
               </button>
 
-              {/* NEW TAB: REASSURANCE CHATBOT (COMPANION MODE) */}
               <button
                 onClick={() => setActiveTab('companion')}
                 className={`px-3 py-1.5 text-xs font-black uppercase tracking-wider border-2 border-black transition-all flex items-center space-x-1.5 ${
@@ -443,20 +526,20 @@ export default function App() {
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-3">
           <div className="flex items-center space-x-2">
             <span className="bg-black text-[#FFE55C] font-black text-xs px-2.5 py-0.5 uppercase tracking-wider">
-              Care Continuity
+              Clinical Triage Scoring
             </span>
             <span className="text-xs sm:text-sm font-extrabold text-black">
-              Waiting for an appointment shouldn't cause secondary anxiety. Companion Mode bridges the gap.
+              Natural Language Intake + 5 Objective Clinical Acuity Questions calibrate queue priority (P1 to P4).
             </span>
           </div>
 
           <div className="flex items-center space-x-2">
             <button
-              onClick={() => setActiveTab('companion')}
-              className="bg-[#DDD6FE] hover:bg-purple-200 text-black font-black text-xs uppercase px-3 py-1 border-2 border-black shadow-[2px_2px_0px_0px_#000] flex items-center space-x-1"
+              onClick={handleIDontKnowWhereToStart}
+              className="bg-black hover:bg-gray-800 text-[#FFE55C] font-black text-xs uppercase px-3 py-1 border-2 border-black shadow-[2px_2px_0px_0px_#000] flex items-center space-x-1"
             >
-              <Bot className="w-3.5 h-3.5" />
-              <span>Open Companion Mode Chat</span>
+              <HelpCircle className="w-3.5 h-3.5" />
+              <span>Load Test Case</span>
             </button>
           </div>
         </div>
@@ -472,18 +555,19 @@ export default function App() {
         {/* ======================================================== */}
         {activeTab === 'triage' && (
           <div className="space-y-8">
-            {/* INTAKE FORM */}
+            
+            {/* STEP 1: INTAKE FORM */}
             <div className="bg-white border-[3px] border-black shadow-[8px_8px_0px_0px_#000] p-6 sm:p-8 space-y-6">
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b-2 border-black pb-4">
                 <div>
                   <div className="inline-block bg-[#FFE55C] border-2 border-black shadow-[2px_2px_0px_0px_#000] px-3 py-0.5 text-xs font-black uppercase tracking-wider mb-2">
-                    Universal Multi-Need Intake
+                    Step 1 • Universal Topic Intake
                   </div>
                   <h2 className="text-2xl sm:text-3xl font-black text-black tracking-tight uppercase">
                     Tell Us What's Going On
                   </h2>
                   <p className="text-sm font-semibold text-gray-700 mt-1">
-                    You don't need to know which department to contact. Describe everything on your plate.
+                    Describe your concerns in plain natural language. Dhrona detects concurrent needs across all 12 silos.
                   </p>
                 </div>
 
@@ -502,7 +586,7 @@ export default function App() {
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-xs font-black uppercase tracking-wider text-black flex items-center space-x-1.5">
                     <Flame className="w-4 h-4 text-orange-600 fill-orange-500" />
-                    <span>Quick Pitch Scenarios (Click to Test Real-time Multi-Need Detection)</span>
+                    <span>Quick Pitch Scenarios (Click to Pre-fill Topics & Clinical Questions)</span>
                   </span>
                   <span className="text-[11px] font-bold text-gray-500 font-mono">1-Click Live Tests</span>
                 </div>
@@ -511,7 +595,7 @@ export default function App() {
                   {DEMO_PRESETS.map((preset) => (
                     <button
                       key={preset.id}
-                      onClick={() => handleSelectPreset(preset.text)}
+                      onClick={() => handleSelectPreset(preset)}
                       className={`text-left p-3.5 border-2 border-black shadow-[3px_3px_0px_0px_#000] ${preset.bg} ${preset.hover} hover:translate-x-[-1px] hover:translate-y-[-1px] hover:shadow-[5px_5px_0px_0px_#000] active:translate-x-0.5 active:translate-y-0.5 active:shadow-[1px_1px_0px_0px_#000] transition-all flex flex-col justify-between`}
                     >
                       <div className="flex items-center justify-between mb-2">
@@ -546,37 +630,304 @@ export default function App() {
                     </button>
                   )}
                 </div>
-
-                <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-1">
-                  <div className="flex items-center space-x-2 text-xs font-bold text-gray-700">
-                    <ShieldCheck className="w-5 h-5 text-emerald-600 stroke-[2.5] shrink-0" />
-                    <span>
-                      {isAnonymous ? 'Anonymous Triage Active' : 'Identified as ' + studentId} • Zero Diagnostic Labeling • Support Recommendation Only
-                    </span>
-                  </div>
-
-                  <button
-                    onClick={() => handleTriage()}
-                    disabled={isProcessing || !inputText.trim()}
-                    className="w-full sm:w-auto px-8 py-3.5 bg-[#FFE55C] hover:bg-[#FACC15] text-black font-black uppercase tracking-wider text-sm border-[3px] border-black shadow-[5px_5px_0px_0px_#000] hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[7px_7px_0px_0px_#000] active:translate-x-1 active:translate-y-1 active:shadow-[1px_1px_0px_0px_#000] transition-all disabled:opacity-50 flex items-center justify-center space-x-2"
-                  >
-                    {isProcessing ? (
-                      <>
-                        <Clock className="w-4 h-4 animate-spin stroke-[3]" />
-                        <span>Analyzing All Concurrent Needs...</span>
-                      </>
-                    ) : (
-                      <>
-                        <Send className="w-4 h-4 stroke-[2.5]" />
-                        <span>Build My Support Plan</span>
-                      </>
-                    )}
-                  </button>
-                </div>
               </div>
             </div>
 
-            {/* TRIAGE RESULT DISPLAY */}
+            {/* ======================================================== */}
+            {/* STEP 2: 5 CLINICAL QUESTIONS (REQUESTED BY USER)        */}
+            {/* ======================================================== */}
+            <div className="bg-white border-[3px] border-black shadow-[8px_8px_0px_0px_#000] p-6 sm:p-8 space-y-6">
+              
+              {/* Header with Live Score Meter */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b-2 border-black pb-4">
+                <div>
+                  <div className="inline-block bg-[#A7F3D0] border-2 border-black shadow-[2px_2px_0px_0px_#000] px-3 py-0.5 text-xs font-black uppercase tracking-wider mb-1.5">
+                    Step 2 • Clinical Acuity & Triage Assessment
+                  </div>
+                  <h3 className="text-xl sm:text-2xl font-black text-black uppercase tracking-tight">
+                    5-Question Clinical Acuity Scoring System
+                  </h3>
+                  <p className="text-xs font-bold text-gray-700 mt-1">
+                    Calibrates objective queue priority (P1 to P4) to protect students with acute decompensation.
+                  </p>
+                </div>
+
+                {/* Live Acuity Score Tracker Badge */}
+                <div className="bg-[#FFFDF7] border-[3px] border-black p-3.5 text-right shadow-[4px_4px_0px_0px_#000] shrink-0">
+                  <div className="text-[10px] font-black uppercase text-gray-600">Calculated Clinical Score</div>
+                  <div className="text-2xl font-black text-black font-mono mt-0.5 flex items-center justify-end space-x-2">
+                    <span>{liveScore.totalScore} Pts</span>
+                    <span className={`text-xs font-black uppercase px-2 py-0.5 border border-black ${
+                      liveScore.queueTier === 'P1'
+                        ? 'bg-[#FF4949] text-white animate-pulse'
+                        : liveScore.queueTier === 'P2'
+                        ? 'bg-[#FFE55C] text-black'
+                        : 'bg-[#BAE6FD] text-black'
+                    }`}>
+                      {liveScore.queueTier} Tier
+                    </span>
+                  </div>
+                  <div className="text-[10px] font-bold text-gray-700 truncate mt-0.5">
+                    {liveScore.tierLabel}
+                  </div>
+                </div>
+              </div>
+
+              {/* THE 5 QUESTIONS ACCORDION / GRID */}
+              <div className="space-y-6">
+
+                {/* Q1: Safety & Self-Harm (Clinical Override) */}
+                <div className={`p-4 sm:p-5 border-[3px] border-black shadow-[4px_4px_0px_0px_#000] space-y-3 ${
+                  clinicalAssessment.q1Safety === 'yes' ? 'bg-[#FF4949] text-white' : 'bg-[#FFFDF7]'
+                }`}>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-black uppercase tracking-wider text-black bg-[#FFE55C] px-2.5 py-0.5 border border-black">
+                      Q1: Safety & Self-Harm (Clinical Override)
+                    </span>
+                    <span className="text-xs font-mono font-black text-black bg-white px-2 py-0.5 border border-black">
+                      Weight: 0 to 100 Pts
+                    </span>
+                  </div>
+                  <div className="text-sm font-black text-black">
+                    "Are you currently having thoughts of self-harm, suicide, or feeling unsafe?"
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
+                    {[
+                      { key: 'no', label: 'No', pts: '0 Pts', note: 'Standard flow' },
+                      { key: 'unsure', label: 'Unsure / Mild thoughts', pts: '25 Pts', note: 'Elevated triage' },
+                      { key: 'yes', label: 'Yes', pts: '100 Pts', note: 'INSTANT P1 OVERRIDE' }
+                    ].map((opt) => (
+                      <button
+                        key={opt.key}
+                        type="button"
+                        onClick={() => setClinicalAssessment({ ...clinicalAssessment, q1Safety: opt.key as any })}
+                        className={`p-3 text-left border-2 border-black transition-all flex flex-col justify-between ${
+                          clinicalAssessment.q1Safety === opt.key
+                            ? opt.key === 'yes' 
+                              ? 'bg-black text-[#FFE55C] shadow-[3px_3px_0px_0px_#000]'
+                              : 'bg-[#FFE55C] text-black shadow-[3px_3px_0px_0px_#000] translate-x-0.5 translate-y-0.5'
+                            : 'bg-white hover:bg-gray-100 text-black shadow-[2px_2px_0px_0px_#000]'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between font-black text-xs uppercase">
+                          <span>{opt.label}</span>
+                          <span className="font-mono">{opt.pts}</span>
+                        </div>
+                        <span className="text-[10px] font-bold text-gray-700 mt-1">{opt.note}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Q2: Time Horizon (Duration & Onset) */}
+                <div className="p-4 sm:p-5 bg-white border-[3px] border-black shadow-[4px_4px_0px_0px_#000] space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-black uppercase tracking-wider text-black bg-[#BAE6FD] px-2.5 py-0.5 border border-black">
+                      Q2: Time Horizon (Duration & Onset)
+                    </span>
+                    <span className="text-xs font-mono font-black text-black bg-white px-2 py-0.5 border border-black">
+                      Weight: 5 to 20 Pts
+                    </span>
+                  </div>
+                  <div className="text-sm font-black text-black">
+                    "How long has this situation or distress been affecting you?"
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-4 gap-2.5 pt-1">
+                    {[
+                      { key: 'chronic', label: 'Over a month', pts: '5 Pts', note: 'Chronic / stable' },
+                      { key: 'gradual', label: '1 to 4 weeks', pts: '10 Pts', note: 'Gradual buildup' },
+                      { key: 'escalating', label: '3 to 7 days', pts: '15 Pts', note: 'Escalating' },
+                      { key: 'acute', label: 'Last 48 hours', pts: '20 Pts', note: 'Fell apart suddenly (Acute)' }
+                    ].map((opt) => (
+                      <button
+                        key={opt.key}
+                        type="button"
+                        onClick={() => setClinicalAssessment({ ...clinicalAssessment, q2TimeHorizon: opt.key as any })}
+                        className={`p-3 text-left border-2 border-black transition-all flex flex-col justify-between ${
+                          clinicalAssessment.q2TimeHorizon === opt.key
+                            ? 'bg-[#BAE6FD] text-black shadow-[3px_3px_0px_0px_#000] translate-x-0.5 translate-y-0.5'
+                            : 'bg-white hover:bg-gray-100 text-black shadow-[2px_2px_0px_0px_#000]'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between font-black text-xs uppercase">
+                          <span>{opt.label}</span>
+                          <span className="font-mono">{opt.pts}</span>
+                        </div>
+                        <span className="text-[10px] font-bold text-gray-700 mt-1">{opt.note}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Q3: Daily Functional Impact */}
+                <div className="p-4 sm:p-5 bg-white border-[3px] border-black shadow-[4px_4px_0px_0px_#000] space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-black uppercase tracking-wider text-black bg-[#DDD6FE] px-2.5 py-0.5 border border-black">
+                      Q3: Daily Functional Impact
+                    </span>
+                    <span className="text-xs font-mono font-black text-black bg-white px-2 py-0.5 border border-black">
+                      Weight: 5 to 25 Pts
+                    </span>
+                  </div>
+                  <div className="text-sm font-black text-black">
+                    "How severely is this impacting your ability to function today? (e.g., sleeping, eating, attending class)"
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 pt-1">
+                    {[
+                      { key: 'minimal', label: 'Minimal', pts: '5 Pts', desc: "Managing, but under stress." },
+                      { key: 'moderate', label: 'Moderate', pts: '10 Pts', desc: "Struggling to focus, sleep, or study, but getting by." },
+                      { key: 'severe', label: 'Severe', pts: '20 Pts', desc: "Skipping classes, unable to eat/sleep, isolating." },
+                      { key: 'shutdown', label: 'Total Shutdown', pts: '25 Pts', desc: "Completely unable to perform basic daily routines." }
+                    ].map((opt) => (
+                      <button
+                        key={opt.key}
+                        type="button"
+                        onClick={() => setClinicalAssessment({ ...clinicalAssessment, q3FunctionalImpact: opt.key as any })}
+                        className={`p-3 text-left border-2 border-black transition-all flex flex-col justify-between ${
+                          clinicalAssessment.q3FunctionalImpact === opt.key
+                            ? 'bg-[#DDD6FE] text-black shadow-[3px_3px_0px_0px_#000] translate-x-0.5 translate-y-0.5'
+                            : 'bg-white hover:bg-gray-100 text-black shadow-[2px_2px_0px_0px_#000]'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between font-black text-xs uppercase mb-1">
+                          <span>{opt.label}</span>
+                          <span className="font-mono">{opt.pts}</span>
+                        </div>
+                        <span className="text-[11px] font-semibold text-gray-700 leading-snug">{opt.desc}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Q4: Compound Pressures & Trigger Factors */}
+                <div className="p-4 sm:p-5 bg-white border-[3px] border-black shadow-[4px_4px_0px_0px_#000] space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-black uppercase tracking-wider text-black bg-[#FED7AA] px-2.5 py-0.5 border border-black">
+                      Q4: Compound Pressures & Trigger Factors
+                    </span>
+                    <span className="text-xs font-mono font-black text-black bg-white px-2 py-0.5 border border-black">
+                      Select all that apply
+                    </span>
+                  </div>
+                  <div className="text-sm font-black text-black">
+                    "Are any critical external triggers adding immediate pressure?"
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 pt-1">
+                    {[
+                      { key: 'none', label: 'None of these', pts: '0 Pts' },
+                      { key: 'deadline', label: 'Impending deadline / Failing grades', pts: '5 Pts' },
+                      { key: 'housing_finaid', label: 'Housing insecurity / Loss of aid', pts: '10 Pts' },
+                      { key: 'trauma', label: 'Personal trauma / Safety / Abuse', pts: '15 Pts' }
+                    ].map((opt) => {
+                      const isSelected = opt.key === 'none' 
+                        ? clinicalAssessment.q4CompoundTriggers.length === 0 
+                        : clinicalAssessment.q4CompoundTriggers.includes(opt.key);
+                      return (
+                        <button
+                          key={opt.key}
+                          type="button"
+                          onClick={() => toggleQ4Trigger(opt.key)}
+                          className={`p-3 text-left border-2 border-black transition-all flex flex-col justify-between ${
+                            isSelected
+                              ? 'bg-[#FED7AA] text-black shadow-[3px_3px_0px_0px_#000] translate-x-0.5 translate-y-0.5'
+                              : 'bg-white hover:bg-gray-100 text-black shadow-[2px_2px_0px_0px_#000]'
+                          }`}
+                        >
+                          <div className="flex items-center justify-between font-black text-xs uppercase mb-1">
+                            <span className="flex items-center space-x-1.5">
+                              <span className={`w-3.5 h-3.5 border border-black flex items-center justify-center text-[10px] ${isSelected ? 'bg-black text-white' : 'bg-white'}`}>
+                                {isSelected ? '✓' : ''}
+                              </span>
+                              <span>{opt.label}</span>
+                            </span>
+                          </div>
+                          <span className="text-[11px] font-mono font-bold text-gray-700">+{opt.pts}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Q5: Emotional Distress Level (Self-Reported) */}
+                <div className="p-4 sm:p-5 bg-white border-[3px] border-black shadow-[4px_4px_0px_0px_#000] space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-black uppercase tracking-wider text-black bg-[#FEF08A] px-2.5 py-0.5 border border-black">
+                      Q5: Emotional Distress Level (Self-Reported)
+                    </span>
+                    <span className="text-xs font-mono font-black text-black bg-white px-2 py-0.5 border border-black">
+                      Weight: 5 to 20 Pts
+                    </span>
+                  </div>
+                  <div className="text-sm font-black text-black">
+                    "On a scale of 1 to 4, how close do you feel to your breaking point right now?"
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 pt-1">
+                    {[
+                      { val: 1, label: '1 - Low', pts: '5 Pts', desc: "I need guidance or advice." },
+                      { val: 2, label: '2 - Moderate', pts: '10 Pts', desc: "Overwhelmed, need support soon." },
+                      { val: 3, label: '3 - High', pts: '15 Pts', desc: "Near my limit, struggling to cope." },
+                      { val: 4, label: '4 - Extreme', pts: '20 Pts', desc: "At my breaking point right now." }
+                    ].map((opt) => (
+                      <button
+                        key={opt.val}
+                        type="button"
+                        onClick={() => setClinicalAssessment({ ...clinicalAssessment, q5DistressLevel: opt.val as any })}
+                        className={`p-3 text-left border-2 border-black transition-all flex flex-col justify-between ${
+                          clinicalAssessment.q5DistressLevel === opt.val
+                            ? 'bg-[#FEF08A] text-black shadow-[3px_3px_0px_0px_#000] translate-x-0.5 translate-y-0.5'
+                            : 'bg-white hover:bg-gray-100 text-black shadow-[2px_2px_0px_0px_#000]'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between font-black text-xs uppercase mb-1">
+                          <span>{opt.label}</span>
+                          <span className="font-mono">{opt.pts}</span>
+                        </div>
+                        <span className="text-[11px] font-semibold text-gray-700 leading-snug">{opt.desc}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+              </div>
+
+              {/* ACTION BUTTON TO EXECUTE ASSESSMENT */}
+              <div className="pt-4 border-t-2 border-black flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div className="text-xs font-bold text-gray-700 flex items-center space-x-2">
+                  <ShieldCheck className="w-5 h-5 text-emerald-600 stroke-[2.5]" />
+                  <span>
+                    Deterministic Clinical Algorithm Active • Total Acuity: <strong>{liveScore.totalScore} Pts</strong> ({liveScore.queueTier})
+                  </span>
+                </div>
+
+                <button
+                  onClick={() => handleTriage()}
+                  disabled={isProcessing || !inputText.trim()}
+                  className="w-full sm:w-auto px-8 py-3.5 bg-[#FFE55C] hover:bg-[#FACC15] text-black font-black uppercase tracking-wider text-sm border-[3px] border-black shadow-[5px_5px_0px_0px_#000] hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[7px_7px_0px_0px_#000] active:translate-x-1 active:translate-y-1 active:shadow-[1px_1px_0px_0px_#000] transition-all disabled:opacity-50 flex items-center justify-center space-x-2"
+                >
+                  {isProcessing ? (
+                    <>
+                      <Clock className="w-4 h-4 animate-spin stroke-[3]" />
+                      <span>Fusing Topic Triage & Clinical Scoring...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Send className="w-4 h-4 stroke-[2.5]" />
+                      <span>Build My Coordinated Support Plan</span>
+                    </>
+                  )}
+                </button>
+              </div>
+
+            </div>
+
+            {/* ======================================================== */}
+            {/* TRIAGE RESULT DISPLAY                                    */}
+            {/* ======================================================== */}
             {triageResult && (
               <div className="space-y-8 animate-fadeIn">
                 {triageResult.crisis_flag ? (
@@ -588,7 +939,7 @@ export default function App() {
                         </div>
                         <div>
                           <div className="inline-block bg-black text-white text-xs font-black uppercase tracking-wider px-3 py-1 mb-1">
-                            ⚠️ IMMEDIATE HUMAN SUPPORT REQUIRED
+                            ⚠️ IMMEDIATE HUMAN SUPPORT REQUIRED (CLINICAL OVERRIDE)
                           </div>
                           <h3 className="text-2xl sm:text-3xl font-black text-white uppercase tracking-tight">
                             We Are Here With You Right Now.
@@ -597,13 +948,13 @@ export default function App() {
                       </div>
 
                       <div className="bg-white border-2 border-black px-3 py-1.5 shadow-[3px_3px_0px_0px_#000]">
-                        <span className="text-[10px] font-black uppercase text-red-600 block">Deterministic Safety Filter</span>
-                        <span className="text-xs font-black text-black">Emergency Protocol Active</span>
+                        <span className="text-[10px] font-black uppercase text-red-600 block">Q1 Clinical Override</span>
+                        <span className="text-xs font-black text-black font-mono">100 Pts • Instant P1 Dispatch</span>
                       </div>
                     </div>
 
                     <p className="text-sm font-bold text-white max-w-3xl leading-relaxed">
-                      Your message indicates an immediate safety concern. Normal automated conversation has been suspended. 
+                      Your assessment indicates an immediate safety concern. Normal automated conversation has been suspended. 
                       Please connect with one of these 24/7 free, confidential emergency responders right now:
                     </p>
 
@@ -674,7 +1025,7 @@ export default function App() {
                   </div>
                 ) : (
                   <div className="space-y-8">
-                    {/* SUPPORT NAVIGATOR HERO HEADER */}
+                    {/* SUPPORT NAVIGATOR HERO HEADER WITH CLINICAL SCORE BADGE */}
                     <div className="bg-white border-[4px] border-black shadow-[8px_8px_0px_0px_#000] p-6 sm:p-8 space-y-4">
                       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b-2 border-black pb-4">
                         <div>
@@ -692,17 +1043,21 @@ export default function App() {
                           </h3>
                         </div>
 
-                        <div className="bg-[#FFFDF7] border-2 border-black p-3 shadow-[3px_3px_0px_0px_#000] text-right">
-                          <span className="text-[10px] font-black uppercase text-gray-600 block">Overall Urgency Level</span>
+                        {/* Clinical Score Breakdown Display */}
+                        <div className="bg-[#FFFDF7] border-2 border-black p-3.5 shadow-[3px_3px_0px_0px_#000] text-right">
+                          <span className="text-[10px] font-black uppercase text-gray-600 block">Assigned Queue Priority</span>
                           <span className={`text-sm font-black uppercase px-2 py-0.5 border border-black inline-block mt-0.5 ${
-                            triageResult.overallUrgency === 'high'
+                            triageResult.clinicalScore?.queueTier === 'P1'
                               ? 'bg-[#FF4949] text-white'
-                              : triageResult.overallUrgency === 'medium'
+                              : triageResult.clinicalScore?.queueTier === 'P2'
                               ? 'bg-[#FFE55C] text-black'
                               : 'bg-[#BAE6FD] text-black'
                           }`}>
-                            {triageResult.overallUrgency} Urgency
+                            {triageResult.clinicalScore ? `${triageResult.clinicalScore.queueTier} (${triageResult.clinicalScore.totalScore} Pts)` : `${triageResult.overallUrgency} Urgency`}
                           </span>
+                          <div className="text-[10px] font-bold text-gray-600 mt-1">
+                            {triageResult.clinicalScore?.tierLabel}
+                          </div>
                         </div>
                       </div>
 
@@ -714,10 +1069,10 @@ export default function App() {
                           </div>
                           <div>
                             <div className="text-xs font-black uppercase text-black">
-                              Waiting for your appointment?
+                              Waiting in {triageResult.clinicalScore?.queueTier || 'P3'} Queue?
                             </div>
                             <div className="text-xs font-bold text-purple-900">
-                              Activate the Temporary Reassurance Chatbot (Companion Mode) for grounding exercises and dynamic re-triage.
+                              Activate the Temporary Reassurance Chatbot (Companion Mode) for validation, grounding exercises and dynamic re-triage.
                             </div>
                           </div>
                         </div>
@@ -739,7 +1094,7 @@ export default function App() {
                           <span>Detected Support Pathways ({triageResult.needs.length})</span>
                         </h4>
                         <span className="text-xs font-bold text-gray-500 font-mono">
-                          Coordinated across campus silos
+                          Calibrated by Topic Intake + 5 Clinical Questions
                         </span>
                       </div>
 
@@ -790,12 +1145,12 @@ export default function App() {
                                     <span>Why We Recommend This</span>
                                   </span>
                                   <span className="text-[10px] font-bold text-gray-500 uppercase bg-gray-100 px-2 py-0.5 border border-black">
-                                    Support Recommendation • Not A Diagnosis
+                                    Clinical & Contextual Recommendation
                                   </span>
                                 </div>
 
                                 <div className="text-xs font-bold text-gray-800">
-                                  You mentioned in your message:
+                                  Identified from your input & clinical assessment:
                                 </div>
                                 <ul className="space-y-1 pl-2">
                                   {need.extractedPoints.map((point, pIdx) => (
@@ -859,13 +1214,13 @@ export default function App() {
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b-2 border-black pb-4">
                         <div>
                           <span className="bg-black text-[#FFE55C] font-black text-xs uppercase px-2.5 py-1 mb-1 inline-block">
-                            ⭐ Killer Demo Feature: One-Click Handoff
+                            ⭐ Pre-Triaged Cross-Department Handoff
                           </span>
                           <h3 className="text-2xl font-black text-black uppercase tracking-tight">
-                            Unified Cross-Department Support Handoff
+                            Unified Clinical Support Handoff
                           </h3>
                           <p className="text-xs font-bold text-black mt-1">
-                            Save students from retelling their story 3 separate times across 3 different offices.
+                            Includes Topic summary + 5-Question Acuity score ({liveScore.totalScore} Pts • {liveScore.queueTier}).
                           </p>
                         </div>
 
@@ -930,11 +1285,10 @@ export default function App() {
         )}
 
         {/* ======================================================== */}
-        {/* TAB 2: REASSURANCE CHATBOT (COMPANION MODE) (USER IMAGE) */}
+        {/* TAB 2: REASSURANCE CHATBOT (COMPANION MODE)             */}
         {/* ======================================================== */}
         {activeTab === 'companion' && (
           <div className="space-y-6 animate-fadeIn">
-            {/* COMPANION HEADER & QUEUE STATUS CARD */}
             <div className="bg-white border-[4px] border-black shadow-[8px_8px_0px_0px_#000] p-6 sm:p-8 space-y-6">
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b-2 border-black pb-5">
                 <div>
@@ -954,7 +1308,6 @@ export default function App() {
                   </p>
                 </div>
 
-                {/* Queue Status Box & Escalation Button */}
                 <div className="flex flex-col items-end gap-2 shrink-0">
                   <div className="bg-[#F3F4F6] border-2 border-black p-3 text-right shadow-[3px_3px_0px_0px_#000] w-full sm:w-auto">
                     <div className="text-[10px] font-black uppercase text-gray-600">Active Queue Status</div>
@@ -964,7 +1317,6 @@ export default function App() {
                     <div className="text-[10px] font-semibold text-gray-600">Counselling & Psychological Services</div>
                   </div>
 
-                  {/* PROMINENT RE-TRIAGE ESCALATION BUTTON (CAPABILITY 3) */}
                   <button
                     onClick={() => setEscalationModalOpen(true)}
                     className="w-full sm:w-auto py-2.5 px-4 bg-[#FF4949] hover:bg-red-600 text-white font-black text-xs uppercase tracking-wider border-2 border-black shadow-[4px_4px_0px_0px_#000] active:translate-x-0.5 active:translate-y-0.5 active:shadow-[1px_1px_0px_0px_#000] transition-all flex items-center justify-center space-x-1.5"
@@ -975,7 +1327,7 @@ export default function App() {
                 </div>
               </div>
 
-              {/* CAPABILITY 4: DAILY WARM CHECK-IN SIMULATION (SMS / APP NOTIFICATION) */}
+              {/* DAILY WARM CHECK-IN */}
               <div className="bg-[#FEF08A] border-2 border-black p-4 space-y-2 shadow-[3px_3px_0px_0px_#000]">
                 <div className="flex items-center justify-between">
                   <span className="text-[11px] font-black uppercase tracking-wider text-black flex items-center space-x-1.5">
@@ -1035,13 +1387,9 @@ export default function App() {
                 </div>
               </div>
 
-              {/* CHAT WINDOW & INTERACTIVE TOOLS GRID */}
+              {/* CHAT WINDOW & INTERACTIVE TOOLS */}
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                
-                {/* Left: Chat Conversation Window (7 cols) */}
                 <div className="lg:col-span-7 bg-[#FFFDF9] border-[3px] border-black shadow-[6px_6px_0px_0px_#000] flex flex-col h-[520px]">
-                  
-                  {/* Chat Header */}
                   <div className="p-3.5 bg-white border-b-2 border-black flex items-center justify-between">
                     <div className="flex items-center space-x-2.5">
                       <div className="w-8 h-8 bg-[#DDD6FE] border-2 border-black flex items-center justify-center">
@@ -1059,7 +1407,6 @@ export default function App() {
                     <span className="text-[10px] font-mono font-bold text-gray-500">24/7 Active</span>
                   </div>
 
-                  {/* Message Stream */}
                   <div className="flex-1 p-4 overflow-y-auto space-y-3.5">
                     {chatMessages.map((msg) => (
                       <div
@@ -1085,7 +1432,6 @@ export default function App() {
                     ))}
                   </div>
 
-                  {/* Quick Action Suggestion Chips */}
                   <div className="p-2.5 bg-white border-t-2 border-black flex flex-wrap gap-1.5">
                     <button
                       onClick={() => {
@@ -1113,7 +1459,6 @@ export default function App() {
                     </button>
                   </div>
 
-                  {/* Chat Input Bar */}
                   <div className="p-3 bg-white border-t-2 border-black flex items-center space-x-2">
                     <input
                       type="text"
@@ -1132,10 +1477,7 @@ export default function App() {
                   </div>
                 </div>
 
-                {/* Right: CAPABILITY 2: GROUNDING & MICRO-COPING EXERCISES (5 cols) */}
                 <div className="lg:col-span-5 space-y-4">
-                  
-                  {/* Tool Tabs Header */}
                   <div className="bg-white border-[3px] border-black shadow-[4px_4px_0px_0px_#000] p-4 space-y-3">
                     <div className="flex items-center justify-between border-b-2 border-black pb-2">
                       <span className="text-xs font-black uppercase tracking-wider text-black flex items-center space-x-1.5">
@@ -1180,14 +1522,12 @@ export default function App() {
                       </button>
                     </div>
 
-                    {/* TOOL 1: BOX BREATHING (4-4-4-4) */}
                     {(activeExercise === 'breathing' || activeExercise === null) && (
                       <div className="bg-[#BAE6FD] border-2 border-black p-4 space-y-4 text-center">
                         <div className="text-xs font-black uppercase text-black">
                           Box Breathing Protocol (4-4-4-4)
                         </div>
 
-                        {/* Animated Visual Box */}
                         <div className="py-2 flex flex-col items-center justify-center">
                           <div
                             className={`w-28 h-28 border-[4px] border-black bg-white flex flex-col items-center justify-center shadow-[4px_4px_0px_0px_#000] transition-transform duration-1000 ${
@@ -1242,7 +1582,6 @@ export default function App() {
                       </div>
                     )}
 
-                    {/* TOOL 2: 5-4-3-2-1 SENSORY GROUNDING */}
                     {activeExercise === 'sensory' && (
                       <div className="bg-[#DDD6FE] border-2 border-black p-4 space-y-3">
                         <div className="text-xs font-black uppercase text-black flex items-center justify-between">
@@ -1283,7 +1622,6 @@ export default function App() {
                       </div>
                     )}
 
-                    {/* TOOL 3: GUIDED MUSCLE RELAXATION */}
                     {activeExercise === 'muscle' && (
                       <div className="bg-[#A7F3D0] border-2 border-black p-4 space-y-3">
                         <div className="text-xs font-black uppercase text-black">
@@ -1511,9 +1849,9 @@ export default function App() {
                 </div>
 
                 <div className="bg-[#FF4949] text-white border-2 border-black shadow-[3px_3px_0px_0px_#000] p-4 space-y-1">
-                  <div className="text-[10px] font-black uppercase text-yellow-300">2. Deterministic Filter</div>
-                  <div className="text-sm font-black text-white uppercase">Safety First</div>
-                  <p className="text-xs font-bold text-white/90">Immediate catch for self-harm keywords; suspends normal AI chat.</p>
+                  <div className="text-[10px] font-black uppercase text-yellow-300">2. 5-Question Clinical Score</div>
+                  <div className="text-sm font-black text-white uppercase">Acuity Engine</div>
+                  <p className="text-xs font-bold text-white/90">Objective point system calibrating P1 to P4 queues.</p>
                 </div>
 
                 <div className="bg-[#DDD6FE] border-2 border-black shadow-[3px_3px_0px_0px_#000] p-4 space-y-1">
@@ -1567,7 +1905,8 @@ export default function App() {
                   <div><strong>Reference ID:</strong> DH-{Math.floor(100000 + Math.random() * 900000)}</div>
                   <div><strong>Student Identity:</strong> {isAnonymous ? 'Anonymous Student (Privacy Mode)' : studentId}</div>
                   <div><strong>Target Offices:</strong> {triageResult.needs.map(n => n.route.service).join(' • ')}</div>
-                  <div><strong>Urgency Flag:</strong> {triageResult.overallUrgency.toUpperCase()}</div>
+                  <div><strong>Clinical Acuity:</strong> {liveScore.totalScore} Pts ({liveScore.queueTier})</div>
+                  <div><strong>Queue Priority:</strong> {liveScore.tierLabel}</div>
                 </div>
 
                 <p className="text-xs font-bold text-gray-700">
@@ -1618,7 +1957,7 @@ export default function App() {
                       onChange={(e) => setConsentSummary(e.target.checked)}
                       className="w-4 h-4 border-2 border-black"
                     />
-                    <span>Share structured summary & detected concern areas</span>
+                    <span>Share structured summary & clinical acuity score ({liveScore.totalScore} Pts)</span>
                   </label>
 
                   <label className="flex items-center space-x-2 text-xs font-bold text-black cursor-pointer">
@@ -1628,7 +1967,7 @@ export default function App() {
                       onChange={(e) => setConsentUrgency(e.target.checked)}
                       className="w-4 h-4 border-2 border-black"
                     />
-                    <span>Share urgency assessment ({triageResult.overallUrgency})</span>
+                    <span>Share queue tier assignment ({liveScore.queueTier})</span>
                   </label>
 
                   <label className="flex items-center space-x-2 text-xs font-bold text-black cursor-pointer">
@@ -1835,15 +2174,15 @@ export default function App() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left">
           <div>
             <span className="font-black text-sm uppercase text-black">
-              DHRONA / STUDENT SUPPORT & CARE COMPANION
+              DHRONA / STUDENT SUPPORT & CLINICAL TRIAGE
             </span>
             <span className="text-xs font-bold text-gray-600 block">
-              Track 01: Multi-Need Triage, Companion Mode Chatbot & Coordinated Campus Support
+              Track 01: Multi-Need Triage, Clinical Acuity Scoring & Care Companion Chatbot
             </span>
           </div>
 
           <div className="text-xs font-bold text-gray-500">
-            Intake & Reassurance Assistant • Not a Clinical Diagnostic Tool
+            Intake & Clinical Navigation Assistant • Not a Diagnostic Medical System
           </div>
         </div>
       </footer>
