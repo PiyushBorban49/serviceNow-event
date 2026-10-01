@@ -1,7 +1,7 @@
 """
-DHRONA — Student Support & AI Triage
-Track 01: Student Triage & Routing
-Streamlit Interactive Application
+DHRONA — Student Support Navigator
+Track 01: Multi-Need Triage, Consent Handoff & Coordinated Campus Support
+Streamlit Application
 """
 
 import streamlit as st
@@ -10,7 +10,7 @@ from routing import get_route, ROUTES
 from safety import detect_crisis
 
 st.set_page_config(
-    page_title="DHRONA — Student Support Triage",
+    page_title="DHRONA — Support Navigator",
     page_icon="🎓",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -52,31 +52,17 @@ st.markdown("""
         transform: translate(2px, 2px) !important;
         box-shadow: 1px 1px 0px 0px #000000 !important;
     }
-    .crisis-card {
-        background-color: #FF4949;
-        border: 4px solid #000000;
-        box-shadow: 8px 8px 0px 0px #000000;
-        padding: 24px;
-        color: #000000;
-        font-weight: bold;
-    }
-    .support-card {
-        background-color: #FFFFFF;
-        border: 3px solid #000000;
-        box-shadow: 6px 6px 0px 0px #000000;
-        padding: 24px;
-    }
 </style>
 """, unsafe_allow_html=True)
 
 # Top Bar / Challenge problem statement
-st.title("🎓 DHRONA — Student Support & AI Triage")
-st.caption("Find the right university support quickly without knowing which department to contact.")
+st.title("🎓 DHRONA — Student Support Navigator")
+st.caption("Understand the student → Assess urgency → Identify multiple concurrent needs → One-click handoff.")
 
 # 12 Departments challenge metric cards
 col1, col2, col3 = st.columns(3)
 with col1:
-    st.metric(label="Fragmented University Departments", value="12 Departments", delta="Campus Maze", delta_color="inverse")
+    st.metric(label="Fragmented University Departments", value="12 Silos", delta="Campus Maze", delta_color="inverse")
 with col2:
     st.metric(label="Average Intake Wait Time", value="3 Weeks", delta="Pre-triage delay", delta_color="inverse")
 with col3:
@@ -84,72 +70,72 @@ with col3:
 
 st.divider()
 
-# Sidebar: One-click demo test scenarios
+# Sidebar: Quick Demo Scenarios
 with st.sidebar:
-    st.header("⚡ Quick Demo Scenarios")
-    st.info("Click any preset below to test with realistic student problems:")
+    st.header("⚡ Killer Demo Scenarios")
+    st.info("Test with complex multi-need student situations:")
     
-    preset_1 = st.button("📚 Test 1: Academic Overload")
-    preset_2 = st.button("🧠 Test 2: Stress & Sleep (Mental Health)")
-    preset_3 = st.button("🏠 Test 3: Housing / Roommate Conflict")
-    preset_4 = st.button("💰 Test 4: Financial Hardship & Tuition")
-    preset_5 = st.button("🚨 Test 5: Immediate Safety Crisis")
+    preset_multi = st.button("⭐ Test 1: Exams + Roommate + Tuition (3 Needs)")
+    preset_dual = st.button("🧠 Test 2: Panic Attacks & Failing Course (2 Needs)")
+    preset_housing = st.button("🏠 Test 3: Eviction Risk & Lost Job (2 Needs)")
+    preset_academic = st.button("📚 Test 4: Single Need - Study Workload")
+    preset_crisis = st.button("🚨 Test 5: Immediate Safety Intercept")
     
     st.divider()
-    st.subheader("🏛️ All 12 Campus Departments")
+    st.subheader("🏛️ 12 Campus Silos")
     with st.expander("View fragmented department directory"):
         for key, val in ROUTES.items():
             st.markdown(f"**{val['service']}** ({val['department']})\n📍 {val['location']}")
 
 # Handle presets
 default_text = ""
-if preset_1:
-    default_text = "I am struggling to keep up with my classes and I don't know how to organize my workload."
-elif preset_2:
-    default_text = "I haven't been sleeping properly for the last two weeks. Exams are coming up and I'm extremely stressed."
-elif preset_3:
-    default_text = "I don't know who to talk to. I'm having problems with my roommate and I'm worried I might lose my housing."
-elif preset_4:
-    default_text = "I lost my on-campus part-time job and my family cannot help with next month's tuition payment."
-elif preset_5:
+if preset_multi:
+    default_text = "I'm struggling with exams, my roommate situation is getting worse every day, and I'm stressed about paying my tuition next month. I don't know who to talk to."
+elif preset_dual:
+    default_text = "I haven't slept in three days because I'm failing Organic Chemistry. I'm having panic attacks before every lab lecture."
+elif preset_housing:
+    default_text = "My landlord threatened to evict me and I just lost my on-campus dining hall job. I have no money for rent or food."
+elif preset_academic:
+    default_text = "I am having trouble organizing my study schedule and balancing four heavy project deadlines this month."
+elif preset_crisis:
     default_text = "I feel like hurting myself and I don't know what to do."
 
 # Input section
 st.subheader("Tell us what's going on")
+col_input, col_start_btn = st.columns([4, 1])
+with col_start_btn:
+    if st.button("❓ I Don't Know Where To Start", use_container_width=True):
+        default_text = "I'm struggling with exams, my roommate situation is getting worse every day, and I'm stressed about paying my tuition next month. I don't know who to talk to."
+
 student_message = st.text_area(
-    "Describe what you are struggling with in your own words:",
+    "Describe everything on your plate in your own words:",
     value=default_text,
     height=120,
-    placeholder="e.g., I've been feeling overwhelmed with my exams and can't sleep, or I'm struggling with rent..."
+    placeholder="e.g. I'm struggling with exams, my roommate situation is getting worse, and I'm stressed about paying tuition..."
 )
 
 col_btn, col_info = st.columns([1, 3])
 with col_btn:
-    submit = st.button("🔍 Find My Support", type="primary", use_container_width=True)
+    submit = st.button("🔍 Build My Support Plan", type="primary", use_container_width=True)
 with col_info:
-    st.caption("🔒 *Your message is analyzed purely for routing to campus support services. AI does not diagnose medical conditions.*")
+    st.caption("🔒 *Confidential • Zero medical diagnostic labeling • Support navigation recommendation only.*")
 
 if submit and student_message.strip():
-    with st.spinner("Analyzing message and consulting campus routing rules..."):
-        # Layer 1 Safety check + Layer 2 AI Triage
-        result = triage_student(student_message)
-        category = result.get("category", "general")
-        urgency = result.get("urgency", "low").upper()
-        confidence = int(float(result.get("confidence", 0.90)) * 100)
-        reason = result.get("reason", "")
-        crisis_flag = result.get("crisis_flag", False)
-        
-        # Layer 3 Routing
-        route = get_route(category)
+    with st.spinner("Analyzing multi-need dependencies and consulting campus routing rules..."):
+        triage_data = triage_student(student_message)
+        needs = triage_data.get("needs", [])
+        overall_urgency = triage_data.get("overall_urgency", "low").upper()
+        crisis_flag = triage_data.get("crisis_flag", False)
+        student_summary = triage_data.get("student_summary", "")
 
     st.divider()
 
     # IF CRISIS / IMMEDIATE SAFETY
-    if crisis_flag or urgency == "HIGH" or detect_crisis(student_message):
-        st.error("### ⚠️ IMMEDIATE SUPPORT AVAILABLE")
+    if crisis_flag or detect_crisis(student_message):
+        st.error("### ⚠️ IMMEDIATE SUPPORT REQUIRED")
         st.markdown("""
         **Your message suggests you may need immediate care or support.**
-        Please connect with one of these confidential, 24/7 crisis resources right now:
+        Please connect with one of these confidential, 24/7 emergency responders right now:
         """)
         
         c1, c2, c3 = st.columns(3)
@@ -162,58 +148,49 @@ if submit and student_message.strip():
             
         st.info("A dedicated student wellness advocate is also on standby to assist you immediately.")
     
-    # NORMAL / MEDIUM / LOW TRIAGE
+    # MULTI-NEED SUPPORT PLAN
     else:
-        st.success("### ✅ YOUR RECOMMENDED SUPPORT PATH")
-        
-        # Flow diagram visualization
-        path_cols = st.columns(5)
-        with path_cols[0]:
-            st.markdown(f"**1. Input Received**\n\n*Student Message*")
-        with path_cols[1]:
-            st.markdown("➡️")
-        with path_cols[2]:
-            st.markdown(f"**2. AI Triage**\n\n`{category.replace('_', ' ').title()}`")
-        with path_cols[3]:
-            st.markdown("➡️")
-        with path_cols[4]:
-            st.markdown(f"**3. Target Service**\n\n**{route['service']}**")
+        st.success(f"### ✅ COORDINATED SUPPORT PLAN: {len(needs)} CAMPUS NEEDS DETECTED")
+        st.info(f"**Overall Urgency:** `{overall_urgency}` | **Coordinated Summary:** {student_summary}")
 
-        st.markdown("<br>", unsafe_allow_html=True)
-        
-        col_res_left, col_res_right = st.columns([2, 1])
-        
-        with col_res_left:
-            st.markdown(f"#### 🏛️ {route['service']}")
-            st.markdown(f"**Department:** {route['department']}")
-            st.markdown(f"**Location:** 📍 `{route['location']}`")
-            st.markdown(f"**Operating Hours:** 🕒 {route['hours']}")
-            st.markdown(f"**Why we recommend this:** {reason}")
+        for idx, need in enumerate(needs):
+            cat = need.get("category", "general")
+            route = get_route(cat)
             
-            st.markdown("---")
-            st.markdown(f"#### 🎯 Recommended Action: `{route['action']}`")
-            if route.get("priority_support"):
-                st.caption(f"⚡ {route['priority_support']}")
+            with st.container():
+                st.markdown(f"#### Pathway {idx + 1}: {route['service']} ({cat.replace('_', ' ').title()})")
                 
-            b1, b2 = st.columns(2)
-            with b1:
-                st.button(f"📅 {route['action']}", type="primary", key="btn_book")
-            with b2:
-                st.button("✉️ Contact Dedicated Advisor", key="btn_contact")
+                # "Why we recommend this" (Explainable Recommendation)
+                st.markdown("**Why We Recommend This:**")
+                points = need.get("extracted_points", [])
+                for p in points:
+                    st.markdown(f"- *{p}*")
+                st.caption(need.get("why_recommended", ""))
 
-        with col_res_right:
-            st.markdown("#### 📊 Triage Summary")
-            st.markdown(f"**Urgency Level:** `{urgency}`")
-            st.markdown(f"**Confidence Score:** `{confidence}%`")
-            st.markdown(f"**Phone:** `{route['contact_phone']}`")
-            st.markdown(f"**Email:** `{route['contact_email']}`")
-            
-            with st.expander("🔍 View Raw Structured JSON"):
-                st.json({
-                    "category": category,
-                    "urgency": urgency.lower(),
-                    "confidence": confidence / 100.0,
-                    "service": route["service"],
-                    "reason": reason,
-                    "crisis_flag": crisis_flag
-                })
+                c_info, c_action = st.columns([2, 1])
+                with c_info:
+                    st.markdown(f"📍 **Location:** {route['location']}\n🕒 **Hours:** {route['hours']}\n📞 **Phone:** {route['contact_phone']}")
+                with c_action:
+                    st.button(f"📅 {route['action']}", key=f"book_{cat}_{idx}", use_container_width=True)
+
+                st.divider()
+
+        # ONE-CLICK HANDOFF SLIP
+        st.subheader("📄 One-Click Unified Handoff")
+        st.markdown("Transmit your pre-triaged summary to the duty advisors above so you don't have to repeat your story.")
+
+        c_consent1 = st.checkbox("Approve sharing structured concern summary & urgency", value=True)
+        c_consent2 = st.checkbox("DO NOT share raw conversational transcript", value=True)
+
+        if st.button("🚀 Approve & Generate Unified Handoff Slip", type="primary"):
+            st.balloons()
+            st.success("✅ **Handoff Slip Dispatched to Advisors!**")
+            st.code(f"""
+SUPPORT HANDOFF SLIP (DHRONA)
+Ref: DH-2026-9182
+Student Identity: Anonymous (Privacy Protected)
+Needs Coordinated: {', '.join(n.get('category', '').title() for n in needs)}
+Overall Urgency: {overall_urgency}
+Student Summary: {student_summary}
+Consent: Approved by Student
+            """, language="text")

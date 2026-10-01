@@ -1,20 +1,10 @@
 /**
- * DHRONA Student Support Triage & Routing Engine
+ * DHRONA Student Support Triage & Multi-Need Routing Engine
  */
-
-export interface TriageResult {
-  category: 'mental_wellbeing' | 'academic' | 'financial' | 'housing' | 'disability' | 'harassment' | 'general';
-  urgency: 'low' | 'medium' | 'high';
-  confidence: number;
-  reason: string;
-  recommended_action: string;
-  crisis_flag: boolean;
-  timestamp: string;
-}
 
 export interface UniversityRoute {
   id: string;
-  category: string;
+  category: 'mental_wellbeing' | 'academic' | 'financial' | 'housing' | 'disability' | 'harassment' | 'general';
   service: string;
   department: string;
   building: string;
@@ -25,6 +15,28 @@ export interface UniversityRoute {
   hours: string;
   priorityNote?: string;
   description: string;
+  immediateResources: Array<{ title: string; type: string; url?: string }>;
+}
+
+export interface DetectedNeed {
+  category: 'mental_wellbeing' | 'academic' | 'financial' | 'housing' | 'disability' | 'harassment' | 'general';
+  title: string;
+  urgency: 'low' | 'medium' | 'high';
+  confidence: number;
+  extractedPoints: string[]; // Specific bullet points of what student mentioned
+  whyRecommended: string;
+  route: UniversityRoute;
+  recommendedAction: string;
+}
+
+export interface MultiNeedTriageResult {
+  needs: DetectedNeed[];
+  primaryCategory: string;
+  overallUrgency: 'low' | 'medium' | 'high';
+  crisis_flag: boolean;
+  crisisMessage?: string;
+  studentSummary: string;
+  timestamp: string;
 }
 
 export const CRISIS_TERMS = [
@@ -42,7 +54,8 @@ export const CRISIS_TERMS = [
   "slit my wrists",
   "take my own life",
   "hanging myself",
-  "jump off"
+  "jump off",
+  "die"
 ];
 
 export function detectCrisis(text: string): boolean {
@@ -59,12 +72,17 @@ export const ROUTES: Record<string, UniversityRoute> = {
     department: "Student Wellness & Psychological Services",
     building: "Student Wellness Center",
     room: "Building B, Suite 204",
-    action: "Book Counselling Appointment",
+    action: "Book Priority Counselling",
     phone: "(555) 019-4821",
     email: "counselling@dhrona.edu",
     hours: "Mon-Fri 8:30 AM - 5:00 PM (Drop-ins 1-3 PM)",
     priorityNote: "Same-day priority triage slot reserved for elevated stress or acute anxiety.",
-    description: "Licensed psychologists and therapists providing individual counseling, crisis intervention, group therapy, and stress management."
+    description: "Licensed psychologists and therapists providing individual counseling, crisis intervention, group therapy, and stress management.",
+    immediateResources: [
+      { title: "Exam Anxiety & Somatic Grounding Audio Guide", type: "Audio Guide" },
+      { title: "24/7 Peer Support Chatline (Togetherall)", type: "Digital Portal" },
+      { title: "Circadian Rhythm & Sleep Hygiene Toolkit", type: "PDF Guide" }
+    ]
   },
   academic: {
     id: "route_academic",
@@ -78,7 +96,12 @@ export const ROUTES: Record<string, UniversityRoute> = {
     email: "academicsuccess@dhrona.edu",
     hours: "Mon-Fri 9:00 AM - 6:00 PM",
     priorityNote: "Workload balancing, exam deferral consultation, and subject-specific peer tutoring.",
-    description: "Holistic academic counseling, workload strategies, degree audit clarification, and professor communication coaching."
+    description: "Holistic academic counseling, workload strategies, degree audit clarification, and professor communication coaching.",
+    immediateResources: [
+      { title: "Syllabus Deconstruction & Workload Calculator", type: "Interactive Tool" },
+      { title: "Official Exam Deferral & Incomplete Grade Policy", type: "Policy Document" },
+      { title: "Drop-in Subject Peer Tutoring Schedule", type: "Timetable" }
+    ]
   },
   financial: {
     id: "route_financial",
@@ -92,7 +115,12 @@ export const ROUTES: Record<string, UniversityRoute> = {
     email: "finaid@dhrona.edu",
     hours: "Mon-Fri 9:00 AM - 4:30 PM",
     priorityNote: "Emergency student micro-grants (up to $1,000) and tuition installment deferral.",
-    description: "FAFSA/scholarship advisement, emergency living expense assistance, on-campus employment navigation, and emergency loans."
+    description: "FAFSA/scholarship advisement, emergency living expense assistance, on-campus employment navigation, and emergency loans.",
+    immediateResources: [
+      { title: "Student Emergency Relief Fund (SERF) Application", type: "Fast-Track Form" },
+      { title: "Tuition Installment Payment Plan (TIPP) Request", type: "Form" },
+      { title: "Campus Food Pantry & Community Grocery Voucher", type: "Assistance" }
+    ]
   },
   housing: {
     id: "route_housing",
@@ -106,7 +134,12 @@ export const ROUTES: Record<string, UniversityRoute> = {
     email: "housing@dhrona.edu",
     hours: "Mon-Fri 8:00 AM - 5:00 PM",
     priorityNote: "Emergency room reassignments and mediator-assisted roommate resolution.",
-    description: "Dorm assignment, tenant advocacy, off-campus lease reviews, safety inspections, and roommate mediation."
+    description: "Dorm assignment, tenant advocacy, off-campus lease reviews, safety inspections, and roommate mediation.",
+    immediateResources: [
+      { title: "Confidential Roommate Dispute Mediation Request", type: "Online Form" },
+      { title: "Emergency Temporary On-Campus Bed Request", type: "Emergency Portal" },
+      { title: "Tenant Rights & Off-Campus Lease Inspection Guide", type: "Legal Guide" }
+    ]
   },
   disability: {
     id: "route_disability",
@@ -120,7 +153,12 @@ export const ROUTES: Record<string, UniversityRoute> = {
     email: "access@dhrona.edu",
     hours: "Mon-Fri 9:00 AM - 5:00 PM",
     priorityNote: "Expedited temporary classroom and exam accommodation letters.",
-    description: "Accommodations for physical disabilities, neurodiversity/ADHD, chronic illnesses, and mobility transit."
+    description: "Accommodations for physical disabilities, neurodiversity/ADHD, chronic illnesses, and mobility transit.",
+    immediateResources: [
+      { title: "Academic Accommodations Intake Packet", type: "PDF Form" },
+      { title: "Screen Reader & Assistive Tech Lab Booking", type: "Lab Access" },
+      { title: "Campus Mobility Cart & Transit Shuttle Dispatch", type: "Service" }
+    ]
   },
   harassment: {
     id: "route_harassment",
@@ -134,7 +172,11 @@ export const ROUTES: Record<string, UniversityRoute> = {
     email: "safety@dhrona.edu",
     hours: "24/7 Confidential Line Available",
     priorityNote: "Confidential options counseling, safety escorts, and immediate protective measures.",
-    description: "Support for victims of harassment, stalking, discrimination, or interpersonal violence with strict privacy."
+    description: "Support for victims of harassment, stalking, discrimination, or interpersonal violence with strict privacy.",
+    immediateResources: [
+      { title: "Confidential Title IX Advocacy Protocol", type: "Safety Guide" },
+      { title: "No-Contact Directive & Safety Escort Request", type: "Immediate Measure" }
+    ]
   },
   general: {
     id: "route_general",
@@ -148,11 +190,14 @@ export const ROUTES: Record<string, UniversityRoute> = {
     email: "support@dhrona.edu",
     hours: "Mon-Sat 8:00 AM - 8:00 PM",
     priorityNote: "First point of contact for cross-campus administrative questions.",
-    description: "General campus navigation, ID cards, registration holds, and multi-department referrals."
+    description: "General campus navigation, ID cards, registration holds, and multi-department referrals.",
+    immediateResources: [
+      { title: "Campus Support Directory & Office Map", type: "Interactive Map" },
+      { title: "One-Stop Registrar & Records Desk", type: "Portal" }
+    ]
   }
 };
 
-/** All 12 campus departments for the directory & contrast display */
 export const ALL_12_DEPARTMENTS = [
   { name: "Counselling & Psychological Services", category: "Mental Wellbeing", wait: "18 days", referrals: "High", icon: "Brain" },
   { name: "Academic Advising & Success Center", category: "Academic", wait: "14 days", referrals: "Medium", icon: "BookOpen" },
@@ -174,169 +219,222 @@ export function getRoute(category: string): UniversityRoute {
 }
 
 /**
- * Heuristic classifier matching the structured Groq JSON schema
+ * Intelligent Multi-Need Triage Classifier
+ * Identifies 1 to 4 distinct domain needs simultaneously from one single student statement.
  */
-export function classifyMessage(message: string): TriageResult {
+export function classifyMultiNeedMessage(message: string): MultiNeedTriageResult {
   const text = message.toLowerCase();
 
-  // Layer 1: Safety keyword check
+  // Layer 1: Deterministic Crisis Check
   if (detectCrisis(message)) {
-    return {
+    const crisisNeed: DetectedNeed = {
       category: 'mental_wellbeing',
+      title: 'Emergency Mental Health & Crisis Care',
       urgency: 'high',
       confidence: 0.99,
-      reason: "Direct safety/crisis keywords detected. Prompt emergency support and campus safety intervention activated.",
-      recommended_action: "Connect immediately to 24/7 Campus Crisis Care",
+      extractedPoints: [
+        "Immediate safety concern detected",
+        "Direct crisis/self-harm phrasing present",
+        "Urgent emotional distress requiring human intervention"
+      ],
+      whyRecommended: "Your message contains direct indicators of crisis or self-harm. Human safety responders are on standby immediately.",
+      route: ROUTES.mental_wellbeing,
+      recommendedAction: "Connect immediately to 24/7 Campus Crisis & Emergency Care"
+    };
+
+    return {
+      needs: [crisisNeed],
+      primaryCategory: 'mental_wellbeing',
+      overallUrgency: 'high',
       crisis_flag: true,
+      crisisMessage: "Immediate Safety Protocol Activated: AI conversational flow suspended. Direct connection to confidential emergency responders.",
+      studentSummary: "Immediate safety/crisis support requested.",
       timestamp: new Date().toLocaleTimeString()
     };
   }
 
-  // Layer 2: Domain-specific triage heuristics
-  if (
-    text.includes("exam") ||
-    text.includes("class") ||
-    text.includes("grade") ||
-    text.includes("fail") ||
-    text.includes("study") ||
-    text.includes("workload") ||
-    text.includes("professor") ||
-    text.includes("course") ||
-    text.includes("gpa") ||
-    text.includes("homework") ||
-    text.includes("deadline") ||
-    text.includes("academic")
-  ) {
-    const isMedium = text.includes("fail") || text.includes("falling behind") || text.includes("overwhelm") || text.includes("deadline");
-    return {
+  const detectedNeeds: DetectedNeed[] = [];
+
+  // Need 1: Academic
+  const hasAcademic = [
+    "exam", "exams", "class", "classes", "grade", "grades", "fail", "failing",
+    "study", "studying", "workload", "course", "courses", "professor", "gpa",
+    "homework", "deadline", "deadlines", "assignment", "assignments", "academic",
+    "syllabus", "semester"
+  ].some(k => text.includes(k));
+
+  if (hasAcademic) {
+    const points: string[] = [];
+    if (text.includes("exam")) points.push("Upcoming exam pressure & scheduling");
+    if (text.includes("fail") || text.includes("falling")) points.push("Concerns about failing classes or GPA decline");
+    if (text.includes("workload") || text.includes("overwhelm")) points.push("Managing cumulative academic coursework");
+    if (text.includes("deadline") || text.includes("assignment")) points.push("Approaching assignment deadlines");
+    if (points.length === 0) points.push("General coursework and study organization");
+
+    const isUrgent = text.includes("fail") || text.includes("next week") || text.includes("overwhelm");
+
+    detectedNeeds.push({
       category: 'academic',
-      urgency: isMedium ? 'medium' : 'low',
-      confidence: 0.92,
-      reason: "Student reports difficulty managing academic workload, understanding course expectations, or staying on track with studies.",
-      recommended_action: "Talk to Academic Advisor at Academic Success Center",
-      crisis_flag: false,
-      timestamp: new Date().toLocaleTimeString()
-    };
+      title: 'Academic Success & Advising',
+      urgency: isUrgent ? 'medium' : 'low',
+      confidence: 0.93,
+      extractedPoints: points,
+      whyRecommended: "You mentioned difficulty organizing class workload, impending exams, and worries regarding academic standing. The Academic Success Center can restructure your study plan or coordinate exam extensions.",
+      route: ROUTES.academic,
+      recommendedAction: "Schedule workload restructuring consultation with Academic Advisor"
+    });
   }
 
-  if (
-    text.includes("sleep") ||
-    text.includes("stress") ||
-    text.includes("anxious") ||
-    text.includes("anxiety") ||
-    text.includes("depress") ||
-    text.includes("mental") ||
-    text.includes("panic") ||
-    text.includes("crying") ||
-    text.includes("burnout") ||
-    text.includes("exhausted") ||
-    text.includes("lonely")
-  ) {
-    return {
+  // Need 2: Mental Wellbeing / Stress
+  const hasWellbeing = [
+    "sleep", "sleeping", "stress", "stressed", "anxious", "anxiety", "depress",
+    "depressed", "mental", "panic", "crying", "burnout", "exhausted", "lonely",
+    "breakdown", "overwhelmed"
+  ].some(k => text.includes(k));
+
+  if (hasWellbeing) {
+    const points: string[] = [];
+    if (text.includes("sleep")) points.push("Prolonged sleep disruption & insomnia");
+    if (text.includes("stress")) points.push("Elevated emotional and physiological stress");
+    if (text.includes("anxious") || text.includes("anxiety") || text.includes("panic")) points.push("Acute anxiety symptoms or panic sensations");
+    if (text.includes("burnout") || text.includes("exhausted")) points.push("Exhaustion and cognitive burnout");
+    if (points.length === 0) points.push("Emotional distress and mental wellbeing concerns");
+
+    detectedNeeds.push({
       category: 'mental_wellbeing',
+      title: 'Mental Health & Counselling',
       urgency: 'medium',
-      confidence: 0.94,
-      reason: "Student reports symptoms of prolonged emotional distress, elevated anxiety, and sleep disruption.",
-      recommended_action: "Book priority counselling appointment at Student Wellness Center",
-      crisis_flag: false,
-      timestamp: new Date().toLocaleTimeString()
-    };
+      confidence: 0.95,
+      extractedPoints: points,
+      whyRecommended: "You mentioned ongoing sleep disruption and feeling severely overwhelmed. Speaking with a confidential counselor can help stabilize anxiety and prevent burnout.",
+      route: ROUTES.mental_wellbeing,
+      recommendedAction: "Book priority confidential intake session with Counselling Services"
+    });
   }
 
-  if (
-    text.includes("rent") ||
-    text.includes("money") ||
-    text.includes("afford") ||
-    text.includes("tuition") ||
-    text.includes("aid") ||
-    text.includes("scholarship") ||
-    text.includes("loan") ||
-    text.includes("broke") ||
-    text.includes("job") ||
-    text.includes("financial") ||
-    text.includes("fee")
-  ) {
-    return {
+  // Need 3: Financial Aid & Living Expenses
+  const hasFinancial = [
+    "rent", "money", "afford", "tuition", "aid", "scholarship", "loan", "loans",
+    "broke", "job", "financial", "fee", "fees", "bills", "cost", "pay"
+  ].some(k => text.includes(k));
+
+  if (hasFinancial) {
+    const points: string[] = [];
+    if (text.includes("tuition") || text.includes("fee")) points.push("Imminent tuition payment deadlines");
+    if (text.includes("rent") || text.includes("groceries") || text.includes("broke")) points.push("Emergency living expense shortage");
+    if (text.includes("job") || text.includes("lost")) points.push("Loss of student employment income");
+    if (points.length === 0) points.push("Financial hardship or grant inquiries");
+
+    detectedNeeds.push({
       category: 'financial',
-      urgency: 'medium',
-      confidence: 0.90,
-      reason: "Student reports financial hardship, unexpected tuition expenses, or urgent need for emergency aid counseling.",
-      recommended_action: "Contact Financial Aid Office for emergency consultation and micro-grants",
-      crisis_flag: false,
-      timestamp: new Date().toLocaleTimeString()
-    };
-  }
-
-  if (
-    text.includes("roommate") ||
-    text.includes("dorm") ||
-    text.includes("housing") ||
-    text.includes("landlord") ||
-    text.includes("evict") ||
-    text.includes("lease") ||
-    text.includes("apartment") ||
-    text.includes("residence") ||
-    text.includes("room")
-  ) {
-    return {
-      category: 'housing',
+      title: 'Financial Aid & Emergency Grants',
       urgency: 'medium',
       confidence: 0.91,
-      reason: "Student reports residential friction, roommate dispute, or threat to housing stability.",
-      recommended_action: "Contact Student Housing Office for mediation or emergency room swap",
-      crisis_flag: false,
-      timestamp: new Date().toLocaleTimeString()
-    };
+      extractedPoints: points,
+      whyRecommended: "You highlighted acute financial pressure and concerns regarding upcoming tuition or living costs. Financial Services provides emergency micro-grants and deferral options.",
+      route: ROUTES.financial,
+      recommendedAction: "Apply for Student Emergency Relief Fund & tuition installment plan"
+    });
   }
 
-  if (
-    text.includes("disability") ||
-    text.includes("accommodation") ||
-    text.includes("adhd") ||
-    text.includes("wheelchair") ||
-    text.includes("accessible") ||
-    text.includes("hearing") ||
-    text.includes("extra time") ||
-    text.includes("chronic")
-  ) {
-    return {
+  // Need 4: Housing & Residential Life
+  const hasHousing = [
+    "roommate", "roommates", "dorm", "housing", "landlord", "evict", "eviction",
+    "lease", "apartment", "residence", "room", "living situation"
+  ].some(k => text.includes(k));
+
+  if (hasHousing) {
+    const points: string[] = [];
+    if (text.includes("roommate")) points.push("Roommate friction and living space conflict");
+    if (text.includes("evict") || text.includes("lease")) points.push("Housing security or lease termination risk");
+    if (text.includes("dorm") || text.includes("housing")) points.push("On-campus dorm assignment challenges");
+    if (points.length === 0) points.push("Residential stability concerns");
+
+    detectedNeeds.push({
+      category: 'housing',
+      title: 'Residence Life & Housing Operations',
+      urgency: 'medium',
+      confidence: 0.92,
+      extractedPoints: points,
+      whyRecommended: "You noted interpersonal living friction with a roommate and worry about losing housing. The Housing Office offers neutral mediation and emergency room swaps.",
+      route: ROUTES.housing,
+      recommendedAction: "Request confidential roommate mediation or room reassignment"
+    });
+  }
+
+  // Need 5: Disability & Accommodations
+  const hasDisability = [
+    "disability", "accommodation", "accommodations", "adhd", "wheelchair",
+    "accessible", "hearing", "extra time", "chronic", "medical condition"
+  ].some(k => text.includes(k));
+
+  if (hasDisability) {
+    detectedNeeds.push({
       category: 'disability',
+      title: 'Accessibility & DRC Accommodations',
       urgency: 'low',
-      confidence: 0.93,
-      reason: "Student requests classroom accommodations, assistive learning technology, or campus accessibility support.",
-      recommended_action: "Submit accommodation intake packet with Accessibility Services",
-      crisis_flag: false,
-      timestamp: new Date().toLocaleTimeString()
-    };
+      confidence: 0.94,
+      extractedPoints: [
+        "Classroom or exam accommodation needs",
+        "Disability support documentation"
+      ],
+      whyRecommended: "You expressed needs relating to accessibility or learning accommodations to ensure equitable academic access.",
+      route: ROUTES.disability,
+      recommendedAction: "Submit accommodation intake packet with Disability Resource Center"
+    });
   }
 
-  if (
-    text.includes("harass") ||
-    text.includes("stalk") ||
-    text.includes("threat") ||
-    text.includes("unsafe") ||
-    text.includes("assault") ||
-    text.includes("title ix") ||
-    text.includes("abusive")
-  ) {
-    return {
+  // Need 6: Harassment / Safety
+  const hasHarassment = [
+    "harass", "harassment", "stalk", "stalking", "threat", "threatened",
+    "unsafe", "assault", "title ix", "abusive", "uncomfortable"
+  ].some(k => text.includes(k));
+
+  if (hasHarassment) {
+    detectedNeeds.push({
       category: 'harassment',
+      title: 'Student Safety & Title IX Advocacy',
       urgency: 'high',
-      confidence: 0.96,
-      reason: "Student describes personal safety threat, interpersonal harassment, or hostile campus environment.",
-      recommended_action: "Connect immediately with Confidential Title IX Advocate",
-      crisis_flag: true,
-      timestamp: new Date().toLocaleTimeString()
-    };
+      confidence: 0.97,
+      extractedPoints: [
+        "Interpersonal harassment or stalking concern",
+        "Campus safety & personal security threat"
+      ],
+      whyRecommended: "You mentioned feeling unsafe or harassed on campus. The Title IX Office provides immediate protective measures and confidential advocacy.",
+      route: ROUTES.harassment,
+      recommendedAction: "Connect with Confidential Campus Safety & Title IX Advocate"
+    });
   }
+
+  // Fallback to General if no specific category matched
+  if (detectedNeeds.length === 0) {
+    detectedNeeds.push({
+      category: 'general',
+      title: 'Student Support Desk',
+      urgency: 'low',
+      confidence: 0.85,
+      extractedPoints: ["General campus navigation inquiry"],
+      whyRecommended: "Your inquiry covers broad campus topics. The One-Stop Support Desk connects students to the appropriate staff.",
+      route: ROUTES.general,
+      recommendedAction: "Connect with One-Stop Support Specialist"
+    });
+  }
+
+  // Determine overall urgency
+  const hasHigh = detectedNeeds.some(n => n.urgency === 'high');
+  const hasMedium = detectedNeeds.some(n => n.urgency === 'medium');
+  const overallUrgency = hasHigh ? 'high' : hasMedium ? 'medium' : 'low';
+
+  // Generate concise student summary for the one-click handoff
+  const needTitles = detectedNeeds.map(n => n.title).join(", ");
+  const studentSummary = `Student reported simultaneous concerns across: ${needTitles}. Core indicators include: ${detectedNeeds.flatMap(n => n.extractedPoints).slice(0, 3).join("; ")}.`;
 
   return {
-    category: 'general',
-    urgency: 'low',
-    confidence: 0.85,
-    reason: "General inquiry regarding campus resources and administrative navigation.",
-    recommended_action: "Talk to Student Support Desk at Central Atrium",
+    needs: detectedNeeds,
+    primaryCategory: detectedNeeds[0].category,
+    overallUrgency,
     crisis_flag: false,
+    studentSummary,
     timestamp: new Date().toLocaleTimeString()
   };
 }
