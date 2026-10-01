@@ -1,402 +1,277 @@
 import React, { useState } from 'react';
 import { 
-  Terminal, 
-  Send, 
-  CheckCircle2, 
+  HeartHandshake, 
+  Brain, 
+  BookOpen, 
+  Home, 
+  Coins, 
+  ShieldAlert, 
   AlertTriangle, 
-  AlertOctagon, 
-  Info, 
-  Copy, 
-  Check, 
-  RefreshCw, 
-  Database, 
+  CheckCircle2, 
+  Clock, 
+  MapPin, 
+  Phone, 
+  Mail, 
+  Calendar, 
+  ArrowRight, 
+  Send, 
+  Sparkles, 
+  ShieldCheck, 
+  HelpCircle, 
+  Building2, 
   Layers, 
-  Code2, 
-  GitBranch, 
-  ExternalLink, 
-  Cpu, 
-  HardDrive, 
-  Server, 
-  ShieldAlert,
-  Flame,
-  ArrowRight
+  Code, 
+  ExternalLink,
+  X,
+  PhoneCall,
+  Check,
+  Compass
 } from 'lucide-react';
+import { 
+  classifyMessage, 
+  detectCrisis, 
+  getRoute, 
+  ALL_12_DEPARTMENTS, 
+  TriageResult, 
+  UniversityRoute 
+} from './services/triage';
 
-interface ServiceNowEvent {
-  id: string;
-  source: string;
-  node: string;
-  type: string;
-  resource: string;
-  severity: number; // 1: Critical, 2: Major, 3: Minor, 4: Warning, 5: Info, 0: Clear
-  metric_name: string;
-  metric_value?: string;
-  description: string;
-  message_key: string;
-  additional_info: string;
-  time_of_event: string;
-  status: 'Ready' | 'Processed' | 'Alert Created';
-  alert_id?: string;
-  incident_id?: string;
-}
-
-const SEVERITY_CONFIG: Record<number, { label: string; color: string; badge: string; icon: React.ReactNode }> = {
-  1: { 
-    label: '1 - Critical', 
-    color: 'text-red-400', 
-    badge: 'bg-red-500/10 text-red-400 border-red-500/30',
-    icon: <AlertOctagon className="w-4 h-4 text-red-400" />
-  },
-  2: { 
-    label: '2 - Major', 
-    color: 'text-orange-400', 
-    badge: 'bg-orange-500/10 text-orange-400 border-orange-500/30',
-    icon: <Flame className="w-4 h-4 text-orange-400" />
-  },
-  3: { 
-    label: '3 - Minor', 
-    color: 'text-amber-400', 
-    badge: 'bg-amber-500/10 text-amber-400 border-amber-500/30',
-    icon: <AlertTriangle className="w-4 h-4 text-amber-400" />
-  },
-  4: { 
-    label: '4 - Warning', 
-    color: 'text-yellow-400', 
-    badge: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/30',
-    icon: <AlertTriangle className="w-4 h-4 text-yellow-400" />
-  },
-  5: { 
-    label: '5 - Info', 
-    color: 'text-blue-400', 
-    badge: 'bg-blue-500/10 text-blue-400 border-blue-500/30',
-    icon: <Info className="w-4 h-4 text-blue-400" />
-  },
-  0: { 
-    label: '0 - Clear', 
-    color: 'text-emerald-400', 
-    badge: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30',
-    icon: <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-  }
-};
-
-const TEMPLATES = [
+const DEMO_PRESETS = [
   {
-    name: 'High CPU on Production DB',
-    icon: Cpu,
-    source: 'Datadog',
-    node: 'db-prod-cluster-01.corp.internal',
-    type: 'HighCPUUtilization',
-    resource: 'CPU-Core-All',
-    severity: 1,
-    metric_name: 'system.cpu.idle',
-    metric_value: '2.4%',
-    description: 'CPU idle capacity below 5% for >10 mins on active primary PostgreSQL node.',
-    additional_info: JSON.stringify({ cluster: 'db-prod', region: 'us-east-1', hypervisor: 'aws-ec2' }, null, 2)
+    id: "preset_academic",
+    title: "Academic Overload",
+    category: "Academic Support",
+    icon: BookOpen,
+    color: "from-blue-500/20 to-indigo-500/20 border-blue-500/40 text-blue-300",
+    text: "I am struggling to keep up with my classes and I don't know how to organize my workload. I have three exams next week and feel like I'm failing."
   },
   {
-    name: 'Disk Space Running Out',
-    icon: HardDrive,
-    source: 'SolarWinds',
-    node: 'storage-san-tier1.datacenter.corp',
-    type: 'DiskVolumeThreshold',
-    resource: '/dev/vg_data/lv_appdata',
-    severity: 2,
-    metric_name: 'disk.used_percent',
-    metric_value: '94.8%',
-    description: 'Data partition usage exceeds 90% threshold. Immediate cleanup or expansion required.',
-    additional_info: JSON.stringify({ mount_point: '/var/lib/docker', total_gb: 2048, free_gb: 106 }, null, 2)
+    id: "preset_mental",
+    title: "Stress & Sleep",
+    category: "Mental Wellbeing",
+    icon: Brain,
+    color: "from-purple-500/20 to-pink-500/20 border-purple-500/40 text-purple-300",
+    text: "I haven't been sleeping properly for the last two weeks. Exams are coming up and I'm extremely stressed and having panic moments."
   },
   {
-    name: 'Kubernetes Pod CrashLoopBackOff',
-    icon: Server,
-    source: 'Prometheus',
-    node: 'k8s-worker-node-42',
-    type: 'ContainerCrashLoop',
-    resource: 'payment-checkout-api-7b89f5c4f-8x9pz',
-    severity: 1,
-    metric_name: 'kube_pod_container_status_restarts_total',
-    metric_value: '18',
-    description: 'Service pod payment-checkout-api continuously crashing due to OOMKilled signal 137.',
-    additional_info: JSON.stringify({ namespace: 'ecommerce', replica_set: 'payment-checkout-api-7b89f5c4f' }, null, 2)
+    id: "preset_housing",
+    title: "Roommate / Housing",
+    category: "Student Housing",
+    icon: Home,
+    color: "from-amber-500/20 to-orange-500/20 border-amber-500/40 text-amber-300",
+    text: "I don't know who to talk to. I'm having problems with my roommate and I'm worried I might lose my housing if things escalate."
   },
   {
-    name: 'SSL Expiry Warning',
+    id: "preset_financial",
+    title: "Tuition & Emergency Aid",
+    category: "Financial Aid",
+    icon: Coins,
+    color: "from-emerald-500/20 to-teal-500/20 border-emerald-500/40 text-emerald-300",
+    text: "I lost my on-campus part-time job this week. I don't have enough money for next month's tuition fee installment and groceries."
+  },
+  {
+    id: "preset_crisis",
+    title: "Immediate Crisis (Safety Test)",
+    category: "Emergency / Crisis",
     icon: ShieldAlert,
-    source: 'Dynatrace',
-    node: 'api.acme-corp.com',
-    type: 'SSLCertExpiry',
-    resource: 'port-443-tls',
-    severity: 4,
-    metric_name: 'ssl_certificate_days_remaining',
-    metric_value: '6',
-    description: 'Inbound TLS wildcard certificate will expire in less than 7 calendar days.',
-    additional_info: JSON.stringify({ issuer: "Let's Encrypt", expires_on: '2026-10-07' }, null, 2)
+    color: "from-red-500/20 to-rose-500/20 border-red-500/50 text-red-300",
+    text: "I feel like hurting myself and I don't know what to do."
   }
 ];
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState<'workbench' | 'pipeline' | 'api' | 'github'>('workbench');
-  const [copiedSnippet, setCopiedSnippet] = useState(false);
+  const [activeTab, setActiveTab] = useState<'triage' | 'departments' | 'architecture'>('triage');
+  const [inputText, setInputText] = useState('');
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [result, setResult] = useState<TriageResult | null>(null);
+  const [route, setRoute] = useState<UniversityRoute | null>(null);
+  const [history, setHistory] = useState<Array<{ text: string; result: TriageResult; route: UniversityRoute }>>([]);
 
-  // Form state
-  const [source, setSource] = useState('Datadog');
-  const [node, setNode] = useState('db-prod-cluster-01.corp.internal');
-  const [type, setType] = useState('HighCPUUtilization');
-  const [resource, setResource] = useState('CPU-Core-All');
-  const [severity, setSeverity] = useState<number>(1);
-  const [metricName, setMetricName] = useState('system.cpu.idle');
-  const [metricValue, setMetricValue] = useState('2.4%');
-  const [description, setDescription] = useState('CPU idle capacity below 5% for >10 mins on active primary PostgreSQL node.');
-  const [additionalInfo, setAdditionalInfo] = useState(
-    JSON.stringify({ cluster: 'db-prod', region: 'us-east-1', hypervisor: 'aws-ec2' }, null, 2)
-  );
+  // Modal states
+  const [bookingModalOpen, setBookingModalOpen] = useState(false);
+  const [bookingConfirmed, setBookingConfirmed] = useState(false);
+  const [bookingDate, setBookingDate] = useState('Tomorrow, 2:00 PM');
+  
+  const [contactModalOpen, setContactModalOpen] = useState(false);
+  const [messageSent, setMessageSent] = useState(false);
+  const [advisorMessage, setAdvisorMessage] = useState('');
 
-  // Instance config for mock/preview
-  const [instanceUrl, setInstanceUrl] = useState('https://dev12345.service-now.com');
-  const [apiFormat, setApiFormat] = useState<'table_api' | 'itom_jsonv2'>('table_api');
+  const handleTriage = (textToAnalyze?: string) => {
+    const text = textToAnalyze !== undefined ? textToAnalyze : inputText;
+    if (!text.trim()) return;
 
-  // History events
-  const [events, setEvents] = useState<ServiceNowEvent[]>([
-    {
-      id: 'EVT0049201',
-      source: 'Datadog',
-      node: 'db-prod-cluster-01.corp.internal',
-      type: 'HighCPUUtilization',
-      resource: 'CPU-Core-All',
-      severity: 1,
-      metric_name: 'system.cpu.idle',
-      metric_value: '2.4%',
-      description: 'CPU idle capacity below 5% for >10 mins on active primary PostgreSQL node.',
-      message_key: 'Datadog_db-prod-cluster-01.corp.internal_HighCPUUtilization_CPU-Core-All',
-      additional_info: '{"cluster":"db-prod","region":"us-east-1"}',
-      time_of_event: new Date(Date.now() - 1000 * 60 * 12).toLocaleTimeString(),
-      status: 'Alert Created',
-      alert_id: 'ALT0018402',
-      incident_id: 'INC0094821'
-    },
-    {
-      id: 'EVT0049198',
-      source: 'SolarWinds',
-      node: 'storage-san-tier1.datacenter.corp',
-      type: 'DiskVolumeThreshold',
-      resource: '/dev/vg_data/lv_appdata',
-      severity: 2,
-      metric_name: 'disk.used_percent',
-      metric_value: '94.8%',
-      description: 'Data partition usage exceeds 90% threshold. Immediate cleanup or expansion required.',
-      message_key: 'SolarWinds_storage-san-tier1.datacenter.corp_DiskVolumeThreshold',
-      additional_info: '{"total_gb":2048,"free_gb":106}',
-      time_of_event: new Date(Date.now() - 1000 * 60 * 45).toLocaleTimeString(),
-      status: 'Alert Created',
-      alert_id: 'ALT0018399',
-      incident_id: 'INC0094819'
-    },
-    {
-      id: 'EVT0049182',
-      source: 'Dynatrace',
-      node: 'api.acme-corp.com',
-      type: 'SSLCertExpiry',
-      resource: 'port-443-tls',
-      severity: 4,
-      metric_name: 'ssl_certificate_days_remaining',
-      metric_value: '6',
-      description: 'Inbound TLS wildcard certificate will expire in less than 7 calendar days.',
-      message_key: 'Dynatrace_api.acme-corp.com_SSLCertExpiry',
-      additional_info: '{"expires_on":"2026-10-07"}',
-      time_of_event: new Date(Date.now() - 1000 * 60 * 180).toLocaleTimeString(),
-      status: 'Processed'
-    }
-  ]);
+    setIsProcessing(true);
+    setResult(null);
 
-  const loadTemplate = (tmpl: typeof TEMPLATES[0]) => {
-    setSource(tmpl.source);
-    setNode(tmpl.node);
-    setType(tmpl.type);
-    setResource(tmpl.resource);
-    setSeverity(tmpl.severity);
-    setMetricName(tmpl.metric_name);
-    setMetricValue(tmpl.metric_value);
-    setDescription(tmpl.description);
-    setAdditionalInfo(tmpl.additional_info);
+    // Simulate instant AI evaluation with sub-second feedback
+    setTimeout(() => {
+      const triageRes = classifyMessage(text);
+      const targetRoute = getRoute(triageRes.category);
+      setResult(triageRes);
+      setRoute(targetRoute);
+      setIsProcessing(false);
+
+      setHistory(prev => [
+        { text, result: triageRes, route: targetRoute },
+        ...prev.slice(0, 4)
+      ]);
+    }, 350);
   };
 
-  const handleSendEvent = (e: React.FormEvent) => {
-    e.preventDefault();
-    const eventId = `EVT0049${Math.floor(200 + Math.random() * 800)}`;
-    const msgKey = `${source}_${node}_${type}_${resource || 'default'}`;
-    const willCreateAlert = severity === 1 || severity === 2;
-    const alertId = willCreateAlert ? `ALT0018${Math.floor(400 + Math.random() * 500)}` : undefined;
-    const incId = severity === 1 ? `INC0094${Math.floor(820 + Math.random() * 150)}` : undefined;
-
-    const newEvent: ServiceNowEvent = {
-      id: eventId,
-      source,
-      node,
-      type,
-      resource,
-      severity,
-      metric_name: metricName,
-      metric_value: metricValue,
-      description,
-      message_key: msgKey,
-      additional_info: additionalInfo,
-      time_of_event: new Date().toLocaleTimeString(),
-      status: willCreateAlert ? 'Alert Created' : 'Processed',
-      alert_id: alertId,
-      incident_id: incId
-    };
-
-    setEvents([newEvent, ...events]);
+  const handleSelectPreset = (presetText: string) => {
+    setInputText(presetText);
+    handleTriage(presetText);
   };
 
-  // Generate payload JSON
-  const currentPayload = apiFormat === 'table_api' 
-    ? {
-        source,
-        node,
-        type,
-        resource,
-        severity: severity.toString(),
-        metric_name: metricName,
-        metric_value: metricValue,
-        description,
-        message_key: `${source}_${node}_${type}_${resource || 'default'}`,
-        additional_info: additionalInfo.startsWith('{') ? additionalInfo : JSON.stringify({ raw: additionalInfo }),
-        time_of_event: new Date().toISOString()
-      }
-    : {
-        records: [
-          {
-            source,
-            node,
-            type,
-            resource,
-            severity,
-            metric_name: metricName,
-            description,
-            additional_info: additionalInfo,
-            time_of_event: new Date().toISOString()
-          }
-        ]
-      };
+  const handleConfirmBooking = () => {
+    setBookingConfirmed(true);
+    setTimeout(() => {
+      setBookingConfirmed(false);
+      setBookingModalOpen(false);
+    }, 1800);
+  };
 
-  const curlSnippet = `curl -X POST "${instanceUrl}${apiFormat === 'table_api' ? '/api/now/table/em_event' : '/api/global/em/jsonv2'}" \\
-  -H "Accept: application/json" \\
-  -H "Content-Type: application/json" \\
-  -u "admin:YOUR_PASSWORD_OR_TOKEN" \\
-  -d '${JSON.stringify(currentPayload, null, 2)}'`;
-
-  const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text);
-    setCopiedSnippet(true);
-    setTimeout(() => setCopiedSnippet(false), 2000);
+  const handleSendAdvisorMessage = () => {
+    setMessageSent(true);
+    setTimeout(() => {
+      setMessageSent(false);
+      setContactModalOpen(false);
+      setAdvisorMessage('');
+    }, 1800);
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-emerald-500/30 selection:text-emerald-200">
-      {/* Top Header */}
-      <header className="border-b border-slate-800 bg-slate-900/80 backdrop-blur sticky top-0 z-50">
+    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-indigo-500/30 selection:text-indigo-200">
+      {/* Top University Branding Header */}
+      <header className="border-b border-slate-800 bg-slate-900/90 backdrop-blur sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-400 flex items-center justify-center shadow-lg shadow-emerald-500/20">
-              <Database className="w-5 h-5 text-white" />
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 via-blue-600 to-teal-400 flex items-center justify-center shadow-lg shadow-indigo-500/20">
+              <HeartHandshake className="w-5 h-5 text-white" />
             </div>
             <div>
               <div className="flex items-center space-x-2">
-                <h1 className="font-bold text-lg text-white tracking-tight">serviceNow-event</h1>
-                <span className="text-[10px] font-semibold tracking-wider uppercase px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                  ITOM Event Management
+                <span className="font-extrabold text-lg tracking-tight text-white">DHRONA</span>
+                <span className="text-slate-500 text-sm font-light">/</span>
+                <span className="text-slate-300 font-semibold text-sm">STUDENT SUPPORT</span>
+                <span className="text-[10px] uppercase tracking-wider font-bold bg-indigo-500/10 text-indigo-400 border border-indigo-500/30 px-2 py-0.5 rounded-full ml-1">
+                  Track 01 Triage
                 </span>
               </div>
-              <p className="text-xs text-slate-400">Event Ingestion, em_event Table & Alert Pipeline</p>
+              <p className="text-xs text-slate-400">One intelligent door to all campus support services</p>
             </div>
           </div>
 
-          {/* Navigation Tabs */}
-          <nav className="flex items-center space-x-1 bg-slate-800/80 p-1 rounded-lg border border-slate-700/60 text-xs font-medium">
+          {/* Navigation */}
+          <nav className="flex items-center space-x-1 bg-slate-950/70 p-1 rounded-xl border border-slate-800 text-xs font-medium">
             <button
-              onClick={() => setActiveTab('workbench')}
-              className={`px-3 py-1.5 rounded-md transition-all flex items-center space-x-1.5 ${
-                activeTab === 'workbench'
-                  ? 'bg-emerald-600 text-white shadow-sm'
-                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-700/40'
+              onClick={() => setActiveTab('triage')}
+              className={`px-3 py-1.5 rounded-lg transition flex items-center space-x-1.5 ${
+                activeTab === 'triage'
+                  ? 'bg-indigo-600 text-white shadow-sm font-semibold'
+                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
               }`}
             >
-              <Send className="w-3.5 h-3.5" />
-              <span>Workbench</span>
+              <Sparkles className="w-3.5 h-3.5" />
+              <span>Student Intake</span>
             </button>
             <button
-              onClick={() => setActiveTab('pipeline')}
-              className={`px-3 py-1.5 rounded-md transition-all flex items-center space-x-1.5 ${
-                activeTab === 'pipeline'
-                  ? 'bg-emerald-600 text-white shadow-sm'
-                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-700/40'
+              onClick={() => setActiveTab('departments')}
+              className={`px-3 py-1.5 rounded-lg transition flex items-center space-x-1.5 ${
+                activeTab === 'departments'
+                  ? 'bg-indigo-600 text-white shadow-sm font-semibold'
+                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
+              }`}
+            >
+              <Building2 className="w-3.5 h-3.5" />
+              <span>12 Departments</span>
+            </button>
+            <button
+              onClick={() => setActiveTab('architecture')}
+              className={`px-3 py-1.5 rounded-lg transition flex items-center space-x-1.5 ${
+                activeTab === 'architecture'
+                  ? 'bg-indigo-600 text-white shadow-sm font-semibold'
+                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
               }`}
             >
               <Layers className="w-3.5 h-3.5" />
-              <span>Event Pipeline</span>
-            </button>
-            <button
-              onClick={() => setActiveTab('api')}
-              className={`px-3 py-1.5 rounded-md transition-all flex items-center space-x-1.5 ${
-                activeTab === 'api'
-                  ? 'bg-emerald-600 text-white shadow-sm'
-                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-700/40'
-              }`}
-            >
-              <Code2 className="w-3.5 h-3.5" />
-              <span>REST & cURL</span>
-            </button>
-            <button
-              onClick={() => setActiveTab('github')}
-              className={`px-3 py-1.5 rounded-md transition-all flex items-center space-x-1.5 ${
-                activeTab === 'github'
-                  ? 'bg-emerald-600 text-white shadow-sm'
-                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-700/40'
-              }`}
-            >
-              <GitBranch className="w-3.5 h-3.5" />
-              <span>GitHub Repo</span>
+              <span>Architecture & Pitch</span>
             </button>
           </nav>
         </div>
       </header>
 
-      {/* Main Content Area */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
-        {/* TAB 1: WORKBENCH */}
-        {activeTab === 'workbench' && (
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-            {/* Left: Quick Templates & Ingestion Form */}
-            <div className="lg:col-span-6 space-y-6">
-              {/* Presets */}
-              <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-sm">
-                <div className="flex items-center justify-between mb-3">
-                  <h3 className="text-sm font-semibold text-slate-200 flex items-center space-x-2">
-                    <Flame className="w-4 h-4 text-emerald-400" />
-                    <span>Quick Event Templates</span>
-                  </h3>
-                  <span className="text-xs text-slate-400">Click to fill</span>
+      {/* Challenge Problem Statement Bar (Section 13) */}
+      <div className="bg-slate-900/60 border-b border-slate-800/80 py-3">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="flex items-center space-x-2 text-xs text-slate-400">
+              <span className="font-semibold text-slate-200">The Student Support Crisis:</span>
+              <span>Students shouldn't need an org chart to get help.</span>
+            </div>
+
+            <div className="grid grid-cols-3 gap-3 text-center sm:text-left">
+              <div className="bg-slate-950/80 border border-slate-800/80 px-3.5 py-1.5 rounded-lg flex items-center space-x-2">
+                <span className="text-base font-black text-rose-400">12</span>
+                <span className="text-[11px] text-slate-400 leading-tight">Fragmented Departments</span>
+              </div>
+              <div className="bg-slate-950/80 border border-slate-800/80 px-3.5 py-1.5 rounded-lg flex items-center space-x-2">
+                <span className="text-base font-black text-amber-400">3 Weeks</span>
+                <span className="text-[11px] text-slate-400 leading-tight">Average Intake Wait</span>
+              </div>
+              <div className="bg-slate-950/80 border border-slate-800/80 px-3.5 py-1.5 rounded-lg flex items-center space-x-2">
+                <span className="text-base font-black text-indigo-400">+40%</span>
+                <span className="text-[11px] text-slate-400 leading-tight">Bounced Referrals</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Body */}
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* ======================================================== */}
+        {/* TAB 1: STUDENT TRIAGE & INTAKE                           */}
+        {/* ======================================================== */}
+        {activeTab === 'triage' && (
+          <div className="space-y-8">
+            {/* Intake Card */}
+            <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-xl shadow-black/20">
+              <div className="text-center max-w-2xl mx-auto mb-6">
+                <h2 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">
+                  How can we help you today?
+                </h2>
+                <p className="text-sm text-slate-400 mt-2">
+                  Tell us what you are struggling with in plain words. Dhrona analyzes your situation safely and routes you to the exact campus support you need.
+                </p>
+              </div>
+
+              {/* Quick Preset Buttons for Hackathon Judges (Section 14 & 11) */}
+              <div className="mb-6">
+                <div className="flex items-center justify-between mb-2.5">
+                  <span className="text-xs font-semibold uppercase tracking-wider text-slate-400 flex items-center space-x-1.5">
+                    <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
+                    <span>Quick Demo Scenarios (1-Click Test for Judges)</span>
+                  </span>
+                  <span className="text-[11px] text-slate-500">Instant test cases</span>
                 </div>
-                <div className="grid grid-cols-2 gap-2">
-                  {TEMPLATES.map((tmpl) => {
-                    const Icon = tmpl.icon;
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2.5">
+                  {DEMO_PRESETS.map((preset) => {
+                    const Icon = preset.icon;
                     return (
                       <button
-                        key={tmpl.name}
-                        onClick={() => loadTemplate(tmpl)}
-                        className="text-left p-2.5 rounded-xl border border-slate-800 bg-slate-950/60 hover:bg-slate-800/60 hover:border-slate-700 transition flex items-start space-x-2.5 group"
+                        key={preset.id}
+                        onClick={() => handleSelectPreset(preset.text)}
+                        className={`text-left p-3 rounded-xl border bg-gradient-to-br ${preset.color} hover:scale-[1.02] active:scale-[0.99] transition-all flex flex-col justify-between group`}
                       >
-                        <div className="p-1.5 rounded-lg bg-slate-800 group-hover:bg-emerald-500/20 group-hover:text-emerald-400 text-slate-400 transition">
-                          <Icon className="w-4 h-4" />
+                        <div className="flex items-center justify-between mb-1.5">
+                          <Icon className="w-4 h-4 opacity-90 group-hover:scale-110 transition-transform" />
+                          <span className="text-[10px] font-bold uppercase tracking-wider opacity-75">
+                            {preset.category}
+                          </span>
                         </div>
-                        <div className="min-w-0">
-                          <div className="text-xs font-medium text-slate-200 truncate group-hover:text-emerald-300">
-                            {tmpl.name}
-                          </div>
-                          <div className="text-[10px] text-slate-400">
-                            {tmpl.source} • Sev {tmpl.severity}
-                          </div>
+                        <div className="text-xs font-semibold text-white group-hover:text-indigo-200 line-clamp-1">
+                          {preset.title}
                         </div>
                       </button>
                     );
@@ -404,441 +279,655 @@ export default function App() {
                 </div>
               </div>
 
-              {/* Event Form */}
-              <form onSubmit={handleSendEvent} className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-sm space-y-4">
-                <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-                  <div>
-                    <h3 className="text-sm font-semibold text-white">Event Payload Builder</h3>
-                    <p className="text-xs text-slate-400">Writes directly into ServiceNow <code className="text-emerald-400">em_event</code></p>
-                  </div>
-                  <span className="text-xs font-mono text-slate-500">POST /api/now/table/em_event</span>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs font-medium text-slate-300 mb-1">Source (Monitoring Tool)</label>
-                    <input
-                      type="text"
-                      value={source}
-                      onChange={(e) => setSource(e.target.value)}
-                      required
-                      placeholder="e.g. Datadog, SolarWinds, CloudWatch"
-                      className="w-full text-xs bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-medium text-slate-300 mb-1">Node (CI / Host / IP)</label>
-                    <input
-                      type="text"
-                      value={node}
-                      onChange={(e) => setNode(e.target.value)}
-                      required
-                      placeholder="e.g. srv-app-01.corp"
-                      className="w-full text-xs bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs font-medium text-slate-300 mb-1">Type (Event / Metric Type)</label>
-                    <input
-                      type="text"
-                      value={type}
-                      onChange={(e) => setType(e.target.value)}
-                      required
-                      placeholder="e.g. HighCPUUtilization, DiskFull"
-                      className="w-full text-xs bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-medium text-slate-300 mb-1">Resource (Sub-component)</label>
-                    <input
-                      type="text"
-                      value={resource}
-                      onChange={(e) => setResource(e.target.value)}
-                      placeholder="e.g. /var/log, eth0, CPU-0"
-                      className="w-full text-xs bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs font-medium text-slate-300 mb-1">Severity</label>
-                    <select
-                      value={severity}
-                      onChange={(e) => setSeverity(Number(e.target.value))}
-                      className="w-full text-xs bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-emerald-500"
+              {/* Input Area */}
+              <div className="space-y-4">
+                <div className="relative">
+                  <textarea
+                    rows={4}
+                    value={inputText}
+                    onChange={(e) => setInputText(e.target.value)}
+                    placeholder="e.g., I've been really stressed about exams and haven't been sleeping for the past two weeks, or I'm struggling with rent and tuition..."
+                    className="w-full bg-slate-950 border border-slate-800 rounded-2xl p-4 sm:p-5 text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition resize-none leading-relaxed"
+                  />
+                  {inputText && (
+                    <button
+                      onClick={() => setInputText('')}
+                      className="absolute top-4 right-4 text-xs text-slate-500 hover:text-slate-300 p-1"
                     >
-                      <option value={1}>1 - Critical (Creates P1 Incident)</option>
-                      <option value={2}>2 - Major (Creates Alert)</option>
-                      <option value={3}>3 - Minor</option>
-                      <option value={4}>4 - Warning</option>
-                      <option value={5}>5 - Information</option>
-                      <option value={0}>0 - Clear (Auto-closes Alert)</option>
-                    </select>
+                      Clear
+                    </button>
+                  )}
+                </div>
+
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-1">
+                  <div className="flex items-center space-x-2 text-xs text-slate-400">
+                    <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
+                    <span>
+                      Private & Confidential • Zero diagnosis • Intended strictly for student intake & routing
+                    </span>
                   </div>
-                  <div>
-                    <label className="block text-xs font-medium text-slate-300 mb-1">Metric Value</label>
-                    <div className="flex space-x-2">
-                      <input
-                        type="text"
-                        value={metricName}
-                        onChange={(e) => setMetricName(e.target.value)}
-                        placeholder="Name (e.g. cpu.load)"
-                        className="w-1/2 text-xs bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-emerald-500"
-                      />
-                      <input
-                        type="text"
-                        value={metricValue}
-                        onChange={(e) => setMetricValue(e.target.value)}
-                        placeholder="Value (e.g. 98.4%)"
-                        className="w-1/2 text-xs bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-emerald-500"
-                      />
-                    </div>
-                  </div>
-                </div>
 
-                <div>
-                  <label className="block text-xs font-medium text-slate-300 mb-1">Description</label>
-                  <textarea
-                    rows={2}
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
-                    required
-                    placeholder="Short description of the event condition..."
-                    className="w-full text-xs bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-emerald-500 resize-none"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-medium text-slate-300 mb-1">
-                    Additional Info (JSON payload)
-                  </label>
-                  <textarea
-                    rows={3}
-                    value={additionalInfo}
-                    onChange={(e) => setAdditionalInfo(e.target.value)}
-                    placeholder='{"tags": ["prod", "us-east"]}'
-                    className="w-full text-xs font-mono bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-slate-300 focus:outline-none focus:border-emerald-500 resize-none"
-                  />
-                </div>
-
-                <div className="pt-2">
                   <button
-                    type="submit"
-                    className="w-full py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-medium text-sm flex items-center justify-center space-x-2 transition shadow-lg shadow-emerald-600/20 active:scale-[0.99]"
+                    onClick={() => handleTriage()}
+                    disabled={isProcessing || !inputText.trim()}
+                    className="w-full sm:w-auto px-8 py-3 rounded-xl bg-gradient-to-r from-indigo-600 via-blue-600 to-indigo-600 hover:from-indigo-500 hover:to-blue-500 text-white font-semibold text-sm shadow-lg shadow-indigo-600/25 active:scale-95 transition disabled:opacity-50 flex items-center justify-center space-x-2"
                   >
-                    <Send className="w-4 h-4" />
-                    <span>Emit Event to ServiceNow Pipeline</span>
+                    {isProcessing ? (
+                      <>
+                        <Clock className="w-4 h-4 animate-spin" />
+                        <span>Evaluating Support Path...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Send className="w-4 h-4" />
+                        <span>Find My Support</span>
+                      </>
+                    )}
                   </button>
                 </div>
-              </form>
+              </div>
             </div>
 
-            {/* Right: Real-time Ingestion Stream & Alert Grouping */}
-            <div className="lg:col-span-6 space-y-6">
-              <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-sm flex flex-col h-full">
-                <div className="flex items-center justify-between border-b border-slate-800 pb-3 mb-4">
-                  <div>
-                    <h3 className="text-sm font-semibold text-white flex items-center space-x-2">
-                      <Terminal className="w-4 h-4 text-emerald-400" />
-                      <span>Live Event Log & Alert Correlation</span>
-                    </h3>
-                    <p className="text-xs text-slate-400">
-                      Recent records in <code className="text-emerald-400">em_event</code> table
-                    </p>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <span className="flex h-2 w-2 relative">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                      <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-                    </span>
-                    <span className="text-xs text-emerald-400 font-medium">Listening</span>
-                  </div>
-                </div>
-
-                <div className="space-y-3 flex-1 overflow-y-auto max-h-[600px] pr-1">
-                  {events.length === 0 ? (
-                    <div className="text-center py-12 text-slate-500 text-xs">
-                      No events sent yet. Fill the form or pick a template to trigger an event.
+            {/* ======================================================== */}
+            {/* RESULT SECTION: SAFETY / EMERGENCY OR STANDARD ROUTE     */}
+            {/* ======================================================== */}
+            {result && route && (
+              <div className="space-y-6 animate-fadeIn">
+                {/* CASE 1: IMMEDIATE CRISIS TRIGGER (Section 4 & 5) */}
+                {result.crisis_flag || result.urgency === 'high' || detectCrisis(inputText) ? (
+                  <div className="bg-gradient-to-br from-red-950 via-slate-950 to-red-950 border-2 border-red-500 rounded-3xl p-6 sm:p-8 shadow-2xl shadow-red-900/40 space-y-6">
+                    <div className="flex items-start space-x-4">
+                      <div className="w-12 h-12 rounded-2xl bg-red-500/20 border border-red-500/40 flex items-center justify-center shrink-0">
+                        <AlertTriangle className="w-7 h-7 text-red-400 animate-pulse" />
+                      </div>
+                      <div>
+                        <div className="flex items-center space-x-2">
+                          <span className="px-2.5 py-0.5 rounded-full bg-red-500/20 text-red-300 text-xs font-bold uppercase tracking-wider border border-red-500/40">
+                            Immediate Support Available
+                          </span>
+                          <span className="text-xs text-red-400 font-mono">Safety Rule Activated</span>
+                        </div>
+                        <h3 className="text-xl sm:text-2xl font-bold text-white mt-1">
+                          We are here for you right now.
+                        </h3>
+                        <p className="text-sm text-red-200/90 mt-1 max-w-3xl leading-relaxed">
+                          Your message suggests you may be going through an immediate crisis. You do not have to carry this alone. Please reach out to one of the trained, confidential emergency responders below:
+                        </p>
+                      </div>
                     </div>
-                  ) : (
-                    events.map((evt) => {
-                      const sev = SEVERITY_CONFIG[evt.severity] || SEVERITY_CONFIG[5];
-                      return (
-                        <div
-                          key={evt.id}
-                          className="bg-slate-950 border border-slate-800/80 rounded-xl p-3.5 space-y-2.5 hover:border-slate-700 transition"
+
+                    {/* Immediate Hotlines */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div className="bg-slate-900/90 border border-red-500/40 rounded-2xl p-5 space-y-3">
+                        <div className="text-xs font-bold text-red-400 uppercase tracking-wider flex items-center justify-between">
+                          <span>Campus Crisis Dispatch</span>
+                          <PhoneCall className="w-4 h-4 text-red-400" />
+                        </div>
+                        <div className="text-xl font-black text-white">(555) 911-HELP</div>
+                        <p className="text-xs text-slate-300">
+                          Direct 24/7 campus emergency psychological & safety response team.
+                        </p>
+                        <button
+                          onClick={() => alert("Initiating emergency protocol connection to Campus Crisis Dispatch.")}
+                          className="w-full py-2 rounded-xl bg-red-600 hover:bg-red-500 text-white text-xs font-bold transition shadow-md shadow-red-600/30"
                         >
-                          <div className="flex items-center justify-between">
+                          Connect Immediately
+                        </button>
+                      </div>
+
+                      <div className="bg-slate-900/90 border border-red-500/40 rounded-2xl p-5 space-y-3">
+                        <div className="text-xs font-bold text-red-400 uppercase tracking-wider flex items-center justify-between">
+                          <span>National Suicide & Crisis</span>
+                          <HeartHandshake className="w-4 h-4 text-red-400" />
+                        </div>
+                        <div className="text-xl font-black text-white">Call or Text 988</div>
+                        <p className="text-xs text-slate-300">
+                          Free, confidential, 24/7 lifeline for mental health crises & emotional distress.
+                        </p>
+                        <button
+                          onClick={() => alert("Initiating direct call to 988 Suicide & Crisis Lifeline.")}
+                          className="w-full py-2 rounded-xl bg-red-600 hover:bg-red-500 text-white text-xs font-bold transition shadow-md shadow-red-600/30"
+                        >
+                          Call 988
+                        </button>
+                      </div>
+
+                      <div className="bg-slate-900/90 border border-red-500/40 rounded-2xl p-5 space-y-3">
+                        <div className="text-xs font-bold text-red-400 uppercase tracking-wider flex items-center justify-between">
+                          <span>Campus Security Escort</span>
+                          <ShieldAlert className="w-4 h-4 text-red-400" />
+                        </div>
+                        <div className="text-xl font-black text-white">(555) 019-SAFE</div>
+                        <p className="text-xs text-slate-300">
+                          Immediate 24/7 on-campus safety escort and emergency officer support.
+                        </p>
+                        <button
+                          onClick={() => alert("Dispatching request to Campus Safety & Escort Service.")}
+                          className="w-full py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold transition border border-slate-700"
+                        >
+                          Request Campus Officer
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="bg-red-950/60 border border-red-500/30 rounded-xl p-3.5 text-xs text-red-300 flex items-center space-x-2">
+                      <ShieldCheck className="w-4 h-4 text-red-400 shrink-0" />
+                      <span>
+                        <strong>Safety Guarantee:</strong> AI conversation is suspended. You are routed directly to licensed human intervention.
+                      </span>
+                    </div>
+                  </div>
+                ) : (
+                  /* CASE 2: NORMAL / MEDIUM / LOW TRIAGED ROUTING */
+                  <div className="space-y-6">
+                    {/* Visual Support Path (Section 12) */}
+                    <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-lg">
+                      <div className="flex items-center justify-between mb-4">
+                        <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
+                          Your Support Path
+                        </span>
+                        <div className="flex items-center space-x-2">
+                          <span className="text-xs text-slate-400">Triage Confidence:</span>
+                          <span className="text-xs font-mono font-bold text-emerald-400">
+                            {Math.round(result.confidence * 100)}%
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-7 gap-2 items-center">
+                        <div className="md:col-span-2 bg-slate-950 border border-slate-800 rounded-2xl p-4">
+                          <div className="text-[10px] text-slate-500 uppercase font-semibold">Step 1 • Student Intake</div>
+                          <div className="text-xs font-medium text-slate-300 mt-1 line-clamp-2 italic">
+                            "{inputText}"
+                          </div>
+                        </div>
+
+                        <div className="flex justify-center text-slate-600">
+                          <ArrowRight className="w-5 h-5 hidden md:block" />
+                          <span className="md:hidden text-xs">↓</span>
+                        </div>
+
+                        <div className="md:col-span-2 bg-indigo-950/40 border border-indigo-500/30 rounded-2xl p-4">
+                          <div className="text-[10px] text-indigo-400 uppercase font-semibold">Step 2 • AI Triage</div>
+                          <div className="text-sm font-bold text-white mt-1 capitalize">
+                            {result.category.replace('_', ' ')}
+                          </div>
+                          <div className="flex items-center space-x-2 mt-1">
+                            <span className={`text-[10px] px-2 py-0.5 rounded font-semibold uppercase ${
+                              result.urgency === 'high' 
+                                ? 'bg-red-500/20 text-red-300 border border-red-500/30'
+                                : result.urgency === 'medium'
+                                ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
+                                : 'bg-blue-500/20 text-blue-300 border border-blue-500/30'
+                            }`}>
+                              {result.urgency} Urgency
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="flex justify-center text-slate-600">
+                          <ArrowRight className="w-5 h-5 hidden md:block" />
+                          <span className="md:hidden text-xs">↓</span>
+                        </div>
+
+                        <div className="md:col-span-2 bg-emerald-950/40 border border-emerald-500/30 rounded-2xl p-4">
+                          <div className="text-[10px] text-emerald-400 uppercase font-semibold">Step 3 • University Service</div>
+                          <div className="text-sm font-bold text-white mt-1">
+                            {route.service}
+                          </div>
+                          <div className="text-[11px] text-emerald-300/80 mt-1 truncate">
+                            {route.action}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Detailed Recommended Service Card */}
+                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                      {/* Left: Department Details & Actions */}
+                      <div className="lg:col-span-8 bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 space-y-6 shadow-xl">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-5">
+                          <div>
                             <div className="flex items-center space-x-2">
-                              <span className="font-mono text-xs font-bold text-white">{evt.id}</span>
-                              <span className={`text-[10px] font-semibold px-2 py-0.5 rounded border ${sev.badge} flex items-center space-x-1`}>
-                                {sev.icon}
-                                <span>{sev.label}</span>
+                              <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 text-xs font-bold uppercase tracking-wider border border-emerald-500/20">
+                                Recommended Destination
                               </span>
+                              <span className="text-xs text-slate-500">•</span>
+                              <span className="text-xs text-slate-400">{route.department}</span>
                             </div>
-                            <span className="text-[10px] text-slate-400 font-mono">{evt.time_of_event}</span>
+                            <h3 className="text-2xl font-bold text-white mt-1">
+                              {route.service}
+                            </h3>
                           </div>
 
-                          <div className="text-xs text-slate-200">
-                            <span className="font-semibold text-white">{evt.type}</span> on <span className="font-mono text-emerald-300">{evt.node}</span>
-                            {evt.resource && <span className="text-slate-400"> ({evt.resource})</span>}
+                          <div className="flex items-center space-x-2">
+                            <span className="text-xs text-slate-400">Triage Match:</span>
+                            <span className="text-sm font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-lg">
+                              {(result.confidence * 100).toFixed(0)}% Match
+                            </span>
                           </div>
+                        </div>
 
-                          <p className="text-xs text-slate-400 leading-relaxed">
-                            {evt.description}
+                        {/* Why We Recommend This */}
+                        <div className="bg-slate-950/80 border border-slate-800 rounded-2xl p-4 space-y-1.5">
+                          <div className="text-xs font-bold text-indigo-400 uppercase tracking-wider flex items-center space-x-1.5">
+                            <Sparkles className="w-3.5 h-3.5" />
+                            <span>Why We Recommend This</span>
+                          </div>
+                          <p className="text-sm text-slate-200 leading-relaxed">
+                            {result.reason}
                           </p>
+                        </div>
 
-                          {/* Message Key and Alert links */}
-                          <div className="flex flex-wrap items-center justify-between pt-2 border-t border-slate-800/80 text-[11px]">
-                            <div className="text-slate-400">
-                              Source: <span className="text-slate-200 font-medium">{evt.source}</span>
-                              {evt.metric_value && (
-                                <span className="ml-2 font-mono text-amber-300">[{evt.metric_name}: {evt.metric_value}]</span>
-                              )}
+                        {/* Location, Hours, Contact Grid */}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          <div className="bg-slate-950/60 border border-slate-800/80 rounded-xl p-3.5 flex items-start space-x-3">
+                            <MapPin className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                            <div className="text-xs">
+                              <div className="font-semibold text-white">{route.building}</div>
+                              <div className="text-slate-400">{route.room}</div>
                             </div>
+                          </div>
 
-                            <div className="flex items-center space-x-2 mt-1 sm:mt-0">
-                              {evt.alert_id && (
-                                <span className="px-2 py-0.5 rounded bg-purple-500/10 text-purple-300 border border-purple-500/30 text-[10px] font-mono">
-                                  {evt.alert_id}
-                                </span>
-                              )}
-                              {evt.incident_id && (
-                                <span className="px-2 py-0.5 rounded bg-red-500/10 text-red-300 border border-red-500/30 text-[10px] font-mono">
-                                  {evt.incident_id}
-                                </span>
-                              )}
-                              <span className="px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 text-[10px]">
-                                {evt.status}
-                              </span>
+                          <div className="bg-slate-950/60 border border-slate-800/80 rounded-xl p-3.5 flex items-start space-x-3">
+                            <Clock className="w-4 h-4 text-blue-400 shrink-0 mt-0.5" />
+                            <div className="text-xs">
+                              <div className="font-semibold text-white">Hours & Walk-ins</div>
+                              <div className="text-slate-400">{route.hours}</div>
+                            </div>
+                          </div>
+
+                          <div className="bg-slate-950/60 border border-slate-800/80 rounded-xl p-3.5 flex items-start space-x-3">
+                            <Phone className="w-4 h-4 text-purple-400 shrink-0 mt-0.5" />
+                            <div className="text-xs">
+                              <div className="font-semibold text-white">Direct Phone</div>
+                              <div className="text-slate-400 font-mono">{route.phone}</div>
+                            </div>
+                          </div>
+
+                          <div className="bg-slate-950/60 border border-slate-800/80 rounded-xl p-3.5 flex items-start space-x-3">
+                            <Mail className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+                            <div className="text-xs">
+                              <div className="font-semibold text-white">Department Email</div>
+                              <div className="text-slate-400 font-mono">{route.email}</div>
                             </div>
                           </div>
                         </div>
-                      );
-                    })
-                  )}
-                </div>
+
+                        {/* Priority support note */}
+                        {route.priorityNote && (
+                          <div className="bg-indigo-950/30 border border-indigo-500/20 rounded-xl p-3.5 text-xs text-indigo-300 flex items-center space-x-2">
+                            <CheckCircle2 className="w-4 h-4 text-indigo-400 shrink-0" />
+                            <span>
+                              <strong>Priority Intake Notice:</strong> {route.priorityNote}
+                            </span>
+                          </div>
+                        )}
+
+                        {/* Action Buttons */}
+                        <div className="pt-2 flex flex-col sm:flex-row items-center gap-3">
+                          <button
+                            onClick={() => setBookingModalOpen(true)}
+                            className="w-full sm:w-1/2 py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-sm transition flex items-center justify-center space-x-2 shadow-lg shadow-emerald-600/20 active:scale-95"
+                          >
+                            <Calendar className="w-4 h-4" />
+                            <span>{route.action}</span>
+                          </button>
+
+                          <button
+                            onClick={() => setContactModalOpen(true)}
+                            className="w-full sm:w-1/2 py-3 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold text-sm transition flex items-center justify-center space-x-2 border border-slate-700 active:scale-95"
+                          >
+                            <Mail className="w-4 h-4" />
+                            <span>Contact Assigned Advisor</span>
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Right: Structured Triage Inspector (Groq JSON schema) */}
+                      <div className="lg:col-span-4 space-y-4">
+                        <div className="bg-slate-900 border border-slate-800 rounded-3xl p-5 shadow-lg space-y-4">
+                          <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+                            <span className="text-xs font-bold text-white flex items-center space-x-1.5">
+                              <Code className="w-3.5 h-3.5 text-indigo-400" />
+                              <span>Groq Triage Schema</span>
+                            </span>
+                            <span className="text-[10px] bg-slate-800 text-slate-400 px-2 py-0.5 rounded font-mono">
+                              JSON Output
+                            </span>
+                          </div>
+
+                          <pre className="bg-slate-950 border border-slate-800/80 rounded-2xl p-4 text-[11px] font-mono text-emerald-300 overflow-x-auto leading-relaxed">
+{JSON.stringify({
+  category: result.category,
+  urgency: result.urgency,
+  confidence: result.confidence,
+  recommended_service: route.service,
+  reason: result.reason,
+  immediate_action: route.action,
+  crisis_flag: result.crisis_flag
+}, null, 2)}
+                          </pre>
+
+                          <div className="text-[11px] text-slate-400 leading-normal">
+                            Classification generated through dual-layer verification (deterministic safety keywords + structured LLM triage).
+                          </div>
+                        </div>
+
+                        {/* Recent Ingestion History */}
+                        {history.length > 1 && (
+                          <div className="bg-slate-900/60 border border-slate-800/60 rounded-2xl p-4 space-y-2.5">
+                            <div className="text-xs font-semibold text-slate-400">
+                              Recent Session Inquiries
+                            </div>
+                            <div className="space-y-2">
+                              {history.slice(1, 3).map((item, idx) => (
+                                <button
+                                  key={idx}
+                                  onClick={() => {
+                                    setInputText(item.text);
+                                    setResult(item.result);
+                                    setRoute(item.route);
+                                  }}
+                                  className="w-full text-left p-2 rounded-lg bg-slate-950/60 border border-slate-800/60 hover:border-slate-700 text-xs text-slate-300 truncate transition block"
+                                >
+                                  <div className="font-semibold text-indigo-300">{item.route.service}</div>
+                                  <div className="text-[10px] text-slate-500 truncate">{item.text}</div>
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
-            </div>
+            )}
           </div>
         )}
 
-        {/* TAB 2: PIPELINE EXPLAINER */}
-        {activeTab === 'pipeline' && (
+        {/* ======================================================== */}
+        {/* TAB 2: THE 12 DEPARTMENTS PROBLEM (Section 13)           */}
+        {/* ======================================================== */}
+        {activeTab === 'departments' && (
           <div className="space-y-6">
-            <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-sm">
-              <h2 className="text-lg font-bold text-white mb-2">ServiceNow ITOM Event Processing Architecture</h2>
-              <p className="text-sm text-slate-400 max-w-3xl leading-relaxed">
-                ServiceNow Event Management connects external monitoring tools with CMDB Configuration Items (CIs).
-                Raw monitoring alerts flow through normalization, deduplication, alert correlation, and automated incident creation.
-              </p>
-
-              {/* Step diagram */}
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-6">
-                <div className="bg-slate-950 border border-slate-800 rounded-xl p-4 space-y-2 relative">
-                  <div className="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center font-bold text-sm border border-emerald-500/20">
-                    1
-                  </div>
-                  <h4 className="text-sm font-semibold text-white">Event Ingestion</h4>
-                  <p className="text-xs text-slate-400 leading-relaxed">
-                    Events enter through REST API (<code className="text-emerald-400">em_event</code>), SNMP traps, Mid Server push, or connectors.
-                  </p>
-                  <div className="text-[10px] font-mono text-slate-500 pt-2">Table: em_event</div>
-                </div>
-
-                <div className="bg-slate-950 border border-slate-800 rounded-xl p-4 space-y-2 relative">
-                  <div className="w-8 h-8 rounded-lg bg-blue-500/10 text-blue-400 flex items-center justify-center font-bold text-sm border border-blue-500/20">
-                    2
-                  </div>
-                  <h4 className="text-sm font-semibold text-white">Event Rules & Filtering</h4>
-                  <p className="text-xs text-slate-400 leading-relaxed">
-                    Transforms raw strings, binds to CMDB CI based on IP/FQDN/MAC, and calculates severity thresholds.
-                  </p>
-                  <div className="text-[10px] font-mono text-slate-500 pt-2">Rule: em_event_rule</div>
-                </div>
-
-                <div className="bg-slate-950 border border-slate-800 rounded-xl p-4 space-y-2 relative">
-                  <div className="w-8 h-8 rounded-lg bg-purple-500/10 text-purple-400 flex items-center justify-center font-bold text-sm border border-purple-500/20">
-                    3
-                  </div>
-                  <h4 className="text-sm font-semibold text-white">Deduplication & Alerts</h4>
-                  <p className="text-xs text-slate-400 leading-relaxed">
-                    Groups events matching <code className="text-purple-400">message_key</code>. Creates or updates a single actionable alert.
-                  </p>
-                  <div className="text-[10px] font-mono text-slate-500 pt-2">Table: em_alert</div>
-                </div>
-
-                <div className="bg-slate-950 border border-slate-800 rounded-xl p-4 space-y-2 relative">
-                  <div className="w-8 h-8 rounded-lg bg-red-500/10 text-red-400 flex items-center justify-center font-bold text-sm border border-red-500/20">
-                    4
-                  </div>
-                  <h4 className="text-sm font-semibold text-white">Alert Management Rule</h4>
-                  <p className="text-xs text-slate-400 leading-relaxed">
-                    Auto-opens Incidents (<code className="text-red-400">incident</code>), executes remediation workflows or subflows in Flow Designer.
-                  </p>
-                  <div className="text-[10px] font-mono text-slate-500 pt-2">Table: incident</div>
-                </div>
+            <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 space-y-4">
+              <div className="max-w-3xl">
+                <span className="text-xs font-bold uppercase tracking-wider text-indigo-400">
+                  The Problem Statement
+                </span>
+                <h2 className="text-2xl font-bold text-white mt-1">
+                  Why University Support Systems Fail Students
+                </h2>
+                <p className="text-sm text-slate-300 mt-2 leading-relaxed">
+                  Traditional universities operate 12+ separate administrative silos. A stressed student struggling with both grades and rent has to figure out which of these 12 buildings to visit, fill out redundant intake forms, and frequently gets referred in circles.
+                </p>
               </div>
-            </div>
 
-            {/* Severity Matrix */}
-            <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-sm">
-              <h3 className="text-sm font-semibold text-white mb-4">ServiceNow Standard Severity Scale</h3>
-              <div className="grid grid-cols-2 md:grid-cols-6 gap-3">
-                {Object.entries(SEVERITY_CONFIG).map(([sevNum, cfg]) => (
-                  <div key={sevNum} className="bg-slate-950 border border-slate-800 rounded-xl p-3 text-center space-y-1">
-                    <div className="flex justify-center">{cfg.icon}</div>
-                    <div className={`text-xs font-bold ${cfg.color}`}>{cfg.label}</div>
-                    <div className="text-[10px] text-slate-400">
-                      {Number(sevNum) === 0 ? 'Closes active alert' : Number(sevNum) === 1 ? 'High priority incident' : 'Alert monitoring'}
+              {/* Grid of the 12 fragmented departments */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 pt-4">
+                {ALL_12_DEPARTMENTS.map((dept, i) => (
+                  <div
+                    key={i}
+                    className="bg-slate-950 border border-slate-800/80 rounded-2xl p-4 space-y-2 hover:border-slate-700 transition"
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                        Department {i + 1} of 12
+                      </span>
+                      <span className="text-[10px] px-2 py-0.5 rounded bg-slate-800 text-slate-400">
+                        Wait: {dept.wait}
+                      </span>
+                    </div>
+                    <div className="text-sm font-bold text-white">{dept.name}</div>
+                    <div className="text-xs text-slate-400 flex items-center justify-between pt-1 border-t border-slate-800/60">
+                      <span>Category: {dept.category}</span>
+                      <span className="text-rose-400 text-[10px]">Misdirection: {dept.referrals}</span>
                     </div>
                   </div>
                 ))}
               </div>
-            </div>
-          </div>
-        )}
 
-        {/* TAB 3: REST & CURL */}
-        {activeTab === 'api' && (
-          <div className="space-y-6">
-            <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-sm space-y-4">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-4">
+              {/* The Dhrona Solution Banner */}
+              <div className="bg-gradient-to-r from-indigo-900/60 via-blue-900/40 to-slate-900 border border-indigo-500/30 rounded-2xl p-5 mt-6 flex flex-col md:flex-row items-center justify-between gap-4">
                 <div>
-                  <h3 className="text-base font-semibold text-white">ServiceNow Event REST APIs</h3>
-                  <p className="text-xs text-slate-400">Ready-to-use curl and script commands for testing external webhooks</p>
+                  <h4 className="text-base font-bold text-white">How Dhrona Solves This in Seconds</h4>
+                  <p className="text-xs text-slate-300 mt-1 max-w-2xl">
+                    Instead of forcing students to understand the university hierarchy, Dhrona offers a single empathetic conversational intake, classifies the intent, and maps directly to the right department.
+                  </p>
                 </div>
-
-                <div className="flex items-center space-x-2">
-                  <button
-                    onClick={() => setApiFormat('table_api')}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-medium transition ${
-                      apiFormat === 'table_api'
-                        ? 'bg-emerald-600 text-white'
-                        : 'bg-slate-800 text-slate-400 hover:text-slate-200'
-                    }`}
-                  >
-                    Table API (/em_event)
-                  </button>
-                  <button
-                    onClick={() => setApiFormat('itom_jsonv2')}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-medium transition ${
-                      apiFormat === 'itom_jsonv2'
-                        ? 'bg-emerald-600 text-white'
-                        : 'bg-slate-800 text-slate-400 hover:text-slate-200'
-                    }`}
-                  >
-                    ITOM Multi-Insert (/jsonv2)
-                  </button>
-                </div>
-              </div>
-
-              {/* Instance URL */}
-              <div>
-                <label className="block text-xs font-medium text-slate-300 mb-1">Target ServiceNow Instance URL</label>
-                <input
-                  type="text"
-                  value={instanceUrl}
-                  onChange={(e) => setInstanceUrl(e.target.value)}
-                  className="w-full text-xs font-mono bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-emerald-500"
-                />
-              </div>
-
-              {/* Code Snippet */}
-              <div className="relative">
-                <div className="flex items-center justify-between bg-slate-950 px-4 py-2 border-t border-x border-slate-800 rounded-t-xl">
-                  <span className="text-xs font-mono text-slate-400">cURL Command</span>
-                  <button
-                    onClick={() => copyToClipboard(curlSnippet)}
-                    className="flex items-center space-x-1.5 text-xs text-emerald-400 hover:text-emerald-300 transition"
-                  >
-                    {copiedSnippet ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-                    <span>{copiedSnippet ? 'Copied!' : 'Copy cURL'}</span>
-                  </button>
-                </div>
-                <pre className="bg-slate-950 border border-slate-800 rounded-b-xl p-4 text-xs font-mono text-emerald-300 overflow-x-auto">
-                  {curlSnippet}
-                </pre>
-              </div>
-
-              {/* JSON preview */}
-              <div className="pt-2">
-                <h4 className="text-xs font-semibold text-slate-300 mb-2">Payload JSON Body Preview</h4>
-                <pre className="bg-slate-950 border border-slate-800 rounded-xl p-4 text-xs font-mono text-slate-300 overflow-x-auto">
-                  {JSON.stringify(currentPayload, null, 2)}
-                </pre>
+                <button
+                  onClick={() => setActiveTab('triage')}
+                  className="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shrink-0 transition"
+                >
+                  Try Student Intake
+                </button>
               </div>
             </div>
           </div>
         )}
 
-        {/* TAB 4: GITHUB REPO */}
-        {activeTab === 'github' && (
+        {/* ======================================================== */}
+        {/* TAB 3: ARCHITECTURE & PITCH DECK (Section 7, 10, 15)     */}
+        {/* ======================================================== */}
+        {activeTab === 'architecture' && (
           <div className="space-y-6">
-            <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-sm space-y-5">
-              <div className="flex items-center justify-between border-b border-slate-800 pb-4">
-                <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 rounded-xl bg-slate-800 flex items-center justify-center text-slate-200">
-                    <GitBranch className="w-5 h-5 text-emerald-400" />
-                  </div>
-                  <div>
-                    <h3 className="text-base font-semibold text-white">GitHub Project Synchronization</h3>
-                    <p className="text-xs text-slate-400">Repository connected to GitHub origin</p>
-                  </div>
+            {/* The 1-Minute Pitch */}
+            <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 space-y-4">
+              <span className="text-xs font-bold uppercase tracking-wider text-emerald-400">
+                The Pitch Strategy (Section 15)
+              </span>
+              <h2 className="text-2xl font-bold text-white">
+                "Students shouldn't need to understand the university's organizational structure before they can get help."
+              </h2>
+
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4 pt-2">
+                <div className="bg-slate-950 border border-slate-800 p-4 rounded-xl space-y-1">
+                  <div className="text-xs text-slate-500 font-semibold">1. Understand</div>
+                  <div className="text-sm font-bold text-white">Natural Language</div>
+                  <p className="text-xs text-slate-400">Student expresses their raw stress or issue in their own voice.</p>
                 </div>
 
-                <a
-                  href="https://github.com/PiyushBorban49/serviceNow-event"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="px-3 py-1.5 rounded-lg bg-emerald-600/20 text-emerald-400 border border-emerald-500/30 text-xs font-medium flex items-center space-x-1.5 hover:bg-emerald-600/30 transition"
-                >
-                  <span>Open on GitHub</span>
-                  <ExternalLink className="w-3 h-3" />
-                </a>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="bg-slate-950 border border-slate-800 rounded-xl p-4 space-y-2">
-                  <span className="text-xs text-slate-500 uppercase font-semibold">Remote Origin</span>
-                  <div className="font-mono text-xs text-slate-200 break-all">
-                    https://github.com/PiyushBorban49/serviceNow-event.git
-                  </div>
+                <div className="bg-slate-950 border border-slate-800 p-4 rounded-xl space-y-1">
+                  <div className="text-xs text-slate-500 font-semibold">2. Safety First</div>
+                  <div className="text-sm font-bold text-red-400">Keyword Interceptor</div>
+                  <p className="text-xs text-slate-400">Instant deterministic catch for self-harm or crisis terms.</p>
                 </div>
 
-                <div className="bg-slate-950 border border-slate-800 rounded-xl p-4 space-y-2">
-                  <span className="text-xs text-slate-500 uppercase font-semibold">Target Branch</span>
-                  <div className="font-mono text-xs text-emerald-400 flex items-center space-x-1.5">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                    <span>main</span>
-                  </div>
+                <div className="bg-slate-950 border border-slate-800 p-4 rounded-xl space-y-1">
+                  <div className="text-xs text-slate-500 font-semibold">3. Triage</div>
+                  <div className="text-sm font-bold text-indigo-400">Structured Classification</div>
+                  <p className="text-xs text-slate-400">Category, urgency, confidence, and reasoning extraction.</p>
+                </div>
+
+                <div className="bg-slate-950 border border-slate-800 p-4 rounded-xl space-y-1">
+                  <div className="text-xs text-slate-500 font-semibold">4. Route & Act</div>
+                  <div className="text-sm font-bold text-emerald-400">Actionable Service</div>
+                  <p className="text-xs text-slate-400">Direct booking, phone, room number, and immediate advisor access.</p>
                 </div>
               </div>
+            </div>
 
-              <div className="bg-slate-950 border border-slate-800 rounded-xl p-4 space-y-3">
-                <h4 className="text-xs font-semibold text-slate-300">Git Execution Log & Instructions</h4>
-                <div className="font-mono text-xs text-slate-400 space-y-1 bg-slate-900/60 p-3 rounded-lg border border-slate-800/80">
-                  <div className="text-emerald-400">$ echo "# serviceNow-event" &gt;&gt; README.md</div>
-                  <div className="text-emerald-400">$ git init</div>
-                  <div className="text-emerald-400">$ git add .</div>
-                  <div className="text-emerald-400">$ git commit -m "Initialize ServiceNow Event Management workbench"</div>
-                  <div className="text-emerald-400">$ git branch -M main</div>
-                  <div className="text-emerald-400">$ git remote add origin https://github.com/PiyushBorban49/serviceNow-event.git</div>
-                  <div className="text-emerald-400">$ git push -u origin main</div>
-                </div>
+            {/* Architecture Diagram */}
+            <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 space-y-4">
+              <h3 className="text-lg font-bold text-white">System Architecture & Groq Prompt Pipeline</h3>
+              
+              <div className="font-mono text-xs text-slate-300 bg-slate-950 p-6 rounded-2xl border border-slate-800 overflow-x-auto leading-relaxed">
+{`STUDENT MESSAGE
+      │
+      ▼
+SAFETY KEYWORD CHECK (Deterministic Layer)
+      ├── [Crisis Detected] ──► 🚨 Immediate Emergency Protocol (988 / Campus Police)
+      │
+      └── [Standard / Safe]
+            │
+            ▼
+      GROQ LLM INFERENCE (llama-3.3-70b-versatile)
+            │
+            ▼
+      STRUCTURED JSON OUTPUT
+      {
+        "category": "mental_wellbeing" | "academic" | "financial" | ...,
+        "urgency": "low" | "medium" | "high",
+        "confidence": 0.94,
+        "reason": "..."
+      }
+            │
+            ▼
+      ROUTING ENGINE (Python / TypeScript Dict Rules)
+            │
+            ├── mental_wellbeing ──► Counselling Services (Wellness Center B204)
+            ├── academic         ──► Academic Success Center (Library 3rd Floor)
+            ├── financial        ──► Financial Aid & Emergency Grants (Hall A112)
+            ├── housing          ──► Student Housing Office (Pavilion 101)
+            ├── disability       ──► Accessibility Services (Suite 110)
+            └── harassment       ──► Title IX & Safety Office (Suite 300)
+            │
+            ▼
+      ACTIONABLE STUDENT OUTCOME
+      • One-click Appointment Booking
+      • Direct Advisor Outreach
+      • Location & Drop-in Hours`}
               </div>
             </div>
           </div>
         )}
       </main>
 
+      {/* ======================================================== */}
+      {/* MODAL 1: BOOKING APPOINTMENT                             */}
+      {/* ======================================================== */}
+      {bookingModalOpen && route && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fadeIn">
+          <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 max-w-lg w-full space-y-5 shadow-2xl">
+            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+              <div>
+                <h3 className="text-lg font-bold text-white">Book Priority Appointment</h3>
+                <p className="text-xs text-slate-400">{route.service} • {route.building}</p>
+              </div>
+              <button
+                onClick={() => setBookingModalOpen(false)}
+                className="text-slate-400 hover:text-white p-1"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {bookingConfirmed ? (
+              <div className="py-8 text-center space-y-3">
+                <div className="w-12 h-12 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center mx-auto border border-emerald-500/30">
+                  <Check className="w-6 h-6" />
+                </div>
+                <h4 className="text-lg font-bold text-white">Appointment Confirmed!</h4>
+                <p className="text-xs text-slate-300 max-w-sm mx-auto">
+                  Your appointment with <strong>{route.service}</strong> is scheduled for <strong>{bookingDate}</strong>. Confirmation sent to your university email.
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-300 mb-1">
+                    Select Preferred Time Slot
+                  </label>
+                  <select
+                    value={bookingDate}
+                    onChange={(e) => setBookingDate(e.target.value)}
+                    className="w-full text-xs bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-white focus:outline-none focus:border-indigo-500"
+                  >
+                    <option value="Tomorrow, 10:00 AM">Tomorrow, 10:00 AM (Priority Intake)</option>
+                    <option value="Tomorrow, 2:00 PM">Tomorrow, 2:00 PM (Priority Intake)</option>
+                    <option value="In 2 Days, 11:30 AM">In 2 Days, 11:30 AM</option>
+                    <option value="In 3 Days, 3:00 PM">In 3 Days, 3:00 PM</option>
+                  </select>
+                </div>
+
+                <div className="bg-slate-950 border border-slate-800 rounded-xl p-3.5 text-xs text-slate-300 space-y-1">
+                  <div className="font-semibold text-white">Location Details:</div>
+                  <div className="text-slate-400">{route.building}, {route.room}</div>
+                  <div className="text-slate-400">Please arrive 5 minutes early with your student ID card.</div>
+                </div>
+
+                <button
+                  onClick={handleConfirmBooking}
+                  className="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs uppercase tracking-wider transition shadow-lg shadow-emerald-600/30"
+                >
+                  Confirm Priority Booking
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* ======================================================== */}
+      {/* MODAL 2: CONTACT ADVISOR                                 */}
+      {/* ======================================================== */}
+      {contactModalOpen && route && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fadeIn">
+          <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 max-w-lg w-full space-y-5 shadow-2xl">
+            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+              <div>
+                <h3 className="text-lg font-bold text-white">Contact Department Advisor</h3>
+                <p className="text-xs text-slate-400">{route.service} • {route.email}</p>
+              </div>
+              <button
+                onClick={() => setContactModalOpen(false)}
+                className="text-slate-400 hover:text-white p-1"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {messageSent ? (
+              <div className="py-8 text-center space-y-3">
+                <div className="w-12 h-12 rounded-full bg-indigo-500/20 text-indigo-400 flex items-center justify-center mx-auto border border-indigo-500/30">
+                  <Check className="w-6 h-6" />
+                </div>
+                <h4 className="text-lg font-bold text-white">Message Dispatched!</h4>
+                <p className="text-xs text-slate-300 max-w-sm mx-auto">
+                  Your confidential inquiry has been routed to the duty advisor at <strong>{route.service}</strong>. Expect a response within 4 business hours.
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-300 mb-1">
+                    Your Confidential Message to Advisor
+                  </label>
+                  <textarea
+                    rows={4}
+                    value={advisorMessage || inputText}
+                    onChange={(e) => setAdvisorMessage(e.target.value)}
+                    placeholder="Provide any additional context or questions for your advisor..."
+                    className="w-full text-xs bg-slate-950 border border-slate-800 rounded-xl p-3 text-white focus:outline-none focus:border-indigo-500 resize-none"
+                  />
+                </div>
+
+                <div className="text-[11px] text-slate-400">
+                  Direct phone for immediate questions: <span className="font-mono text-white">{route.phone}</span>
+                </div>
+
+                <button
+                  onClick={handleSendAdvisorMessage}
+                  className="w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs uppercase tracking-wider transition shadow-lg shadow-indigo-600/30"
+                >
+                  Send Inquiry to Advisor
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Footer */}
-      <footer className="border-t border-slate-800 py-4 text-center text-xs text-slate-500">
-        <p>serviceNow-event • Interactive ITOM Event Simulator & Ingestion Workbench</p>
+      <footer className="border-t border-slate-800/80 py-6 text-center text-xs text-slate-500 mt-auto bg-slate-950">
+        <p className="font-medium text-slate-400">
+          DHRONA Student Support • Track 01: Student Triage & Routing
+        </p>
+        <p className="text-[11px] text-slate-600 mt-1">
+          Built for Hackathon Demo • Intended as an intake & routing assistant, not a clinical diagnostic system.
+        </p>
       </footer>
     </div>
   );
