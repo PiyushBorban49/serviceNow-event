@@ -17,15 +17,18 @@ import {
   Send, 
   Sparkles, 
   ShieldCheck, 
-  HelpCircle, 
   Building2, 
   Layers, 
   Code, 
-  ExternalLink,
   X,
   PhoneCall,
   Check,
-  Compass
+  Compass,
+  ArrowUpRight,
+  Flame,
+  Zap,
+  HelpCircle,
+  MessageSquare
 } from 'lucide-react';
 import { 
   classifyMessage, 
@@ -40,25 +43,28 @@ const DEMO_PRESETS = [
   {
     id: "preset_academic",
     title: "Academic Overload",
-    category: "Academic Support",
+    category: "Academic",
     icon: BookOpen,
-    color: "from-blue-500/20 to-indigo-500/20 border-blue-500/40 text-blue-300",
+    bg: "bg-[#BAE6FD]", // pastel blue
+    hover: "hover:bg-[#7DD3FC]",
     text: "I am struggling to keep up with my classes and I don't know how to organize my workload. I have three exams next week and feel like I'm failing."
   },
   {
     id: "preset_mental",
     title: "Stress & Sleep",
-    category: "Mental Wellbeing",
+    category: "Mental Health",
     icon: Brain,
-    color: "from-purple-500/20 to-pink-500/20 border-purple-500/40 text-purple-300",
+    bg: "bg-[#DDD6FE]", // pastel purple
+    hover: "hover:bg-[#C4B5FD]",
     text: "I haven't been sleeping properly for the last two weeks. Exams are coming up and I'm extremely stressed and having panic moments."
   },
   {
     id: "preset_housing",
     title: "Roommate / Housing",
-    category: "Student Housing",
+    category: "Campus Housing",
     icon: Home,
-    color: "from-amber-500/20 to-orange-500/20 border-amber-500/40 text-amber-300",
+    bg: "bg-[#FED7AA]", // pastel orange
+    hover: "hover:bg-[#FDBA74]",
     text: "I don't know who to talk to. I'm having problems with my roommate and I'm worried I might lose my housing if things escalate."
   },
   {
@@ -66,15 +72,17 @@ const DEMO_PRESETS = [
     title: "Tuition & Emergency Aid",
     category: "Financial Aid",
     icon: Coins,
-    color: "from-emerald-500/20 to-teal-500/20 border-emerald-500/40 text-emerald-300",
+    bg: "bg-[#A7F3D0]", // pastel green
+    hover: "hover:bg-[#6EE7B7]",
     text: "I lost my on-campus part-time job this week. I don't have enough money for next month's tuition fee installment and groceries."
   },
   {
     id: "preset_crisis",
-    title: "Immediate Crisis (Safety Test)",
-    category: "Emergency / Crisis",
+    title: "Immediate Crisis (Safety)",
+    category: "Safety Intercept",
     icon: ShieldAlert,
-    color: "from-red-500/20 to-rose-500/20 border-red-500/50 text-red-300",
+    bg: "bg-[#FECDD3]", // pastel red/pink
+    hover: "hover:bg-[#FDA4AF]",
     text: "I feel like hurting myself and I don't know what to do."
   }
 ];
@@ -87,10 +95,10 @@ export default function App() {
   const [route, setRoute] = useState<UniversityRoute | null>(null);
   const [history, setHistory] = useState<Array<{ text: string; result: TriageResult; route: UniversityRoute }>>([]);
 
-  // Modal states
+  // Modals
   const [bookingModalOpen, setBookingModalOpen] = useState(false);
   const [bookingConfirmed, setBookingConfirmed] = useState(false);
-  const [bookingDate, setBookingDate] = useState('Tomorrow, 2:00 PM');
+  const [bookingDate, setBookingDate] = useState('Tomorrow, 10:00 AM');
   
   const [contactModalOpen, setContactModalOpen] = useState(false);
   const [messageSent, setMessageSent] = useState(false);
@@ -103,7 +111,7 @@ export default function App() {
     setIsProcessing(true);
     setResult(null);
 
-    // Simulate instant AI evaluation with sub-second feedback
+    // Realistic evaluation delay
     setTimeout(() => {
       const triageRes = classifyMessage(text);
       const targetRoute = getRoute(triageRes.category);
@@ -115,7 +123,7 @@ export default function App() {
         { text, result: triageRes, route: targetRoute },
         ...prev.slice(0, 4)
       ]);
-    }, 350);
+    }, 280);
   };
 
   const handleSelectPreset = (presetText: string) => {
@@ -141,136 +149,173 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-indigo-500/30 selection:text-indigo-200">
-      {/* Top University Branding Header */}
-      <header className="border-b border-slate-800 bg-slate-900/90 backdrop-blur sticky top-0 z-40">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+    <div className="min-h-screen bg-[#FFFDF7] text-[#111827] flex flex-col font-sans selection:bg-[#FFE55C] selection:text-black">
+      {/* ======================================================== */}
+      {/* TOP HEADER - NEOBRUTALISM STYLE                          */}
+      {/* ======================================================== */}
+      <header className="border-b-[3px] border-black bg-white sticky top-0 z-40">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex flex-col sm:flex-row sm:items-center justify-between gap-3 py-3 sm:py-0">
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 via-blue-600 to-teal-400 flex items-center justify-center shadow-lg shadow-indigo-500/20">
-              <HeartHandshake className="w-5 h-5 text-white" />
+            <div className="w-12 h-12 bg-[#FFE55C] border-[3px] border-black shadow-[3px_3px_0px_0px_#000] flex items-center justify-center rotate-[-2deg]">
+              <HeartHandshake className="w-7 h-7 text-black stroke-[2.5]" />
             </div>
             <div>
               <div className="flex items-center space-x-2">
-                <span className="font-extrabold text-lg tracking-tight text-white">DHRONA</span>
-                <span className="text-slate-500 text-sm font-light">/</span>
-                <span className="text-slate-300 font-semibold text-sm">STUDENT SUPPORT</span>
-                <span className="text-[10px] uppercase tracking-wider font-bold bg-indigo-500/10 text-indigo-400 border border-indigo-500/30 px-2 py-0.5 rounded-full ml-1">
+                <span className="font-black text-2xl tracking-tight uppercase text-black">
+                  DHRONA
+                </span>
+                <span className="bg-[#BAE6FD] text-black text-[11px] font-black uppercase tracking-wider px-2.5 py-0.5 border-2 border-black shadow-[2px_2px_0px_0px_#000] rotate-[1deg]">
+                  Student Support
+                </span>
+                <span className="bg-[#A7F3D0] text-black text-[10px] font-extrabold uppercase px-2 py-0.5 border border-black hidden md:inline-block">
                   Track 01 Triage
                 </span>
               </div>
-              <p className="text-xs text-slate-400">One intelligent door to all campus support services</p>
+              <p className="text-xs font-bold text-gray-700">
+                One intelligent front-door to every university department
+              </p>
             </div>
           </div>
 
-          {/* Navigation */}
-          <nav className="flex items-center space-x-1 bg-slate-950/70 p-1 rounded-xl border border-slate-800 text-xs font-medium">
+          {/* Navigation Tabs - Chunky Neobrutalist buttons */}
+          <nav className="flex items-center space-x-2 self-start sm:self-auto">
             <button
               onClick={() => setActiveTab('triage')}
-              className={`px-3 py-1.5 rounded-lg transition flex items-center space-x-1.5 ${
+              className={`px-3.5 py-2 text-xs font-black uppercase tracking-wider border-2 border-black transition-all flex items-center space-x-1.5 ${
                 activeTab === 'triage'
-                  ? 'bg-indigo-600 text-white shadow-sm font-semibold'
-                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
+                  ? 'bg-[#FFE55C] translate-x-0.5 translate-y-0.5 shadow-[2px_2px_0px_0px_#000]'
+                  : 'bg-white hover:bg-yellow-100 shadow-[4px_4px_0px_0px_#000] hover:translate-x-[-1px] hover:translate-y-[-1px]'
               }`}
             >
-              <Sparkles className="w-3.5 h-3.5" />
-              <span>Student Intake</span>
+              <Zap className="w-3.5 h-3.5 stroke-[2.5]" />
+              <span>Intake Desk</span>
             </button>
+
             <button
               onClick={() => setActiveTab('departments')}
-              className={`px-3 py-1.5 rounded-lg transition flex items-center space-x-1.5 ${
+              className={`px-3.5 py-2 text-xs font-black uppercase tracking-wider border-2 border-black transition-all flex items-center space-x-1.5 ${
                 activeTab === 'departments'
-                  ? 'bg-indigo-600 text-white shadow-sm font-semibold'
-                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
+                  ? 'bg-[#BAE6FD] translate-x-0.5 translate-y-0.5 shadow-[2px_2px_0px_0px_#000]'
+                  : 'bg-white hover:bg-blue-100 shadow-[4px_4px_0px_0px_#000] hover:translate-x-[-1px] hover:translate-y-[-1px]'
               }`}
             >
-              <Building2 className="w-3.5 h-3.5" />
+              <Building2 className="w-3.5 h-3.5 stroke-[2.5]" />
               <span>12 Departments</span>
             </button>
+
             <button
               onClick={() => setActiveTab('architecture')}
-              className={`px-3 py-1.5 rounded-lg transition flex items-center space-x-1.5 ${
+              className={`px-3.5 py-2 text-xs font-black uppercase tracking-wider border-2 border-black transition-all flex items-center space-x-1.5 ${
                 activeTab === 'architecture'
-                  ? 'bg-indigo-600 text-white shadow-sm font-semibold'
-                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
+                  ? 'bg-[#A7F3D0] translate-x-0.5 translate-y-0.5 shadow-[2px_2px_0px_0px_#000]'
+                  : 'bg-white hover:bg-green-100 shadow-[4px_4px_0px_0px_#000] hover:translate-x-[-1px] hover:translate-y-[-1px]'
               }`}
             >
-              <Layers className="w-3.5 h-3.5" />
-              <span>Architecture & Pitch</span>
+              <Layers className="w-3.5 h-3.5 stroke-[2.5]" />
+              <span>Architecture</span>
             </button>
           </nav>
         </div>
       </header>
 
-      {/* Challenge Problem Statement Bar (Section 13) */}
-      <div className="bg-slate-900/60 border-b border-slate-800/80 py-3">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div className="flex items-center space-x-2 text-xs text-slate-400">
-              <span className="font-semibold text-slate-200">The Student Support Crisis:</span>
-              <span>Students shouldn't need an org chart to get help.</span>
-            </div>
+      {/* ======================================================== */}
+      {/* CHALLENGE PROBLEM STATEMENT - BRUTALIST TICKER BANNER    */}
+      {/* ======================================================== */}
+      <div className="bg-[#FEF08A] border-b-[3px] border-black py-3 px-4">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-3">
+          <div className="flex items-center space-x-2">
+            <span className="bg-black text-[#FFE55C] font-black text-xs px-2.5 py-1 uppercase tracking-wider">
+              The Campus Maze
+            </span>
+            <span className="text-xs sm:text-sm font-extrabold text-black">
+              Students shouldn't need to know the university hierarchy to get help.
+            </span>
+          </div>
 
-            <div className="grid grid-cols-3 gap-3 text-center sm:text-left">
-              <div className="bg-slate-950/80 border border-slate-800/80 px-3.5 py-1.5 rounded-lg flex items-center space-x-2">
-                <span className="text-base font-black text-rose-400">12</span>
-                <span className="text-[11px] text-slate-400 leading-tight">Fragmented Departments</span>
-              </div>
-              <div className="bg-slate-950/80 border border-slate-800/80 px-3.5 py-1.5 rounded-lg flex items-center space-x-2">
-                <span className="text-base font-black text-amber-400">3 Weeks</span>
-                <span className="text-[11px] text-slate-400 leading-tight">Average Intake Wait</span>
-              </div>
-              <div className="bg-slate-950/80 border border-slate-800/80 px-3.5 py-1.5 rounded-lg flex items-center space-x-2">
-                <span className="text-base font-black text-indigo-400">+40%</span>
-                <span className="text-[11px] text-slate-400 leading-tight">Bounced Referrals</span>
-              </div>
+          <div className="grid grid-cols-3 gap-2.5 sm:gap-4">
+            <div className="bg-white border-2 border-black shadow-[3px_3px_0px_0px_#000] px-3 py-1.5 flex items-center space-x-2">
+              <span className="text-lg font-black text-black">12</span>
+              <span className="text-[10px] font-bold uppercase tracking-tight text-gray-800 leading-tight">
+                Siloed Depts
+              </span>
+            </div>
+            <div className="bg-white border-2 border-black shadow-[3px_3px_0px_0px_#000] px-3 py-1.5 flex items-center space-x-2">
+              <span className="text-lg font-black text-black">3 Wks</span>
+              <span className="text-[10px] font-bold uppercase tracking-tight text-gray-800 leading-tight">
+                Avg. Wait
+              </span>
+            </div>
+            <div className="bg-white border-2 border-black shadow-[3px_3px_0px_0px_#000] px-3 py-1.5 flex items-center space-x-2">
+              <span className="text-lg font-black text-black">+40%</span>
+              <span className="text-[10px] font-bold uppercase tracking-tight text-gray-800 leading-tight">
+                Bounced
+              </span>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Main Body */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      {/* ======================================================== */}
+      {/* MAIN CONTENT CONTAINER                                   */}
+      {/* ======================================================== */}
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+        
         {/* ======================================================== */}
         {/* TAB 1: STUDENT TRIAGE & INTAKE                           */}
         {/* ======================================================== */}
         {activeTab === 'triage' && (
           <div className="space-y-8">
-            {/* Intake Card */}
-            <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-xl shadow-black/20">
-              <div className="text-center max-w-2xl mx-auto mb-6">
-                <h2 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">
-                  How can we help you today?
-                </h2>
-                <p className="text-sm text-slate-400 mt-2">
-                  Tell us what you are struggling with in plain words. Dhrona analyzes your situation safely and routes you to the exact campus support you need.
-                </p>
+            {/* INTAKE HERO CARD */}
+            <div className="bg-white border-[3px] border-black shadow-[8px_8px_0px_0px_#000] p-6 sm:p-8 space-y-6">
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b-2 border-black pb-4">
+                <div>
+                  <div className="inline-block bg-[#FFE55C] border-2 border-black shadow-[2px_2px_0px_0px_#000] px-3 py-0.5 text-xs font-black uppercase tracking-wider mb-2">
+                    Universal Intake Portal
+                  </div>
+                  <h2 className="text-2xl sm:text-3xl font-black text-black tracking-tight uppercase">
+                    How Can We Help You Today?
+                  </h2>
+                  <p className="text-sm font-semibold text-gray-700 mt-1">
+                    Describe your issue in your own words. Dhrona analyzes your situation safely and routes you to the exact service.
+                  </p>
+                </div>
+                <div className="bg-[#F3F4F6] border-2 border-black p-2.5 text-center shrink-0">
+                  <span className="text-[10px] font-black uppercase tracking-wider text-gray-600 block">
+                    Response Speed
+                  </span>
+                  <span className="text-sm font-black text-black font-mono">
+                    ⚡ Instant &lt; 1 sec
+                  </span>
+                </div>
               </div>
 
-              {/* Quick Preset Buttons for Hackathon Judges (Section 14 & 11) */}
-              <div className="mb-6">
-                <div className="flex items-center justify-between mb-2.5">
-                  <span className="text-xs font-semibold uppercase tracking-wider text-slate-400 flex items-center space-x-1.5">
-                    <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
+              {/* 1-Click Demo Scenarios (Judge quick buttons) */}
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-xs font-black uppercase tracking-wider text-black flex items-center space-x-1.5">
+                    <Flame className="w-4 h-4 text-orange-600 fill-orange-500" />
                     <span>Quick Demo Scenarios (1-Click Test for Judges)</span>
                   </span>
-                  <span className="text-[11px] text-slate-500">Instant test cases</span>
+                  <span className="text-[11px] font-bold text-gray-500 font-mono">Click to test instant triage</span>
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2.5">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
                   {DEMO_PRESETS.map((preset) => {
                     const Icon = preset.icon;
                     return (
                       <button
                         key={preset.id}
                         onClick={() => handleSelectPreset(preset.text)}
-                        className={`text-left p-3 rounded-xl border bg-gradient-to-br ${preset.color} hover:scale-[1.02] active:scale-[0.99] transition-all flex flex-col justify-between group`}
+                        className={`text-left p-3.5 border-2 border-black shadow-[3px_3px_0px_0px_#000] ${preset.bg} ${preset.hover} hover:translate-x-[-1px] hover:translate-y-[-1px] hover:shadow-[5px_5px_0px_0px_#000] active:translate-x-0.5 active:translate-y-0.5 active:shadow-[1px_1px_0px_0px_#000] transition-all flex flex-col justify-between group`}
                       >
-                        <div className="flex items-center justify-between mb-1.5">
-                          <Icon className="w-4 h-4 opacity-90 group-hover:scale-110 transition-transform" />
-                          <span className="text-[10px] font-bold uppercase tracking-wider opacity-75">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="p-1.5 bg-white border border-black shadow-[1px_1px_0px_0px_#000]">
+                            <Icon className="w-4 h-4 text-black stroke-[2.5]" />
+                          </span>
+                          <span className="text-[9px] font-black uppercase tracking-wider bg-white/80 px-1.5 py-0.5 border border-black">
                             {preset.category}
                           </span>
                         </div>
-                        <div className="text-xs font-semibold text-white group-hover:text-indigo-200 line-clamp-1">
+                        <div className="text-xs font-black text-black uppercase leading-tight">
                           {preset.title}
                         </div>
                       </button>
@@ -279,47 +324,47 @@ export default function App() {
                 </div>
               </div>
 
-              {/* Input Area */}
+              {/* Textarea Input */}
               <div className="space-y-4">
                 <div className="relative">
                   <textarea
                     rows={4}
                     value={inputText}
                     onChange={(e) => setInputText(e.target.value)}
-                    placeholder="e.g., I've been really stressed about exams and haven't been sleeping for the past two weeks, or I'm struggling with rent and tuition..."
-                    className="w-full bg-slate-950 border border-slate-800 rounded-2xl p-4 sm:p-5 text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition resize-none leading-relaxed"
+                    placeholder="Type what you are going through (e.g., 'I am failing my classes and overwhelmed with deadlines', 'I cannot pay next month's tuition fee', 'I feel like hurting myself')..."
+                    className="w-full bg-[#FFFDF9] border-[3px] border-black shadow-[5px_5px_0px_0px_#000] focus:shadow-[7px_7px_0px_0px_#000] focus:outline-none p-4 text-sm font-semibold text-black placeholder:text-gray-400 leading-relaxed transition-all"
                   />
                   {inputText && (
                     <button
                       onClick={() => setInputText('')}
-                      className="absolute top-4 right-4 text-xs text-slate-500 hover:text-slate-300 p-1"
+                      className="absolute top-3 right-3 bg-white hover:bg-gray-100 text-xs font-black uppercase px-2 py-1 border-2 border-black shadow-[2px_2px_0px_0px_#000]"
                     >
                       Clear
                     </button>
                   )}
                 </div>
 
-                <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-1">
-                  <div className="flex items-center space-x-2 text-xs text-slate-400">
-                    <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-1">
+                  <div className="flex items-center space-x-2 text-xs font-bold text-gray-700">
+                    <ShieldCheck className="w-5 h-5 text-emerald-600 stroke-[2.5] shrink-0" />
                     <span>
-                      Private & Confidential • Zero diagnosis • Intended strictly for student intake & routing
+                      Strictly Confidential • Zero Diagnostic Labeling • Deterministic Safety Layer Active
                     </span>
                   </div>
 
                   <button
                     onClick={() => handleTriage()}
                     disabled={isProcessing || !inputText.trim()}
-                    className="w-full sm:w-auto px-8 py-3 rounded-xl bg-gradient-to-r from-indigo-600 via-blue-600 to-indigo-600 hover:from-indigo-500 hover:to-blue-500 text-white font-semibold text-sm shadow-lg shadow-indigo-600/25 active:scale-95 transition disabled:opacity-50 flex items-center justify-center space-x-2"
+                    className="w-full sm:w-auto px-8 py-3.5 bg-[#FFE55C] hover:bg-[#FACC15] text-black font-black uppercase tracking-wider text-sm border-[3px] border-black shadow-[5px_5px_0px_0px_#000] hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[7px_7px_0px_0px_#000] active:translate-x-1 active:translate-y-1 active:shadow-[1px_1px_0px_0px_#000] transition-all disabled:opacity-50 flex items-center justify-center space-x-2"
                   >
                     {isProcessing ? (
                       <>
-                        <Clock className="w-4 h-4 animate-spin" />
-                        <span>Evaluating Support Path...</span>
+                        <Clock className="w-4 h-4 animate-spin stroke-[3]" />
+                        <span>Triaging Support Path...</span>
                       </>
                     ) : (
                       <>
-                        <Send className="w-4 h-4" />
+                        <Send className="w-4 h-4 stroke-[2.5]" />
                         <span>Find My Support</span>
                       </>
                     )}
@@ -329,275 +374,313 @@ export default function App() {
             </div>
 
             {/* ======================================================== */}
-            {/* RESULT SECTION: SAFETY / EMERGENCY OR STANDARD ROUTE     */}
+            {/* TRIAGE RESULT DISPLAY                                    */}
             {/* ======================================================== */}
             {result && route && (
-              <div className="space-y-6 animate-fadeIn">
+              <div className="space-y-6">
+                
                 {/* CASE 1: IMMEDIATE CRISIS TRIGGER (Section 4 & 5) */}
                 {result.crisis_flag || result.urgency === 'high' || detectCrisis(inputText) ? (
-                  <div className="bg-gradient-to-br from-red-950 via-slate-950 to-red-950 border-2 border-red-500 rounded-3xl p-6 sm:p-8 shadow-2xl shadow-red-900/40 space-y-6">
-                    <div className="flex items-start space-x-4">
-                      <div className="w-12 h-12 rounded-2xl bg-red-500/20 border border-red-500/40 flex items-center justify-center shrink-0">
-                        <AlertTriangle className="w-7 h-7 text-red-400 animate-pulse" />
-                      </div>
-                      <div>
-                        <div className="flex items-center space-x-2">
-                          <span className="px-2.5 py-0.5 rounded-full bg-red-500/20 text-red-300 text-xs font-bold uppercase tracking-wider border border-red-500/40">
-                            Immediate Support Available
-                          </span>
-                          <span className="text-xs text-red-400 font-mono">Safety Rule Activated</span>
+                  <div className="bg-[#FF4949] border-[4px] border-black shadow-[10px_10px_0px_0px_#000] p-6 sm:p-8 space-y-6 text-black">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b-[3px] border-black pb-5">
+                      <div className="flex items-center space-x-4">
+                        <div className="w-14 h-14 bg-white border-[3px] border-black shadow-[4px_4px_0px_0px_#000] flex items-center justify-center shrink-0">
+                          <AlertTriangle className="w-9 h-9 text-red-600 stroke-[3] animate-bounce" />
                         </div>
-                        <h3 className="text-xl sm:text-2xl font-bold text-white mt-1">
-                          We are here for you right now.
-                        </h3>
-                        <p className="text-sm text-red-200/90 mt-1 max-w-3xl leading-relaxed">
-                          Your message suggests you may be going through an immediate crisis. You do not have to carry this alone. Please reach out to one of the trained, confidential emergency responders below:
-                        </p>
+                        <div>
+                          <div className="inline-block bg-black text-white text-xs font-black uppercase tracking-wider px-3 py-1 mb-1">
+                            ⚠️ IMMEDIATE SUPPORT REQUIRED
+                          </div>
+                          <h3 className="text-2xl sm:text-3xl font-black text-white uppercase tracking-tight">
+                            We Are Here For You Right Now.
+                          </h3>
+                        </div>
+                      </div>
+
+                      <div className="bg-white border-2 border-black px-3 py-1.5 shadow-[3px_3px_0px_0px_#000]">
+                        <span className="text-[10px] font-black uppercase text-red-600 block">Safety Protocol</span>
+                        <span className="text-xs font-black text-black">Deterministic Safety Intercept</span>
                       </div>
                     </div>
 
-                    {/* Immediate Hotlines */}
+                    <p className="text-sm font-bold text-white max-w-3xl leading-relaxed">
+                      Your message indicates an immediate safety concern. Normal automated conversation has been suspended. 
+                      Please connect with one of these 24/7 free, confidential emergency responders right now:
+                    </p>
+
+                    {/* Crisis Contact Cards in Neobrutalism */}
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <div className="bg-slate-900/90 border border-red-500/40 rounded-2xl p-5 space-y-3">
-                        <div className="text-xs font-bold text-red-400 uppercase tracking-wider flex items-center justify-between">
-                          <span>Campus Crisis Dispatch</span>
-                          <PhoneCall className="w-4 h-4 text-red-400" />
+                      {/* Emergency Hotline */}
+                      <div className="bg-white border-[3px] border-black shadow-[5px_5px_0px_0px_#000] p-5 space-y-3">
+                        <div className="flex items-center justify-between border-b-2 border-black pb-2">
+                          <span className="text-xs font-black uppercase tracking-wider text-red-600">
+                            Campus Crisis Unit
+                          </span>
+                          <PhoneCall className="w-4 h-4 text-black stroke-[2.5]" />
                         </div>
-                        <div className="text-xl font-black text-white">(555) 911-HELP</div>
-                        <p className="text-xs text-slate-300">
-                          Direct 24/7 campus emergency psychological & safety response team.
+                        <div className="text-2xl font-black text-black font-mono">
+                          (555) 911-HELP
+                        </div>
+                        <p className="text-xs font-semibold text-gray-700">
+                          Direct 24/7 on-campus mobile crisis and mental health stabilization unit.
                         </p>
                         <button
-                          onClick={() => alert("Initiating emergency protocol connection to Campus Crisis Dispatch.")}
-                          className="w-full py-2 rounded-xl bg-red-600 hover:bg-red-500 text-white text-xs font-bold transition shadow-md shadow-red-600/30"
+                          onClick={() => alert("Connecting you directly to Campus Crisis Emergency Dispatch: (555) 911-HELP")}
+                          className="w-full py-2.5 bg-[#FF4949] hover:bg-red-600 text-white font-black text-xs uppercase tracking-wider border-2 border-black shadow-[3px_3px_0px_0px_#000] active:translate-x-0.5 active:translate-y-0.5 active:shadow-[1px_1px_0px_0px_#000] transition-all"
                         >
-                          Connect Immediately
+                          Connect Now (24/7)
                         </button>
                       </div>
 
-                      <div className="bg-slate-900/90 border border-red-500/40 rounded-2xl p-5 space-y-3">
-                        <div className="text-xs font-bold text-red-400 uppercase tracking-wider flex items-center justify-between">
-                          <span>National Suicide & Crisis</span>
-                          <HeartHandshake className="w-4 h-4 text-red-400" />
+                      {/* 988 Lifeline */}
+                      <div className="bg-[#FFE55C] border-[3px] border-black shadow-[5px_5px_0px_0px_#000] p-5 space-y-3">
+                        <div className="flex items-center justify-between border-b-2 border-black pb-2">
+                          <span className="text-xs font-black uppercase tracking-wider text-black">
+                            Suicide & Crisis Lifeline
+                          </span>
+                          <HeartHandshake className="w-4 h-4 text-black stroke-[2.5]" />
                         </div>
-                        <div className="text-xl font-black text-white">Call or Text 988</div>
-                        <p className="text-xs text-slate-300">
-                          Free, confidential, 24/7 lifeline for mental health crises & emotional distress.
+                        <div className="text-2xl font-black text-black font-mono">
+                          Call or Text 988
+                        </div>
+                        <p className="text-xs font-semibold text-gray-800">
+                          National free, confidential 24/7 support for anyone experiencing emotional distress.
                         </p>
                         <button
-                          onClick={() => alert("Initiating direct call to 988 Suicide & Crisis Lifeline.")}
-                          className="w-full py-2 rounded-xl bg-red-600 hover:bg-red-500 text-white text-xs font-bold transition shadow-md shadow-red-600/30"
+                          onClick={() => alert("Dialing 988 Suicide & Crisis Lifeline.")}
+                          className="w-full py-2.5 bg-black hover:bg-gray-800 text-white font-black text-xs uppercase tracking-wider border-2 border-black shadow-[3px_3px_0px_0px_#000] active:translate-x-0.5 active:translate-y-0.5 active:shadow-[1px_1px_0px_0px_#000] transition-all"
                         >
-                          Call 988
+                          Call / Text 988
                         </button>
                       </div>
 
-                      <div className="bg-slate-900/90 border border-red-500/40 rounded-2xl p-5 space-y-3">
-                        <div className="text-xs font-bold text-red-400 uppercase tracking-wider flex items-center justify-between">
-                          <span>Campus Security Escort</span>
-                          <ShieldAlert className="w-4 h-4 text-red-400" />
+                      {/* Campus Security */}
+                      <div className="bg-white border-[3px] border-black shadow-[5px_5px_0px_0px_#000] p-5 space-y-3">
+                        <div className="flex items-center justify-between border-b-2 border-black pb-2">
+                          <span className="text-xs font-black uppercase tracking-wider text-black">
+                            Campus Security & Escort
+                          </span>
+                          <ShieldAlert className="w-4 h-4 text-black stroke-[2.5]" />
                         </div>
-                        <div className="text-xl font-black text-white">(555) 019-SAFE</div>
-                        <p className="text-xs text-slate-300">
-                          Immediate 24/7 on-campus safety escort and emergency officer support.
+                        <div className="text-2xl font-black text-black font-mono">
+                          (555) 019-SAFE
+                        </div>
+                        <p className="text-xs font-semibold text-gray-700">
+                          24/7 student safety escorts and emergency officer response to any building.
                         </p>
                         <button
                           onClick={() => alert("Dispatching request to Campus Safety & Escort Service.")}
-                          className="w-full py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold transition border border-slate-700"
+                          className="w-full py-2.5 bg-[#BAE6FD] hover:bg-blue-300 text-black font-black text-xs uppercase tracking-wider border-2 border-black shadow-[3px_3px_0px_0px_#000] active:translate-x-0.5 active:translate-y-0.5 active:shadow-[1px_1px_0px_0px_#000] transition-all"
                         >
-                          Request Campus Officer
+                          Request Officer
                         </button>
                       </div>
-                    </div>
-
-                    <div className="bg-red-950/60 border border-red-500/30 rounded-xl p-3.5 text-xs text-red-300 flex items-center space-x-2">
-                      <ShieldCheck className="w-4 h-4 text-red-400 shrink-0" />
-                      <span>
-                        <strong>Safety Guarantee:</strong> AI conversation is suspended. You are routed directly to licensed human intervention.
-                      </span>
                     </div>
                   </div>
                 ) : (
                   /* CASE 2: NORMAL / MEDIUM / LOW TRIAGED ROUTING */
                   <div className="space-y-6">
-                    {/* Visual Support Path (Section 12) */}
-                    <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-lg">
-                      <div className="flex items-center justify-between mb-4">
-                        <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
-                          Your Support Path
+                    {/* VISUAL SUPPORT PATH BAR (Section 12) */}
+                    <div className="bg-white border-[3px] border-black shadow-[6px_6px_0px_0px_#000] p-5">
+                      <div className="flex items-center justify-between mb-3 border-b-2 border-black pb-2">
+                        <span className="text-xs font-black uppercase tracking-wider text-black flex items-center space-x-1.5">
+                          <Compass className="w-4 h-4 text-black stroke-[2.5]" />
+                          <span>Your Verified Support Path</span>
                         </span>
                         <div className="flex items-center space-x-2">
-                          <span className="text-xs text-slate-400">Triage Confidence:</span>
-                          <span className="text-xs font-mono font-bold text-emerald-400">
+                          <span className="text-[11px] font-bold text-gray-600">Model Confidence:</span>
+                          <span className="bg-[#A7F3D0] text-black font-mono font-black text-xs px-2 py-0.5 border border-black shadow-[1px_1px_0px_0px_#000]">
                             {Math.round(result.confidence * 100)}%
                           </span>
                         </div>
                       </div>
 
-                      <div className="grid grid-cols-1 md:grid-cols-7 gap-2 items-center">
-                        <div className="md:col-span-2 bg-slate-950 border border-slate-800 rounded-2xl p-4">
-                          <div className="text-[10px] text-slate-500 uppercase font-semibold">Step 1 • Student Intake</div>
-                          <div className="text-xs font-medium text-slate-300 mt-1 line-clamp-2 italic">
+                      <div className="grid grid-cols-1 md:grid-cols-7 gap-2.5 items-center">
+                        {/* Step 1 */}
+                        <div className="md:col-span-2 bg-[#F3F4F6] border-2 border-black shadow-[2px_2px_0px_0px_#000] p-3">
+                          <div className="text-[9px] font-black uppercase tracking-wider text-gray-600">
+                            Step 1 • Student Inquiry
+                          </div>
+                          <div className="text-xs font-bold text-black mt-1 line-clamp-2 italic">
                             "{inputText}"
                           </div>
                         </div>
 
-                        <div className="flex justify-center text-slate-600">
-                          <ArrowRight className="w-5 h-5 hidden md:block" />
-                          <span className="md:hidden text-xs">↓</span>
+                        {/* Arrow */}
+                        <div className="flex justify-center">
+                          <div className="w-8 h-8 bg-black text-[#FFE55C] flex items-center justify-center font-black border-2 border-black shadow-[2px_2px_0px_0px_#000]">
+                            →
+                          </div>
                         </div>
 
-                        <div className="md:col-span-2 bg-indigo-950/40 border border-indigo-500/30 rounded-2xl p-4">
-                          <div className="text-[10px] text-indigo-400 uppercase font-semibold">Step 2 • AI Triage</div>
-                          <div className="text-sm font-bold text-white mt-1 capitalize">
+                        {/* Step 2 */}
+                        <div className="md:col-span-2 bg-[#DDD6FE] border-2 border-black shadow-[2px_2px_0px_0px_#000] p-3">
+                          <div className="text-[9px] font-black uppercase tracking-wider text-black">
+                            Step 2 • AI Triage
+                          </div>
+                          <div className="text-sm font-black text-black mt-0.5 uppercase">
                             {result.category.replace('_', ' ')}
                           </div>
-                          <div className="flex items-center space-x-2 mt-1">
-                            <span className={`text-[10px] px-2 py-0.5 rounded font-semibold uppercase ${
+                          <div className="mt-1">
+                            <span className={`text-[10px] font-black uppercase px-2 py-0.5 border border-black ${
                               result.urgency === 'high' 
-                                ? 'bg-red-500/20 text-red-300 border border-red-500/30'
+                                ? 'bg-[#FF4949] text-white' 
                                 : result.urgency === 'medium'
-                                ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
-                                : 'bg-blue-500/20 text-blue-300 border border-blue-500/30'
+                                ? 'bg-[#FFE55C] text-black'
+                                : 'bg-[#BAE6FD] text-black'
                             }`}>
                               {result.urgency} Urgency
                             </span>
                           </div>
                         </div>
 
-                        <div className="flex justify-center text-slate-600">
-                          <ArrowRight className="w-5 h-5 hidden md:block" />
-                          <span className="md:hidden text-xs">↓</span>
+                        {/* Arrow */}
+                        <div className="flex justify-center">
+                          <div className="w-8 h-8 bg-black text-[#FFE55C] flex items-center justify-center font-black border-2 border-black shadow-[2px_2px_0px_0px_#000]">
+                            →
+                          </div>
                         </div>
 
-                        <div className="md:col-span-2 bg-emerald-950/40 border border-emerald-500/30 rounded-2xl p-4">
-                          <div className="text-[10px] text-emerald-400 uppercase font-semibold">Step 3 • University Service</div>
-                          <div className="text-sm font-bold text-white mt-1">
+                        {/* Step 3 */}
+                        <div className="md:col-span-2 bg-[#A7F3D0] border-2 border-black shadow-[2px_2px_0px_0px_#000] p-3">
+                          <div className="text-[9px] font-black uppercase tracking-wider text-black">
+                            Step 3 • University Service
+                          </div>
+                          <div className="text-sm font-black text-black mt-0.5 uppercase truncate">
                             {route.service}
                           </div>
-                          <div className="text-[11px] text-emerald-300/80 mt-1 truncate">
+                          <div className="text-[11px] font-bold text-gray-800 truncate mt-0.5">
                             {route.action}
                           </div>
                         </div>
                       </div>
                     </div>
 
-                    {/* Detailed Recommended Service Card */}
+                    {/* SERVICE CARD & STRUCTURED INSPECTOR */}
                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                      {/* Left: Department Details & Actions */}
-                      <div className="lg:col-span-8 bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 space-y-6 shadow-xl">
-                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-5">
+                      
+                      {/* Left: Department Details (8 cols) */}
+                      <div className="lg:col-span-8 bg-white border-[3px] border-black shadow-[8px_8px_0px_0px_#000] p-6 sm:p-8 space-y-6">
+                        
+                        {/* Title Header */}
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b-2 border-black pb-5">
                           <div>
-                            <div className="flex items-center space-x-2">
-                              <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 text-xs font-bold uppercase tracking-wider border border-emerald-500/20">
-                                Recommended Destination
+                            <div className="flex items-center space-x-2 mb-1.5">
+                              <span className="bg-[#A7F3D0] text-black font-black text-[11px] uppercase tracking-wider px-2.5 py-0.5 border-2 border-black shadow-[2px_2px_0px_0px_#000]">
+                                Recommended Service
                               </span>
-                              <span className="text-xs text-slate-500">•</span>
-                              <span className="text-xs text-slate-400">{route.department}</span>
+                              <span className="text-xs font-bold text-gray-500">•</span>
+                              <span className="text-xs font-extrabold text-gray-700">{route.department}</span>
                             </div>
-                            <h3 className="text-2xl font-bold text-white mt-1">
+                            <h3 className="text-2xl sm:text-3xl font-black text-black uppercase tracking-tight">
                               {route.service}
                             </h3>
                           </div>
 
-                          <div className="flex items-center space-x-2">
-                            <span className="text-xs text-slate-400">Triage Match:</span>
-                            <span className="text-sm font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-lg">
-                              {(result.confidence * 100).toFixed(0)}% Match
-                            </span>
+                          <div className="bg-[#FFE55C] border-2 border-black p-2.5 text-center shadow-[3px_3px_0px_0px_#000] shrink-0">
+                            <span className="text-[9px] font-black uppercase tracking-wider text-black block">Triage Urgency</span>
+                            <span className="text-sm font-black text-black uppercase">{result.urgency}</span>
                           </div>
                         </div>
 
                         {/* Why We Recommend This */}
-                        <div className="bg-slate-950/80 border border-slate-800 rounded-2xl p-4 space-y-1.5">
-                          <div className="text-xs font-bold text-indigo-400 uppercase tracking-wider flex items-center space-x-1.5">
-                            <Sparkles className="w-3.5 h-3.5" />
+                        <div className="bg-[#FEF08A] border-2 border-black shadow-[4px_4px_0px_0px_#000] p-4 space-y-1">
+                          <div className="text-xs font-black uppercase tracking-wider text-black flex items-center space-x-1.5">
+                            <Sparkles className="w-3.5 h-3.5 text-black stroke-[3]" />
                             <span>Why We Recommend This</span>
                           </div>
-                          <p className="text-sm text-slate-200 leading-relaxed">
+                          <p className="text-sm font-bold text-black leading-relaxed">
                             {result.reason}
                           </p>
                         </div>
 
-                        {/* Location, Hours, Contact Grid */}
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                          <div className="bg-slate-950/60 border border-slate-800/80 rounded-xl p-3.5 flex items-start space-x-3">
-                            <MapPin className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                        {/* Contact & Location Details Grid */}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                          <div className="bg-white border-2 border-black shadow-[3px_3px_0px_0px_#000] p-3.5 flex items-start space-x-3">
+                            <div className="p-2 bg-[#BAE6FD] border border-black shadow-[1px_1px_0px_0px_#000] shrink-0">
+                              <MapPin className="w-4 h-4 text-black stroke-[2.5]" />
+                            </div>
                             <div className="text-xs">
-                              <div className="font-semibold text-white">{route.building}</div>
-                              <div className="text-slate-400">{route.room}</div>
+                              <div className="font-black text-black uppercase">{route.building}</div>
+                              <div className="font-semibold text-gray-700 mt-0.5">{route.room}</div>
                             </div>
                           </div>
 
-                          <div className="bg-slate-950/60 border border-slate-800/80 rounded-xl p-3.5 flex items-start space-x-3">
-                            <Clock className="w-4 h-4 text-blue-400 shrink-0 mt-0.5" />
+                          <div className="bg-white border-2 border-black shadow-[3px_3px_0px_0px_#000] p-3.5 flex items-start space-x-3">
+                            <div className="p-2 bg-[#DDD6FE] border border-black shadow-[1px_1px_0px_0px_#000] shrink-0">
+                              <Clock className="w-4 h-4 text-black stroke-[2.5]" />
+                            </div>
                             <div className="text-xs">
-                              <div className="font-semibold text-white">Hours & Walk-ins</div>
-                              <div className="text-slate-400">{route.hours}</div>
+                              <div className="font-black text-black uppercase">Operating Hours</div>
+                              <div className="font-semibold text-gray-700 mt-0.5">{route.hours}</div>
                             </div>
                           </div>
 
-                          <div className="bg-slate-950/60 border border-slate-800/80 rounded-xl p-3.5 flex items-start space-x-3">
-                            <Phone className="w-4 h-4 text-purple-400 shrink-0 mt-0.5" />
+                          <div className="bg-white border-2 border-black shadow-[3px_3px_0px_0px_#000] p-3.5 flex items-start space-x-3">
+                            <div className="p-2 bg-[#FED7AA] border border-black shadow-[1px_1px_0px_0px_#000] shrink-0">
+                              <Phone className="w-4 h-4 text-black stroke-[2.5]" />
+                            </div>
                             <div className="text-xs">
-                              <div className="font-semibold text-white">Direct Phone</div>
-                              <div className="text-slate-400 font-mono">{route.phone}</div>
+                              <div className="font-black text-black uppercase">Direct Telephone</div>
+                              <div className="font-mono font-bold text-gray-800 mt-0.5">{route.phone}</div>
                             </div>
                           </div>
 
-                          <div className="bg-slate-950/60 border border-slate-800/80 rounded-xl p-3.5 flex items-start space-x-3">
-                            <Mail className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+                          <div className="bg-white border-2 border-black shadow-[3px_3px_0px_0px_#000] p-3.5 flex items-start space-x-3">
+                            <div className="p-2 bg-[#A7F3D0] border border-black shadow-[1px_1px_0px_0px_#000] shrink-0">
+                              <Mail className="w-4 h-4 text-black stroke-[2.5]" />
+                            </div>
                             <div className="text-xs">
-                              <div className="font-semibold text-white">Department Email</div>
-                              <div className="text-slate-400 font-mono">{route.email}</div>
+                              <div className="font-black text-black uppercase">Official Email</div>
+                              <div className="font-mono font-bold text-gray-800 mt-0.5">{route.email}</div>
                             </div>
                           </div>
                         </div>
 
-                        {/* Priority support note */}
+                        {/* Priority intake notice */}
                         {route.priorityNote && (
-                          <div className="bg-indigo-950/30 border border-indigo-500/20 rounded-xl p-3.5 text-xs text-indigo-300 flex items-center space-x-2">
-                            <CheckCircle2 className="w-4 h-4 text-indigo-400 shrink-0" />
+                          <div className="bg-[#BAE6FD] border-2 border-black shadow-[3px_3px_0px_0px_#000] p-3.5 text-xs font-bold text-black flex items-center space-x-2.5">
+                            <CheckCircle2 className="w-5 h-5 text-black stroke-[2.5] shrink-0" />
                             <span>
-                              <strong>Priority Intake Notice:</strong> {route.priorityNote}
+                              <strong>Priority Triage Guarantee:</strong> {route.priorityNote}
                             </span>
                           </div>
                         )}
 
-                        {/* Action Buttons */}
+                        {/* Interactive Buttons */}
                         <div className="pt-2 flex flex-col sm:flex-row items-center gap-3">
                           <button
                             onClick={() => setBookingModalOpen(true)}
-                            className="w-full sm:w-1/2 py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-sm transition flex items-center justify-center space-x-2 shadow-lg shadow-emerald-600/20 active:scale-95"
+                            className="w-full sm:w-1/2 py-3.5 px-4 bg-[#A7F3D0] hover:bg-[#6EE7B7] text-black font-black uppercase tracking-wider text-xs border-[3px] border-black shadow-[4px_4px_0px_0px_#000] hover:translate-x-[-1px] hover:translate-y-[-1px] hover:shadow-[6px_6px_0px_0px_#000] active:translate-x-0.5 active:translate-y-0.5 active:shadow-[1px_1px_0px_0px_#000] transition-all flex items-center justify-center space-x-2"
                           >
-                            <Calendar className="w-4 h-4" />
+                            <Calendar className="w-4 h-4 stroke-[2.5]" />
                             <span>{route.action}</span>
                           </button>
 
                           <button
                             onClick={() => setContactModalOpen(true)}
-                            className="w-full sm:w-1/2 py-3 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold text-sm transition flex items-center justify-center space-x-2 border border-slate-700 active:scale-95"
+                            className="w-full sm:w-1/2 py-3.5 px-4 bg-white hover:bg-gray-100 text-black font-black uppercase tracking-wider text-xs border-[3px] border-black shadow-[4px_4px_0px_0px_#000] hover:translate-x-[-1px] hover:translate-y-[-1px] hover:shadow-[6px_6px_0px_0px_#000] active:translate-x-0.5 active:translate-y-0.5 active:shadow-[1px_1px_0px_0px_#000] transition-all flex items-center justify-center space-x-2"
                           >
-                            <Mail className="w-4 h-4" />
-                            <span>Contact Assigned Advisor</span>
+                            <Mail className="w-4 h-4 stroke-[2.5]" />
+                            <span>Contact Department Advisor</span>
                           </button>
                         </div>
                       </div>
 
-                      {/* Right: Structured Triage Inspector (Groq JSON schema) */}
+                      {/* Right: Groq JSON Output Inspector (4 cols) */}
                       <div className="lg:col-span-4 space-y-4">
-                        <div className="bg-slate-900 border border-slate-800 rounded-3xl p-5 shadow-lg space-y-4">
-                          <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-                            <span className="text-xs font-bold text-white flex items-center space-x-1.5">
-                              <Code className="w-3.5 h-3.5 text-indigo-400" />
-                              <span>Groq Triage Schema</span>
+                        <div className="bg-black border-[3px] border-black shadow-[6px_6px_0px_0px_#000] p-5 text-white space-y-3">
+                          <div className="flex items-center justify-between border-b border-gray-700 pb-2">
+                            <span className="text-xs font-black uppercase tracking-wider text-[#FFE55C] flex items-center space-x-1.5">
+                              <Code className="w-3.5 h-3.5" />
+                              <span>Groq LLM JSON Schema</span>
                             </span>
-                            <span className="text-[10px] bg-slate-800 text-slate-400 px-2 py-0.5 rounded font-mono">
-                              JSON Output
+                            <span className="text-[10px] bg-gray-800 text-gray-300 font-mono px-2 py-0.5 border border-gray-600">
+                              Structured
                             </span>
                           </div>
 
-                          <pre className="bg-slate-950 border border-slate-800/80 rounded-2xl p-4 text-[11px] font-mono text-emerald-300 overflow-x-auto leading-relaxed">
+                          <pre className="text-[11px] font-mono text-[#4ADE80] overflow-x-auto leading-relaxed p-2 bg-gray-950 border border-gray-800">
 {JSON.stringify({
   category: result.category,
   urgency: result.urgency,
@@ -609,15 +692,15 @@ export default function App() {
 }, null, 2)}
                           </pre>
 
-                          <div className="text-[11px] text-slate-400 leading-normal">
-                            Classification generated through dual-layer verification (deterministic safety keywords + structured LLM triage).
-                          </div>
+                          <p className="text-[11px] font-medium text-gray-400 leading-tight">
+                            Deterministic routing rules consume this structured schema to guarantee accurate departmental mapping.
+                          </p>
                         </div>
 
-                        {/* Recent Ingestion History */}
+                        {/* Recent History */}
                         {history.length > 1 && (
-                          <div className="bg-slate-900/60 border border-slate-800/60 rounded-2xl p-4 space-y-2.5">
-                            <div className="text-xs font-semibold text-slate-400">
+                          <div className="bg-white border-[3px] border-black shadow-[4px_4px_0px_0px_#000] p-4 space-y-2">
+                            <div className="text-xs font-black uppercase text-black">
                               Recent Session Inquiries
                             </div>
                             <div className="space-y-2">
@@ -629,10 +712,10 @@ export default function App() {
                                     setResult(item.result);
                                     setRoute(item.route);
                                   }}
-                                  className="w-full text-left p-2 rounded-lg bg-slate-950/60 border border-slate-800/60 hover:border-slate-700 text-xs text-slate-300 truncate transition block"
+                                  className="w-full text-left p-2.5 border-2 border-black bg-[#FFFDF9] hover:bg-[#FFE55C] shadow-[2px_2px_0px_0px_#000] transition-all block"
                                 >
-                                  <div className="font-semibold text-indigo-300">{item.route.service}</div>
-                                  <div className="text-[10px] text-slate-500 truncate">{item.text}</div>
+                                  <div className="font-black text-xs text-black uppercase">{item.route.service}</div>
+                                  <div className="text-[10px] font-medium text-gray-600 truncate mt-0.5">{item.text}</div>
                                 </button>
                               ))}
                             </div>
@@ -652,56 +735,66 @@ export default function App() {
         {/* ======================================================== */}
         {activeTab === 'departments' && (
           <div className="space-y-6">
-            <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 space-y-4">
+            <div className="bg-white border-[3px] border-black shadow-[8px_8px_0px_0px_#000] p-6 sm:p-8 space-y-6">
               <div className="max-w-3xl">
-                <span className="text-xs font-bold uppercase tracking-wider text-indigo-400">
+                <span className="bg-[#FF4949] text-white text-xs font-black uppercase tracking-wider px-3 py-1 border-2 border-black shadow-[2px_2px_0px_0px_#000] inline-block mb-2">
                   The Problem Statement
                 </span>
-                <h2 className="text-2xl font-bold text-white mt-1">
-                  Why University Support Systems Fail Students
+                <h2 className="text-2xl sm:text-3xl font-black text-black uppercase tracking-tight">
+                  The 12-Department Campus Maze
                 </h2>
-                <p className="text-sm text-slate-300 mt-2 leading-relaxed">
-                  Traditional universities operate 12+ separate administrative silos. A stressed student struggling with both grades and rent has to figure out which of these 12 buildings to visit, fill out redundant intake forms, and frequently gets referred in circles.
+                <p className="text-sm font-bold text-gray-700 mt-2 leading-relaxed">
+                  Traditional universities operate 12+ separate administrative silos. Stressed students are forced to figure out which of these buildings to visit, resulting in an average 3-week intake queue and over 40% misdirected referrals.
                 </p>
               </div>
 
               {/* Grid of the 12 fragmented departments */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 pt-4">
-                {ALL_12_DEPARTMENTS.map((dept, i) => (
-                  <div
-                    key={i}
-                    className="bg-slate-950 border border-slate-800/80 rounded-2xl p-4 space-y-2 hover:border-slate-700 transition"
-                  >
-                    <div className="flex items-center justify-between">
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
-                        Department {i + 1} of 12
-                      </span>
-                      <span className="text-[10px] px-2 py-0.5 rounded bg-slate-800 text-slate-400">
-                        Wait: {dept.wait}
-                      </span>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {ALL_12_DEPARTMENTS.map((dept, i) => {
+                  const colors = ['bg-[#BAE6FD]', 'bg-[#DDD6FE]', 'bg-[#FED7AA]', 'bg-[#A7F3D0]', 'bg-[#FEF08A]', 'bg-[#FECDD3]'];
+                  const cardBg = colors[i % colors.length];
+                  return (
+                    <div
+                      key={i}
+                      className={`${cardBg} border-[3px] border-black shadow-[4px_4px_0px_0px_#000] p-4 space-y-2 hover:translate-x-[-1px] hover:translate-y-[-1px] hover:shadow-[6px_6px_0px_0px_#000] transition-all`}
+                    >
+                      <div className="flex items-center justify-between border-b-2 border-black pb-1.5">
+                        <span className="text-[10px] font-black uppercase tracking-wider text-black">
+                          Silo {i + 1} of 12
+                        </span>
+                        <span className="text-[10px] font-black uppercase bg-white px-2 py-0.5 border border-black">
+                          Wait: {dept.wait}
+                        </span>
+                      </div>
+                      <div className="text-base font-black text-black uppercase leading-snug">
+                        {dept.name}
+                      </div>
+                      <div className="text-xs font-bold text-gray-800 flex items-center justify-between pt-1">
+                        <span>Domain: {dept.category}</span>
+                        <span className="bg-black text-white text-[9px] font-black uppercase px-1.5 py-0.5">
+                          Friction: {dept.referrals}
+                        </span>
+                      </div>
                     </div>
-                    <div className="text-sm font-bold text-white">{dept.name}</div>
-                    <div className="text-xs text-slate-400 flex items-center justify-between pt-1 border-t border-slate-800/60">
-                      <span>Category: {dept.category}</span>
-                      <span className="text-rose-400 text-[10px]">Misdirection: {dept.referrals}</span>
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
 
               {/* The Dhrona Solution Banner */}
-              <div className="bg-gradient-to-r from-indigo-900/60 via-blue-900/40 to-slate-900 border border-indigo-500/30 rounded-2xl p-5 mt-6 flex flex-col md:flex-row items-center justify-between gap-4">
+              <div className="bg-[#FFE55C] border-[3px] border-black shadow-[6px_6px_0px_0px_#000] p-6 flex flex-col md:flex-row items-center justify-between gap-4">
                 <div>
-                  <h4 className="text-base font-bold text-white">How Dhrona Solves This in Seconds</h4>
-                  <p className="text-xs text-slate-300 mt-1 max-w-2xl">
-                    Instead of forcing students to understand the university hierarchy, Dhrona offers a single empathetic conversational intake, classifies the intent, and maps directly to the right department.
+                  <h4 className="text-lg font-black text-black uppercase">
+                    How Dhrona Solves This in Seconds
+                  </h4>
+                  <p className="text-xs font-bold text-black mt-1 max-w-2xl leading-relaxed">
+                    Instead of navigating 12 separate websites and waiting weeks, the student enters one conversation. Dhrona performs dual-layer safety triage and routes them immediately to the correct desk with a priority booking.
                   </p>
                 </div>
                 <button
                   onClick={() => setActiveTab('triage')}
-                  className="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shrink-0 transition"
+                  className="px-6 py-3 bg-black hover:bg-gray-800 text-[#FFE55C] text-xs font-black uppercase tracking-wider border-2 border-black shadow-[3px_3px_0px_0px_#000] shrink-0 active:translate-x-0.5 active:translate-y-0.5 transition-all"
                 >
-                  Try Student Intake
+                  Test Student Intake →
                 </button>
               </div>
             </div>
@@ -714,82 +807,98 @@ export default function App() {
         {activeTab === 'architecture' && (
           <div className="space-y-6">
             {/* The 1-Minute Pitch */}
-            <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 space-y-4">
-              <span className="text-xs font-bold uppercase tracking-wider text-emerald-400">
+            <div className="bg-white border-[3px] border-black shadow-[8px_8px_0px_0px_#000] p-6 sm:p-8 space-y-4">
+              <span className="bg-[#A7F3D0] text-black text-xs font-black uppercase tracking-wider px-3 py-1 border-2 border-black shadow-[2px_2px_0px_0px_#000] inline-block">
                 The Pitch Strategy (Section 15)
               </span>
-              <h2 className="text-2xl font-bold text-white">
+              <h2 className="text-2xl sm:text-3xl font-black text-black uppercase tracking-tight">
                 "Students shouldn't need to understand the university's organizational structure before they can get help."
               </h2>
 
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4 pt-2">
-                <div className="bg-slate-950 border border-slate-800 p-4 rounded-xl space-y-1">
-                  <div className="text-xs text-slate-500 font-semibold">1. Understand</div>
-                  <div className="text-sm font-bold text-white">Natural Language</div>
-                  <p className="text-xs text-slate-400">Student expresses their raw stress or issue in their own voice.</p>
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4 pt-3">
+                <div className="bg-[#BAE6FD] border-2 border-black shadow-[3px_3px_0px_0px_#000] p-4 space-y-1">
+                  <div className="text-[10px] font-black uppercase text-gray-800">1. Understand</div>
+                  <div className="text-sm font-black text-black uppercase">Natural Language</div>
+                  <p className="text-xs font-bold text-gray-800">Student expresses raw stress or confusion without knowing jargon.</p>
                 </div>
 
-                <div className="bg-slate-950 border border-slate-800 p-4 rounded-xl space-y-1">
-                  <div className="text-xs text-slate-500 font-semibold">2. Safety First</div>
-                  <div className="text-sm font-bold text-red-400">Keyword Interceptor</div>
-                  <p className="text-xs text-slate-400">Instant deterministic catch for self-harm or crisis terms.</p>
+                <div className="bg-[#FF4949] text-white border-2 border-black shadow-[3px_3px_0px_0px_#000] p-4 space-y-1">
+                  <div className="text-[10px] font-black uppercase text-yellow-300">2. Safety First</div>
+                  <div className="text-sm font-black text-white uppercase">Keyword Intercept</div>
+                  <p className="text-xs font-bold text-white/90">Instant deterministic catch for crisis and self-harm keywords.</p>
                 </div>
 
-                <div className="bg-slate-950 border border-slate-800 p-4 rounded-xl space-y-1">
-                  <div className="text-xs text-slate-500 font-semibold">3. Triage</div>
-                  <div className="text-sm font-bold text-indigo-400">Structured Classification</div>
-                  <p className="text-xs text-slate-400">Category, urgency, confidence, and reasoning extraction.</p>
+                <div className="bg-[#DDD6FE] border-2 border-black shadow-[3px_3px_0px_0px_#000] p-4 space-y-1">
+                  <div className="text-[10px] font-black uppercase text-gray-800">3. AI Triage</div>
+                  <div className="text-sm font-black text-black uppercase">Structured JSON</div>
+                  <p className="text-xs font-bold text-gray-800">Extracts category, urgency, confidence score, and justification.</p>
                 </div>
 
-                <div className="bg-slate-950 border border-slate-800 p-4 rounded-xl space-y-1">
-                  <div className="text-xs text-slate-500 font-semibold">4. Route & Act</div>
-                  <div className="text-sm font-bold text-emerald-400">Actionable Service</div>
-                  <p className="text-xs text-slate-400">Direct booking, phone, room number, and immediate advisor access.</p>
+                <div className="bg-[#A7F3D0] border-2 border-black shadow-[3px_3px_0px_0px_#000] p-4 space-y-1">
+                  <div className="text-[10px] font-black uppercase text-gray-800">4. Route & Act</div>
+                  <div className="text-sm font-black text-black uppercase">Actionable Outcome</div>
+                  <p className="text-xs font-bold text-gray-800">Priority appointment booking, building room number, and direct advisor contact.</p>
                 </div>
               </div>
             </div>
 
             {/* Architecture Diagram */}
-            <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 space-y-4">
-              <h3 className="text-lg font-bold text-white">System Architecture & Groq Prompt Pipeline</h3>
-              
-              <div className="font-mono text-xs text-slate-300 bg-slate-950 p-6 rounded-2xl border border-slate-800 overflow-x-auto leading-relaxed">
-{`STUDENT MESSAGE
-      │
-      ▼
-SAFETY KEYWORD CHECK (Deterministic Layer)
-      ├── [Crisis Detected] ──► 🚨 Immediate Emergency Protocol (988 / Campus Police)
-      │
-      └── [Standard / Safe]
-            │
-            ▼
-      GROQ LLM INFERENCE (llama-3.3-70b-versatile)
-            │
-            ▼
-      STRUCTURED JSON OUTPUT
-      {
-        "category": "mental_wellbeing" | "academic" | "financial" | ...,
-        "urgency": "low" | "medium" | "high",
-        "confidence": 0.94,
-        "reason": "..."
-      }
-            │
-            ▼
-      ROUTING ENGINE (Python / TypeScript Dict Rules)
-            │
-            ├── mental_wellbeing ──► Counselling Services (Wellness Center B204)
-            ├── academic         ──► Academic Success Center (Library 3rd Floor)
-            ├── financial        ──► Financial Aid & Emergency Grants (Hall A112)
-            ├── housing          ──► Student Housing Office (Pavilion 101)
-            ├── disability       ──► Accessibility Services (Suite 110)
-            └── harassment       ──► Title IX & Safety Office (Suite 300)
-            │
-            ▼
-      ACTIONABLE STUDENT OUTCOME
-      • One-click Appointment Booking
-      • Direct Advisor Outreach
-      • Location & Drop-in Hours`}
+            <div className="bg-black border-[4px] border-black shadow-[10px_10px_0px_0px_#000] p-6 sm:p-8 space-y-4 text-white">
+              <div className="flex items-center justify-between border-b border-gray-700 pb-3">
+                <h3 className="text-lg font-black text-[#FFE55C] uppercase tracking-wider">
+                  Technical Architecture Specification
+                </h3>
+                <span className="text-xs font-mono font-bold text-gray-400">Streamlit / React + Groq LLM</span>
               </div>
+
+              <pre className="font-mono text-xs text-[#4ADE80] bg-gray-950 p-6 border-2 border-gray-800 overflow-x-auto leading-relaxed">
+{`                    ┌─────────────────────────┐
+                    │      STUDENT INPUT      │
+                    │  (Raw Natural Language) │
+                    └────────────┬────────────┘
+                                 │
+                                 ▼
+                    ┌─────────────────────────┐
+                    │  SAFETY KEYWORD FILTER  │
+                    │  (Deterministic Layer)  │
+                    └──────┬────────────┬─────┘
+                           │            │
+                     CRISIS DETECTED   SAFE
+                           │            │
+                           ▼            ▼
+                    ┌─────────────┐  ┌─────────────────────────┐
+                    │  EMERGENCY  │  │   GROQ LLM INFERENCE    │
+                    │   ROUTING   │  │ (llama-3.3-70b-versatile│
+                    │ (988/Crisis)│  └──────────┬──────────────┘
+                    └─────────────┘             │
+                                                ▼
+                                     ┌─────────────────────────┐
+                                     │  STRUCTURED JSON OUTPUT │
+                                     │  • category             │
+                                     │  • urgency              │
+                                     │  • confidence           │
+                                     │  • reason               │
+                                     └──────────┬──────────────┘
+                                                │
+                                                ▼
+                                     ┌─────────────────────────┐
+                                     │     ROUTING ENGINE      │
+                                     │  (Python / TS Dict)     │
+                                     └──────────┬──────────────┘
+                                                │
+                     ┌──────────────────────────┼─────────────────────────┐
+                     ▼                          ▼                         ▼
+             Counselling Services      Academic Support          Financial Aid
+             (Wellness Center B204)    (Library 3rd Floor)       (Hall A Room 112)
+                     │                          │                         │
+                     └──────────────────────────┼─────────────────────────┘
+                                                ▼
+                                     ┌─────────────────────────┐
+                                     │    ACTIONABLE OUTCOME   │
+                                     │  • Book Appointment     │
+                                     │  • Direct Phone/Advisor │
+                                     └─────────────────────────┘`}
+              </pre>
             </div>
           </div>
         )}
@@ -799,58 +908,61 @@ SAFETY KEYWORD CHECK (Deterministic Layer)
       {/* MODAL 1: BOOKING APPOINTMENT                             */}
       {/* ======================================================== */}
       {bookingModalOpen && route && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fadeIn">
-          <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 max-w-lg w-full space-y-5 shadow-2xl">
-            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-none">
+          <div className="bg-[#FFFDF7] border-[4px] border-black shadow-[10px_10px_0px_0px_#000] p-6 sm:p-8 max-w-lg w-full space-y-5">
+            <div className="flex items-center justify-between border-b-2 border-black pb-3">
               <div>
-                <h3 className="text-lg font-bold text-white">Book Priority Appointment</h3>
-                <p className="text-xs text-slate-400">{route.service} • {route.building}</p>
+                <span className="text-[10px] font-black uppercase bg-[#FFE55C] px-2 py-0.5 border border-black">
+                  Priority Intake
+                </span>
+                <h3 className="text-xl font-black text-black uppercase mt-1">Book Priority Appointment</h3>
+                <p className="text-xs font-bold text-gray-700">{route.service} • {route.building}</p>
               </div>
               <button
                 onClick={() => setBookingModalOpen(false)}
-                className="text-slate-400 hover:text-white p-1"
+                className="bg-white hover:bg-gray-100 p-1 border-2 border-black shadow-[2px_2px_0px_0px_#000]"
               >
-                <X className="w-5 h-5" />
+                <X className="w-5 h-5 text-black stroke-[3]" />
               </button>
             </div>
 
             {bookingConfirmed ? (
-              <div className="py-8 text-center space-y-3">
-                <div className="w-12 h-12 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center mx-auto border border-emerald-500/30">
-                  <Check className="w-6 h-6" />
+              <div className="py-6 text-center space-y-3 bg-[#A7F3D0] border-2 border-black p-4">
+                <div className="w-12 h-12 bg-white border-2 border-black shadow-[2px_2px_0px_0px_#000] flex items-center justify-center mx-auto">
+                  <Check className="w-7 h-7 text-black stroke-[3]" />
                 </div>
-                <h4 className="text-lg font-bold text-white">Appointment Confirmed!</h4>
-                <p className="text-xs text-slate-300 max-w-sm mx-auto">
-                  Your appointment with <strong>{route.service}</strong> is scheduled for <strong>{bookingDate}</strong>. Confirmation sent to your university email.
+                <h4 className="text-lg font-black text-black uppercase">Appointment Confirmed!</h4>
+                <p className="text-xs font-bold text-gray-800 max-w-sm mx-auto">
+                  Your appointment with <strong>{route.service}</strong> is confirmed for <strong>{bookingDate}</strong>. Intake confirmation sent to your university ID.
                 </p>
               </div>
             ) : (
               <div className="space-y-4">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1">
-                    Select Preferred Time Slot
+                  <label className="block text-xs font-black uppercase text-black mb-1">
+                    Select Preferred Priority Slot
                   </label>
                   <select
                     value={bookingDate}
                     onChange={(e) => setBookingDate(e.target.value)}
-                    className="w-full text-xs bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-white focus:outline-none focus:border-indigo-500"
+                    className="w-full text-xs font-bold bg-white border-2 border-black p-3 text-black shadow-[3px_3px_0px_0px_#000] focus:outline-none"
                   >
-                    <option value="Tomorrow, 10:00 AM">Tomorrow, 10:00 AM (Priority Intake)</option>
-                    <option value="Tomorrow, 2:00 PM">Tomorrow, 2:00 PM (Priority Intake)</option>
+                    <option value="Tomorrow, 10:00 AM">Tomorrow, 10:00 AM (Priority Intake Slot)</option>
+                    <option value="Tomorrow, 2:00 PM">Tomorrow, 2:00 PM (Priority Intake Slot)</option>
                     <option value="In 2 Days, 11:30 AM">In 2 Days, 11:30 AM</option>
                     <option value="In 3 Days, 3:00 PM">In 3 Days, 3:00 PM</option>
                   </select>
                 </div>
 
-                <div className="bg-slate-950 border border-slate-800 rounded-xl p-3.5 text-xs text-slate-300 space-y-1">
-                  <div className="font-semibold text-white">Location Details:</div>
-                  <div className="text-slate-400">{route.building}, {route.room}</div>
-                  <div className="text-slate-400">Please arrive 5 minutes early with your student ID card.</div>
+                <div className="bg-[#F3F4F6] border-2 border-black p-3 text-xs font-semibold text-gray-800 space-y-1">
+                  <div className="font-black text-black uppercase">Check-in Location:</div>
+                  <div>{route.building}, {route.room}</div>
+                  <div>Please bring your student ID card or mobile campus pass.</div>
                 </div>
 
                 <button
                   onClick={handleConfirmBooking}
-                  className="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs uppercase tracking-wider transition shadow-lg shadow-emerald-600/30"
+                  className="w-full py-3.5 bg-[#A7F3D0] hover:bg-[#6EE7B7] text-black font-black uppercase tracking-wider text-xs border-[3px] border-black shadow-[4px_4px_0px_0px_#000] active:translate-x-0.5 active:translate-y-0.5 active:shadow-[1px_1px_0px_0px_#000] transition-all"
                 >
                   Confirm Priority Booking
                 </button>
@@ -864,35 +976,38 @@ SAFETY KEYWORD CHECK (Deterministic Layer)
       {/* MODAL 2: CONTACT ADVISOR                                 */}
       {/* ======================================================== */}
       {contactModalOpen && route && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fadeIn">
-          <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 max-w-lg w-full space-y-5 shadow-2xl">
-            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-none">
+          <div className="bg-[#FFFDF7] border-[4px] border-black shadow-[10px_10px_0px_0px_#000] p-6 sm:p-8 max-w-lg w-full space-y-5">
+            <div className="flex items-center justify-between border-b-2 border-black pb-3">
               <div>
-                <h3 className="text-lg font-bold text-white">Contact Department Advisor</h3>
-                <p className="text-xs text-slate-400">{route.service} • {route.email}</p>
+                <span className="text-[10px] font-black uppercase bg-[#BAE6FD] px-2 py-0.5 border border-black">
+                  Direct Outreach
+                </span>
+                <h3 className="text-xl font-black text-black uppercase mt-1">Contact Department Advisor</h3>
+                <p className="text-xs font-bold text-gray-700">{route.service} • {route.email}</p>
               </div>
               <button
                 onClick={() => setContactModalOpen(false)}
-                className="text-slate-400 hover:text-white p-1"
+                className="bg-white hover:bg-gray-100 p-1 border-2 border-black shadow-[2px_2px_0px_0px_#000]"
               >
-                <X className="w-5 h-5" />
+                <X className="w-5 h-5 text-black stroke-[3]" />
               </button>
             </div>
 
             {messageSent ? (
-              <div className="py-8 text-center space-y-3">
-                <div className="w-12 h-12 rounded-full bg-indigo-500/20 text-indigo-400 flex items-center justify-center mx-auto border border-indigo-500/30">
-                  <Check className="w-6 h-6" />
+              <div className="py-6 text-center space-y-3 bg-[#BAE6FD] border-2 border-black p-4">
+                <div className="w-12 h-12 bg-white border-2 border-black shadow-[2px_2px_0px_0px_#000] flex items-center justify-center mx-auto">
+                  <Check className="w-7 h-7 text-black stroke-[3]" />
                 </div>
-                <h4 className="text-lg font-bold text-white">Message Dispatched!</h4>
-                <p className="text-xs text-slate-300 max-w-sm mx-auto">
-                  Your confidential inquiry has been routed to the duty advisor at <strong>{route.service}</strong>. Expect a response within 4 business hours.
+                <h4 className="text-lg font-black text-black uppercase">Message Dispatched!</h4>
+                <p className="text-xs font-bold text-gray-800 max-w-sm mx-auto">
+                  Your confidential inquiry was delivered to the duty advisor at <strong>{route.service}</strong>. Response time is under 4 business hours.
                 </p>
               </div>
             ) : (
               <div className="space-y-4">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1">
+                  <label className="block text-xs font-black uppercase text-black mb-1">
                     Your Confidential Message to Advisor
                   </label>
                   <textarea
@@ -900,17 +1015,17 @@ SAFETY KEYWORD CHECK (Deterministic Layer)
                     value={advisorMessage || inputText}
                     onChange={(e) => setAdvisorMessage(e.target.value)}
                     placeholder="Provide any additional context or questions for your advisor..."
-                    className="w-full text-xs bg-slate-950 border border-slate-800 rounded-xl p-3 text-white focus:outline-none focus:border-indigo-500 resize-none"
+                    className="w-full text-xs font-semibold bg-white border-2 border-black p-3 text-black shadow-[3px_3px_0px_0px_#000] focus:outline-none resize-none"
                   />
                 </div>
 
-                <div className="text-[11px] text-slate-400">
-                  Direct phone for immediate questions: <span className="font-mono text-white">{route.phone}</span>
+                <div className="text-xs font-bold text-gray-800 bg-[#FEF08A] border-2 border-black p-2.5">
+                  Direct Phone for immediate assistance: <span className="font-mono font-black text-black">{route.phone}</span>
                 </div>
 
                 <button
                   onClick={handleSendAdvisorMessage}
-                  className="w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs uppercase tracking-wider transition shadow-lg shadow-indigo-600/30"
+                  className="w-full py-3.5 bg-[#FFE55C] hover:bg-yellow-400 text-black font-black uppercase tracking-wider text-xs border-[3px] border-black shadow-[4px_4px_0px_0px_#000] active:translate-x-0.5 active:translate-y-0.5 active:shadow-[1px_1px_0px_0px_#000] transition-all"
                 >
                   Send Inquiry to Advisor
                 </button>
@@ -920,14 +1035,24 @@ SAFETY KEYWORD CHECK (Deterministic Layer)
         </div>
       )}
 
-      {/* Footer */}
-      <footer className="border-t border-slate-800/80 py-6 text-center text-xs text-slate-500 mt-auto bg-slate-950">
-        <p className="font-medium text-slate-400">
-          DHRONA Student Support • Track 01: Student Triage & Routing
-        </p>
-        <p className="text-[11px] text-slate-600 mt-1">
-          Built for Hackathon Demo • Intended as an intake & routing assistant, not a clinical diagnostic system.
-        </p>
+      {/* ======================================================== */}
+      {/* FOOTER - NEOBRUTALISM                                    */}
+      {/* ======================================================== */}
+      <footer className="border-t-[3px] border-black py-6 bg-white mt-auto">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left">
+          <div>
+            <span className="font-black text-sm uppercase text-black">
+              DHRONA / STUDENT SUPPORT
+            </span>
+            <span className="text-xs font-bold text-gray-600 block">
+              Track 01: Student Triage & Routing Prototype
+            </span>
+          </div>
+
+          <div className="text-xs font-bold text-gray-500">
+            Intake & Routing Assistant • Not a Clinical Diagnostic Tool
+          </div>
+        </div>
       </footer>
     </div>
   );

@@ -16,27 +16,54 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Custom CSS styling
+# Custom Neobrutalism CSS styling
 st.markdown("""
 <style>
-    .metric-box {
-        background-color: #1e293b;
-        border: 1px solid #334155;
-        border-radius: 10px;
-        padding: 16px;
-        text-align: center;
+    .stApp {
+        background-color: #FFFDF7;
+    }
+    div[data-testid="stMetric"] {
+        background-color: #FFFFFF;
+        border: 3px solid #000000;
+        box-shadow: 4px 4px 0px 0px #000000;
+        padding: 12px;
+    }
+    div[data-testid="stMetricLabel"] {
+        font-weight: 900;
+        color: #000000;
+        text-transform: uppercase;
+    }
+    div[data-testid="stMetricValue"] {
+        font-weight: 900;
+        color: #000000;
+    }
+    .stButton>button {
+        border: 2px solid #000000 !important;
+        box-shadow: 3px 3px 0px 0px #000000 !important;
+        font-weight: 900 !important;
+        text-transform: uppercase !important;
+        transition: all 0.1s ease !important;
+    }
+    .stButton>button:hover {
+        transform: translate(-1px, -1px) !important;
+        box-shadow: 5px 5px 0px 0px #000000 !important;
+    }
+    .stButton>button:active {
+        transform: translate(2px, 2px) !important;
+        box-shadow: 1px 1px 0px 0px #000000 !important;
     }
     .crisis-card {
-        background-color: #450a0a;
-        border: 2px solid #ef4444;
-        border-radius: 12px;
+        background-color: #FF4949;
+        border: 4px solid #000000;
+        box-shadow: 8px 8px 0px 0px #000000;
         padding: 24px;
-        color: #fef2f2;
+        color: #000000;
+        font-weight: bold;
     }
     .support-card {
-        background-color: #0f172a;
-        border: 1px solid #1e293b;
-        border-radius: 12px;
+        background-color: #FFFFFF;
+        border: 3px solid #000000;
+        box-shadow: 6px 6px 0px 0px #000000;
         padding: 24px;
     }
 </style>
