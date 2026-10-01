@@ -14,7 +14,6 @@ import {
   Mail, 
   Calendar, 
   ArrowRight, 
-  ArrowLeft,
   Send, 
   Sparkles, 
   ShieldCheck, 
@@ -479,109 +478,119 @@ export default function App() {
   return (
     <div className="min-h-screen bg-[#FAF8F5] text-[#1A2E26] flex flex-col font-sans selection:bg-[#D4E8DC] selection:text-[#1B4332]">
       {/* ======================================================== */}
-      {/* FLOATING CAPSULE NAVBAR (MATCHING REFERENCE IMAGE)       */}
+      {/* REFINED SERENE HEADER                                    */}
       {/* ======================================================== */}
-      <header className="sticky top-0 z-40 bg-[#FAF8F5]/90 backdrop-blur-md border-b border-[#E8E6E1]/80 py-3.5 px-4 sm:px-8">
-        <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
-          
-          {/* Left: Circular Dark Back Button & Elegant Brand Label */}
+      <header className="border-b border-[#E3E8E3] bg-[#FAF8F5]/90 backdrop-blur-md sticky top-0 z-40">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex flex-col sm:flex-row sm:items-center justify-between gap-3 py-3 sm:py-0">
           <div className="flex items-center space-x-3.5">
-            <button
-              onClick={() => setActiveTab('triage')}
-              title="Return to Home / Navigator"
-              className="w-10 h-10 rounded-full bg-[#18181B] text-white flex items-center justify-center hover:bg-[#27272A] active:scale-95 transition-all shadow-sm shrink-0"
-            >
-              <ArrowLeft className="w-4 h-4 stroke-[2.5]" />
-            </button>
-            <div className="flex items-center space-x-2">
-              <span className="font-serif-warm font-bold text-2xl tracking-tight text-[#143224]">
-                Dhrona
-              </span>
-              <span className="text-[11px] font-semibold text-[#2D6A4F] bg-[#E8F3EE] px-2.5 py-0.5 rounded-full border border-[#C5DEC8] hidden sm:inline">
-                Care
-              </span>
+            <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-[#2D6A4F] to-[#1B4332] text-white shadow-[0_4px_12px_rgba(27,67,50,0.18)] flex items-center justify-center shrink-0">
+              <HeartHandshake className="w-6 h-6 stroke-[2.2]" />
+            </div>
+            <div>
+              <div className="flex items-center space-x-2">
+                <span className="font-heading font-extrabold text-2xl tracking-tight text-[#143224]">
+                  DHRONA
+                </span>
+                <span className="text-[11px] font-bold text-[#2D6A4F] bg-[#E8F3EE] border border-[#C5DEC8] px-2.5 py-0.5 rounded-full">
+                  Care Navigator
+                </span>
+                <span className="text-[10px] font-semibold text-[#507693] bg-[#EBF2F7] border border-[#CADCE9] px-2 py-0.5 rounded-full hidden md:inline-block">
+                  Clinical Acuity Triage
+                </span>
+              </div>
+              <p className="text-xs font-medium text-[#52685E]">
+                Empathetic student triage, multi-need navigation &amp; gentle companion care
+              </p>
             </div>
           </div>
 
-          {/* Center: Floating Dark Capsule Menu (Exact Match to Reference Image) */}
-          <nav className="flex items-center bg-[#18181B] text-white rounded-full p-1 shadow-md border border-white/10 shrink-0">
-            <button
-              onClick={() => setActiveTab('triage')}
-              className={`rounded-full px-4 py-1.5 text-xs font-semibold transition-all duration-200 ${
-                activeTab === 'triage'
-                  ? 'bg-white text-black shadow-xs font-bold'
-                  : 'text-zinc-400 hover:text-white hover:bg-white/10'
-              }`}
-            >
-              Home
-            </button>
-
-            <button
-              onClick={() => setActiveTab('companion')}
-              className={`rounded-full px-4 py-1.5 text-xs font-semibold transition-all duration-200 flex items-center space-x-1.5 ${
-                activeTab === 'companion'
-                  ? 'bg-white text-black shadow-xs font-bold'
-                  : 'text-zinc-400 hover:text-white hover:bg-white/10'
-              }`}
-            >
-              <span>About</span>
-            </button>
-
-            <button
-              onClick={() => setActiveTab('departments')}
-              className={`rounded-full px-4 py-1.5 text-xs font-semibold transition-all duration-200 ${
-                activeTab === 'departments'
-                  ? 'bg-white text-black shadow-xs font-bold'
-                  : 'text-zinc-400 hover:text-white hover:bg-white/10'
-              }`}
-            >
-              Services
-            </button>
-
-            <button
-              onClick={() => setActiveTab('admin')}
-              className={`rounded-full px-4 py-1.5 text-xs font-semibold transition-all duration-200 ${
-                activeTab === 'admin'
-                  ? 'bg-white text-black shadow-xs font-bold'
-                  : 'text-zinc-400 hover:text-white hover:bg-white/10'
-              }`}
-            >
-              Contact
-            </button>
-
-            <button
-              onClick={() => setActiveTab('architecture')}
-              className={`rounded-full px-4 py-1.5 text-xs font-semibold transition-all duration-200 hidden md:inline-block ${
-                activeTab === 'architecture'
-                  ? 'bg-white text-black shadow-xs font-bold'
-                  : 'text-zinc-400 hover:text-white hover:bg-white/10'
-              }`}
-            >
-              Pitch
-            </button>
-          </nav>
-
-          {/* Right: Quick Calming Controls */}
-          <div className="flex items-center space-x-2 shrink-0">
+          {/* Right Controls: Ambient Audio Toggle, Privacy Mode, Tabs */}
+          <div className="flex items-center space-x-2.5 self-start sm:self-auto">
+            {/* Ambient Nature Sound generator (Stress Reduction) */}
             <button
               onClick={toggleAmbientSound}
-              title={isPlayingSound ? "Pause soothing rain sound" : "Play calming rain ambient sound"}
+              title={isPlayingSound ? "Stop soothing rain sound" : "Play soothing rain ambient sound"}
               className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border transition-all ${
                 isPlayingSound 
-                  ? 'bg-[#E8F3EE] text-[#1B4332] border-[#2D6A4F] shadow-xs animate-pulse'
+                  ? 'bg-[#E8F3EE] text-[#1B4332] border-[#2D6A4F] shadow-sm animate-pulse'
                   : 'bg-white text-[#52685E] border-[#E3E8E3] hover:bg-[#F2F7F4]'
               }`}
             >
               {isPlayingSound ? <Volume2 className="w-3.5 h-3.5 text-[#2D6A4F]" /> : <VolumeX className="w-3.5 h-3.5" />}
-              <span className="hidden sm:inline">{isPlayingSound ? 'Rain Sound' : 'Calm Audio'}</span>
+              <span>{isPlayingSound ? 'Rain Sound: On' : 'Calm Audio'}</span>
             </button>
 
+            {/* Privacy Mode */}
             <button
               onClick={() => setIsAnonymous(!isAnonymous)}
               className="px-3 py-1.5 rounded-full text-xs font-semibold bg-white border border-[#E3E8E3] text-[#40564C] hover:bg-[#F6F4F0] transition shadow-xs hidden md:flex items-center space-x-1"
             >
-              <span>{isAnonymous ? '🛡️ Anonymous' : `🎓 ${studentId}`}</span>
+              <span>{isAnonymous ? '🛡️ Anonymous Mode' : `🎓 ${studentId}`}</span>
             </button>
+
+            {/* Primary Nav Navigation */}
+            <nav className="flex items-center bg-[#EDEBE6] p-1 rounded-2xl border border-[#DFDDD8] space-x-1">
+              <button
+                onClick={() => setActiveTab('triage')}
+                className={`px-3 py-1.5 text-xs font-bold rounded-xl transition-all flex items-center space-x-1.5 ${
+                  activeTab === 'triage'
+                    ? 'bg-white text-[#1B4332] shadow-xs'
+                    : 'text-[#5A6D63] hover:text-[#1B4332]'
+                }`}
+              >
+                <Compass className="w-3.5 h-3.5" />
+                <span>Navigator</span>
+              </button>
+
+              <button
+                onClick={() => setActiveTab('companion')}
+                className={`px-3 py-1.5 text-xs font-bold rounded-xl transition-all flex items-center space-x-1.5 ${
+                  activeTab === 'companion'
+                    ? 'bg-white text-[#1B4332] shadow-xs'
+                    : 'text-[#5A6D63] hover:text-[#1B4332]'
+                }`}
+              >
+                <Bot className="w-3.5 h-3.5 text-[#2D6A4F]" />
+                <span>Companion</span>
+                <span className="w-1.5 h-1.5 rounded-full bg-[#2D6A4F]"></span>
+              </button>
+
+              <button
+                onClick={() => setActiveTab('departments')}
+                className={`px-3 py-1.5 text-xs font-bold rounded-xl transition-all flex items-center space-x-1.5 ${
+                  activeTab === 'departments'
+                    ? 'bg-white text-[#1B4332] shadow-xs'
+                    : 'text-[#5A6D63] hover:text-[#1B4332]'
+                }`}
+              >
+                <Building2 className="w-3.5 h-3.5" />
+                <span>12 Silos</span>
+              </button>
+
+              <button
+                onClick={() => setActiveTab('admin')}
+                className={`px-3 py-1.5 text-xs font-bold rounded-xl transition-all flex items-center space-x-1.5 ${
+                  activeTab === 'admin'
+                    ? 'bg-white text-[#1B4332] shadow-xs'
+                    : 'text-[#5A6D63] hover:text-[#1B4332]'
+                }`}
+              >
+                <BarChart3 className="w-3.5 h-3.5" />
+                <span>Admin</span>
+              </button>
+
+              <button
+                onClick={() => setActiveTab('architecture')}
+                className={`px-3 py-1.5 text-xs font-bold rounded-xl transition-all flex items-center space-x-1.5 ${
+                  activeTab === 'architecture'
+                    ? 'bg-white text-[#1B4332] shadow-xs'
+                    : 'text-[#5A6D63] hover:text-[#1B4332]'
+                }`}
+              >
+                <Layers className="w-3.5 h-3.5" />
+                <span>Pitch</span>
+              </button>
+            </nav>
           </div>
         </div>
       </header>

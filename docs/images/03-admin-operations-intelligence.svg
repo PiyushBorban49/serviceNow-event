@@ -11,30 +11,31 @@
 
   <!-- Top Navigation Header -->
   <rect x="0" y="0" width="1200" height="75" fill="#FAF8F5" stroke="#E3E8E3" stroke-width="1"/>
-  <!-- Left circular dark button and brand -->
-  <circle cx="45" cy="37" r="18" fill="#18181B"/>
-  <path d="M 48 37 L 42 37 M 45 34 L 42 37 L 45 40" stroke="#FFFFFF" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-  <text x="75" y="42" font-size="22" font-weight="800" fill="#143224">Dhrona</text>
-  <rect x="160" y="26" width="50" height="20" rx="10" fill="#E8F3EE" stroke="#C5DEC8" stroke-width="1"/>
-  <text x="170" y="40" font-size="10" font-weight="700" fill="#2D6A4F">Care</text>
+  <rect x="25" y="15" width="44" height="44" rx="14" fill="url(#primaryGreen)"/>
+  <path d="M 40 37 L 46 43 L 56 31" stroke="#FFFFFF" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
 
-  <!-- Center Floating Dark Capsule Menu (As in User Image) -->
-  <rect x="420" y="19" width="360" height="36" rx="18" fill="#18181B" filter="url(#softShadow)"/>
-  <text x="440" y="41" font-size="11" font-weight="500" fill="#A1A1AA">Home</text>
-  <text x="506" y="41" font-size="11" font-weight="500" fill="#A1A1AA">About</text>
-  <text x="575" y="41" font-size="11" font-weight="500" fill="#A1A1AA">Services</text>
-  <!-- Active Contact White Capsule -->
-  <rect x="635" y="22" width="75" height="30" rx="15" fill="#FFFFFF"/>
-  <text x="649" y="41" font-size="11" font-weight="700" fill="#000000">Contact</text>
-  <text x="725" y="41" font-size="11" font-weight="500" fill="#A1A1AA">Pitch</text>
+  <text x="82" y="38" font-size="20" font-weight="800" fill="#143224">DHRONA</text>
+  <rect x="175" y="22" width="105" height="22" rx="11" fill="#E8F3EE" stroke="#C5DEC8" stroke-width="1"/>
+  <text x="187" y="37" font-size="10" font-weight="700" fill="#2D6A4F">Care Navigator</text>
+  <rect x="290" y="22" width="130" height="22" rx="11" fill="#EBF2F7" stroke="#CADCE9" stroke-width="1"/>
+  <text x="300" y="37" font-size="10" font-weight="700" fill="#507693">Clinical Acuity Triage</text>
+  <text x="82" y="56" font-size="11" font-weight="500" fill="#52685E">Empathetic student triage, multi-need navigation &amp; gentle companion care</text>
 
   <!-- Controls on right -->
-  <rect x="940" y="22" width="115" height="32" rx="16" fill="#FFFFFF" stroke="#E3E8E3" stroke-width="1"/>
-  <circle cx="955" cy="38" r="3.5" fill="#2D6A4F"/>
-  <text x="968" y="42" font-size="10" font-weight="600" fill="#2D6A4F">Calm Audio: On</text>
+  <rect x="660" y="20" width="115" height="34" rx="17" fill="#FFFFFF" stroke="#E3E8E3" stroke-width="1"/>
+  <circle cx="678" cy="37" r="4" fill="#2D6A4F"/>
+  <text x="690" y="42" font-size="11" font-weight="600" fill="#2D6A4F">Calm Audio: On</text>
 
-  <rect x="1065" y="22" width="105" height="32" rx="16" fill="#FFFFFF" stroke="#E3E8E3" stroke-width="1"/>
-  <text x="1078" y="42" font-size="10" font-weight="600" fill="#40564C">🛡️ Anonymous</text>
+  <rect x="785" y="20" width="120" height="34" rx="17" fill="#FFFFFF" stroke="#E3E8E3" stroke-width="1"/>
+  <text x="800" y="42" font-size="11" font-weight="600" fill="#40564C">🛡️ Anonymous</text>
+
+  <!-- Nav Segmented Tabs -->
+  <rect x="915" y="20" width="260" height="34" rx="14" fill="#EDEBE6" stroke="#DFDDD8" stroke-width="1"/>
+  <text x="930" y="41" font-size="11" font-weight="600" fill="#5A6D63">Navigator</text>
+  <text x="1000" y="41" font-size="11" font-weight="600" fill="#5A6D63">Companion</text>
+  <text x="1080" y="41" font-size="11" font-weight="600" fill="#5A6D63">12 Silos</text>
+  <rect x="1135" y="23" width="36" height="28" rx="11" fill="#FFFFFF" filter="url(#softShadow)"/>
+  <text x="1142" y="41" font-size="11" font-weight="700" fill="#1B4332">Admin</text>
 
   <!-- Banner Ticker -->
   <rect x="0" y="75" width="1200" height="38" fill="#EBF4EF" stroke="#DFE7E1" stroke-width="1"/>
